@@ -679,8 +679,8 @@ const fetchOptions = async () => {
     options.value.idioma = idiomasResponse.data.map((item) => item.idioma);
     const idiomasResponseU = await axios.get(idiomasLsURL);
     optionsu.value.idioma = idiomasResponseU.data.map((item) => ({
-      label: item.idioma,
-      value: item.id_idioma,
+      label: item.idioma || item.nombre || item.label || String(item.id_idioma || item.id || item.value),
+      value: item.id_idioma ?? item.id ?? item.value ?? item.idioma ?? item.nombre ?? item.label,
     }));
     // Obtener editoriales
     const editorialesResponse = await axios.get(editorialesURL);
@@ -707,8 +707,8 @@ const fetchOptions = async () => {
     options.value.indice = indicesResponse.data.map((item) => item.indice);
     const indicesResponseU = await axios.get(indicesLsURL);
     optionsu.value.indice = indicesResponseU.data.map((item) => ({
-      label: item.indice,
-      value: item.id_indice,
+      label: item.indice || item.nombre || item.label || String(item.id_indice || item.id || item.value),
+      value: item.id_indice ?? item.id ?? item.value ?? item.indice ?? item.nombre ?? item.label,
     }));
 
     // Obtener periodicidad
@@ -718,8 +718,8 @@ const fetchOptions = async () => {
     );
     const periodicidadResponseU = await axios.get(periodicidadLsURL);
     optionsu.value.periodicidad = periodicidadResponseU.data.map((item) => ({
-      label: item.periodicidad,
-      value: item.id_periodicidad,
+      label: item.periodicidad || item.nombre || item.label || String(item.id_periodicidad || item.id || item.value),
+      value: item.id_periodicidad ?? item.id ?? item.value ?? item.periodicidad ?? item.nombre ?? item.label,
     }));
 
     // Obtener formatos
@@ -727,8 +727,8 @@ const fetchOptions = async () => {
     formatoOptions.value = formatoResponse.data.map((item) => item.formato);
     const formatoResponseU = await axios.get(formatosLsURL);
     optionsu.value.formato = formatoResponseU.data.map((item) => ({
-      label: item.formato,
-      value: item.id_formato,
+      label: item.formato || item.nombre || item.label || String(item.id_formato || item.id || item.value),
+      value: item.id_formato ?? item.id ?? item.value ?? item.formato ?? item.nombre ?? item.label,
     }));
   } catch (error) {
     console.error("Error al obtener las opciones de los filtros:", error);
@@ -860,31 +860,21 @@ const handleImageUpload = (file) => {
 };
 
 const uploadImage = async () => {
-  if (!imageFile.value || !editForm.value.id) return;
+  if (!imageFile.value) return;
 
   uploadingImage.value = true;
 
   try {
     const formData = new FormData();
     // Usamos el archivo original sin renombrar (el endpoint lo hará)
-    formData.append("portada", imageFile.value);
+    const f = Array.isArray(imageFile.value) ? imageFile.value[0] : imageFile.value;
+    formData.append("archivo", f);
 
-    // Usamos la URL del .env y el nuevo endpoint
-    console.log(
-      `${import.meta.env.VITE_RV_UPLOAD_URL}/upload-portada/${
-        editForm.value.id
-      }`
-    );
+    // Usamos la URL del .env y el endpoint de prueba
+    console.log(`${import.meta.env.VITE_RV_UPLOAD_URL}/test-upload`);
     const response = await axios.post(
-      `${import.meta.env.VITE_RV_UPLOAD_URL}/upload-portada/${
-        editForm.value.id
-      }`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+      `${import.meta.env.VITE_RV_UPLOAD_URL}/test-upload`,
+      formData
     );
 
     Notify.create({
@@ -895,10 +885,11 @@ const uploadImage = async () => {
     // Actualizar la vista previa con la nueva URL
     // El endpoint devuelve el nombre del archivo en response.data.filename
     const timestamp = Date.now();
-    imagePreview.value = `${import.meta.env.VITE_RV_UPLOAD_URL}/portadas/${
+    imagePreview.value = `${import.meta.env.VITE_IMAGE_BASE_URL}${
       response.data.filename
     }?t=${timestamp}`;
     editForm.value.portada = imagePreview.value;
+    return response;
   } catch (error) {
     console.error("Error al subir la imagen:", error);
 
@@ -955,7 +946,6 @@ const saveChanges = async () => {
   const periodicidadId = editForm.value.periodicidad?.value;
   const formatoId = editForm.value.formato?.value;
   const estadoId = editForm.value.estado?.value;
-
   const revistaData = {
     area_conocimiento_id: areaConocimientoId,
     indice_id: indiceId,
@@ -978,30 +968,48 @@ const saveChanges = async () => {
     direccion: editForm.value.direccion,
     telefono: editForm.value.telefono,
     resumen: editForm.value.resumen,
-    portada: `portada${editForm.value.id}.jpg`,
+    portada: null, // Se asigna después del upload
   };
-
   if (isEditing.value) {
     await axios.patch(`${updateURL}${editForm.value.id}`, revistaData);
     Notify.create({
       type: "positive",
       message: "Los cambios se han guardado correctamente.",
     });
-  } else {
-    const response = await axios.post(insertURL, revistaData);
-    // Si el backend devuelve el id de la nueva revista, asígnalo para el upload
-    if (response.data && response.data.id) {
-      editForm.value.id = response.data.id;
+    // Subir la portada si hay imagen seleccionada
+    if (imageFile.value && editForm.value.id) {
+      const uploadResp = await uploadImage();
+      // Actualizar la revista con el nombre de la portada subida
+      if (uploadResp && uploadResp.data && uploadResp.data.filename) {
+        await axios.patch(`${updateURL}${editForm.value.id}`, { portada: uploadResp.data.filename });
+      }
     }
+  } else {
+    // Subir portada primero (si existe)
+    let uploadedFilename = null;
+    if (imageFile.value) {
+      const uploadResp = await uploadImage();
+      if (uploadResp && uploadResp.data && uploadResp.data.filename) {
+        uploadedFilename = uploadResp.data.filename; // Se guarda el archivo con su nombre original
+      }
+    }
+
+    // Insertar la revista estableciendo portada a la cadena PORTADA.JPG
+    const revistaDataToInsert = {
+      ...revistaData,
+      portada: 'PORTADA.JPG',
+    };
+
+    const response = await axios.post(insertURL, revistaDataToInsert);
+    const newId = response.data?.revista?.id || response.data?.id;
+    if (newId) {
+      editForm.value.id = newId;
+    }
+
     Notify.create({
       type: "positive",
       message: "La revista se ha creado correctamente.",
     });
-  }
-
-  // Subir la portada si hay imagen seleccionada
-  if (imageFile.value && editForm.value.id) {
-    await uploadImage();
   }
 
   // Actualizar la lista de revistas

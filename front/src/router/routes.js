@@ -28,6 +28,10 @@ const routes = [
         path: "",
         component: () => import("pages/revistas_private/MantenedorPage.vue"),
       },
+      {
+        path: "test-upload",
+        component: () => import("pages/TestUploadPage.vue"),
+      },
     ],
   },
   {

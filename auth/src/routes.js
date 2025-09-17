@@ -25,10 +25,14 @@ const {
   updateUserSessionTimeout,
   updateRoleSessionTimeout,
   assignPermissionToRole,
+  testUpload,
 } = require("./controllers");
 const { authenticate, authorize, checkBlacklist } = require("./middlewares");
 
 const router = express.Router();
+
+// Endpoint de prueba para upload de archivos
+router.post("/test-upload", testUpload);
 
 // Rutas Públicas
 router.get("/prueba", prueba);
