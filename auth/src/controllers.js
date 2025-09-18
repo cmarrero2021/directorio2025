@@ -657,7 +657,7 @@ exports.insertRevista = async (req, res) => {
   const insertFields = req.body; // Campos a insertar
 
   // Lista de columnas que deben estar en minúsculas
-  const columnasMinusculas = ["correo_revista", "correo_editor", "url"];
+  const columnasMinusculas = ["correo_revista", "correo_editor", "url", "portada"];
 
   // Convertir cadenas a mayúsculas o minúsculas según corresponda
   for (const key in insertFields) {
@@ -914,3 +914,62 @@ exports.assignPermissionToRole = async (req, res) => {
     .status(501)
     .json({ error: "assignPermissionToRole no implementado en este servidor." });
 };
+
+// Inserta una revista con su portada en una sola operación
+exports.insertRevistaWithUpload = [
+  uploadAny, // Middleware de Multer para procesar el archivo
+  async (req, res) => {
+    const insertFields = req.body; // Datos de la revista
+    const file = req.file || (Array.isArray(req.files) && req.files[0]);
+
+    // Si se subió un archivo, usar su nombre como el valor para 'portada'
+    if (file) {
+      insertFields.portada = file.originalname;
+    }
+
+    // Forzar a minúsculas/mayúsculas según las reglas existentes
+    const columnasMinusculas = ["correo_revista", "correo_editor", "url", "portada"];
+    for (const key in insertFields) {
+      if (typeof insertFields[key] === "string") {
+        if (columnasMinusculas.includes(key)) {
+          insertFields[key] = insertFields[key].toLowerCase();
+        } else {
+          insertFields[key] = insertFields[key].toUpperCase();
+        }
+      }
+    }
+
+    const client = await pool.connect();
+    try {
+      const keys = Object.keys(insertFields);
+      if (keys.length === 0) {
+        return res.status(400).json({ error: "No se proporcionaron campos para insertar." });
+      }
+
+      const columns = keys.join(", ");
+      const placeholders = keys.map((_, index) => `$${index + 1}`).join(", ");
+      const values = keys.map((key) => insertFields[key]);
+
+      const query = `INSERT INTO revistas (${columns}) VALUES (${placeholders}) RETURNING *;`;
+      const result = await client.query(query, values);
+
+      if (result.rows.length === 0) {
+        return res.status(500).json({ error: "Error al insertar la revista." });
+      }
+
+      res.status(201).json({
+        message: "Revista y portada insertadas exitosamente.",
+        revista: result.rows[0],
+      });
+    } catch (err) {
+      console.error("Error en insertRevistaWithUpload:", err);
+      // Si algo falla, eliminar el archivo que se subió
+      if (file && fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+      res.status(500).json({ error: "Error interno al procesar la solicitud." });
+    } finally {
+      client.release();
+    }
+  },
+];

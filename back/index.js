@@ -435,7 +435,7 @@ app.get('/lista_areas', async (req, res) => {
 app.get('/lista_indices', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT id,indice FROM indices ORDER BY indice');
+    const result = await client.query('SELECT id AS id_indice, indice FROM indices ORDER BY indice');
     client.release(); // Liberar el cliente
     res.json(result.rows);
   } catch (err) {
@@ -447,7 +447,7 @@ app.get('/lista_indices', async (req, res) => {
 app.get('/lista_editoriales', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT id_editorial,editorial FROM editoriales ORDER BY editorial');
+    const result = await client.query('SELECT id AS id_editorial, editorial FROM editoriales ORDER BY editorial');
     client.release(); // Liberar el cliente
     res.json(result.rows);
   } catch (err) {
@@ -459,7 +459,7 @@ app.get('/lista_editoriales', async (req, res) => {
 app.get('/lista_periodicidad', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT id,periodicidad FROM periodicidad ORDER BY periodicidad');
+    const result = await client.query('SELECT id AS id_periodicidad, periodicidad FROM periodicidad ORDER BY periodicidad');
     client.release(); // Liberar el cliente
     res.json(result.rows);
   } catch (err) {
@@ -471,7 +471,7 @@ app.get('/lista_periodicidad', async (req, res) => {
 app.get('/lista_formatos', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT id,formato FROM formatos ORDER BY formato');
+    const result = await client.query('SELECT id AS id_formato, formato FROM formatos ORDER BY formato');
     client.release(); // Liberar el cliente
     res.json(result.rows);
   } catch (err) {
@@ -483,7 +483,7 @@ app.get('/lista_formatos', async (req, res) => {
 app.get('/lista_idiomas', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT id,idioma FROM idiomas ORDER BY idioma');
+    const result = await client.query('SELECT id AS id_idioma, idioma FROM idiomas ORDER BY idioma');
     client.release(); // Liberar el cliente
     res.json(result.rows);
   } catch (err) {
@@ -560,4 +560,3 @@ app.options('*', (req, res) => {
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   res.send();
 });
-

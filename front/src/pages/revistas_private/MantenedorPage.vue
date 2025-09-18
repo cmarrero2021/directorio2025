@@ -393,15 +393,6 @@
                   class="q-mt-sm"
                 />
 
-                <!-- Botón para subir la imagen -->
-                <!-- <q-btn
-                  v-if="imageFile"
-                  label="Subir Portada"
-                  color="primary"
-                  @click="uploadImage"
-                  class="q-mt-sm"
-                  :loading="uploadingImage"
-                /> -->
               </div>
               <!-- ///////////////////////////////// -->
             </div>
@@ -434,9 +425,7 @@ import axios from "axios";
 const imageFile = ref(null);
 const imagePreview = ref(null);
 const uploadingImage = ref(false);
-const imageBaseUrl =
-  import.meta.env.VITE_IMAGE_BASE_URL ||
-  "http://poi-r.vps.co.ve/apiq/public/portadas/";
+const imageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL;
 // Definición de columnas para la tabla
 const columns = [
   { name: "actions", label: "Acciones", align: "left" },
@@ -551,57 +540,26 @@ const columns = [
 ];
 
 // URLs de los endpoints
-const apiURL = import.meta.env.VITE_API_URL || "http://poi-r.vps.co.ve:3000/";
-const areasURL =
-  import.meta.env.VITE_AREASR_BASE_URL ||
-  "http://poi-r.vps.co.ve:3000/areas_revistas";
-const idiomasURL =
-  import.meta.env.VITE_IDIOMASR_BASE_URL ||
-  "http://poi-r.vps.co.ve:3000/idiomas_revistas";
-const editorialesURL =
-  import.meta.env.VITE_EDITORIALR_BASE_URL ||
-  "http://poi-r.vps.co.ve:3000/editorial_revistas";
-const estadosURL =
-  import.meta.env.VITE_ESTADOR_BASE_URL ||
-  "http://poi-r.vps.co.ve:3000/estado_revistas";
-const indicesURL =
-  import.meta.env.VITE_INDICESR_BASE_URL ||
-  "http://poi-r.vps.co.ve:3000/indices_revistas";
-const periodicidadURL =
-  import.meta.env.VITE_PERIODICIDADR_BASE_URL ||
-  "http://poi-r.vps.co.ve:3000/periodicidad_revistas";
-const formatosURL =
-  import.meta.env.VITE_FORMATOR_BASE_URL ||
-  "http://poi-r.vps.co.ve:3000/formato_revistas";
-const revistaDetailURL =
-  import.meta.env.VITE_REVISTA_URL || "http://poi-r.vps.co.ve:3000/revistas/";
-const updateURL =
-  import.meta.env.VITE_RV_UPDATE_URL || "http://poi-r.vps.co.ve:3001/revistas/";
-const insertURL =
-  import.meta.env.VITE_RV_INSERT_URL ||
-  "http://poi-r.vps.co.ve:3001/auth/revista";
+const apiURL = import.meta.env.VITE_API_URL;
+const areasURL = import.meta.env.VITE_AREASR_BASE_URL;
+const idiomasURL = import.meta.env.VITE_IDIOMASR_BASE_URL;
+const editorialesURL = import.meta.env.VITE_EDITORIALR_BASE_URL;
+const estadosURL = import.meta.env.VITE_ESTADOR_BASE_URL;
+const indicesURL = import.meta.env.VITE_INDICESR_BASE_URL;
+const periodicidadURL = import.meta.env.VITE_PERIODICIDADR_BASE_URL;
+const formatosURL = import.meta.env.VITE_FORMATOR_BASE_URL;
+const revistaDetailURL = import.meta.env.VITE_REVISTA_URL;
+const updateURL = import.meta.env.VITE_RV_UPDATE_URL;
+const insertURL = import.meta.env.VITE_RV_INSERT_URL;
+const insertWithUploadURL = import.meta.env.VITE_RV_INSERT_WITH_UPLOAD_URL;
 
-const areasLsURL =
-  import.meta.env.VITE_LS_AREAS_URL ||
-  "http://poi-r.vps.co.ve:3000/lista_areas";
-const idiomasLsURL =
-  import.meta.env.VITE_LS_IDIOMAS_URL ||
-  "http://poi-r.vps.co.ve:3000/lista_idiomas";
-const editorialesLsURL =
-  import.meta.env.VITE_LS_EDITORIAL_URL ||
-  "http://poi-r.vps.co.ve:3000/lista_editoriales";
-const estadosLsURL =
-  import.meta.env.VITE_LS_ESTADOS_URL ||
-  "http://poi-r.vps.co.ve:3000/lista_estados";
-const indicesLsURL =
-  import.meta.env.VITE_LS_INDICES_URL ||
-  "http://poi-r.vps.co.ve:3000/lista_indices";
-const periodicidadLsURL =
-  import.meta.env.VITE_LS_PERIODICIDAD_URL ||
-  "http://poi-r.vps.co.ve:3000/lista_indices";
-const formatosLsURL =
-  import.meta.env.VITE_LS_FORMATOS_URL ||
-  "http://poi-r.vps.co.ve:3000/lista_indices";
+const areasLsURL = import.meta.env.VITE_LS_AREAS_URL;
+const idiomasLsURL = import.meta.env.VITE_LS_IDIOMAS_URL;
+const editorialesLsURL = import.meta.env.VITE_LS_EDITORIALES_URL;
+const estadosLsURL = import.meta.env.VITE_LS_ESTADOS_URL;
+const indicesLsURL = import.meta.env.VITE_LS_INDICES_URL;
+const periodicidadLsURL = import.meta.env.VITE_LS_PERIODICIDAD_URL;
+const formatosLsURL = import.meta.env.VITE_LS_FORMATOS_URL;
 
 // Estado de la aplicación
 const journals = ref([]);
@@ -639,6 +597,8 @@ const optionsu = ref({
   editorial: [],
   estado: [],
   indice: [],
+  periodicidad: [],
+  formato: [],
 });
 
 // Opciones adicionales
@@ -679,8 +639,8 @@ const fetchOptions = async () => {
     options.value.idioma = idiomasResponse.data.map((item) => item.idioma);
     const idiomasResponseU = await axios.get(idiomasLsURL);
     optionsu.value.idioma = idiomasResponseU.data.map((item) => ({
-      label: item.idioma || item.nombre || item.label || String(item.id_idioma || item.id || item.value),
-      value: item.id_idioma ?? item.id ?? item.value ?? item.idioma ?? item.nombre ?? item.label,
+      label: item.idioma,
+      value: item.id_idioma,
     }));
     // Obtener editoriales
     const editorialesResponse = await axios.get(editorialesURL);
@@ -707,8 +667,8 @@ const fetchOptions = async () => {
     options.value.indice = indicesResponse.data.map((item) => item.indice);
     const indicesResponseU = await axios.get(indicesLsURL);
     optionsu.value.indice = indicesResponseU.data.map((item) => ({
-      label: item.indice || item.nombre || item.label || String(item.id_indice || item.id || item.value),
-      value: item.id_indice ?? item.id ?? item.value ?? item.indice ?? item.nombre ?? item.label,
+      label: item.indice,
+      value: item.id_indice,
     }));
 
     // Obtener periodicidad
@@ -718,8 +678,8 @@ const fetchOptions = async () => {
     );
     const periodicidadResponseU = await axios.get(periodicidadLsURL);
     optionsu.value.periodicidad = periodicidadResponseU.data.map((item) => ({
-      label: item.periodicidad || item.nombre || item.label || String(item.id_periodicidad || item.id || item.value),
-      value: item.id_periodicidad ?? item.id ?? item.value ?? item.periodicidad ?? item.nombre ?? item.label,
+      label: item.periodicidad,
+      value: item.id_periodicidad,
     }));
 
     // Obtener formatos
@@ -727,8 +687,8 @@ const fetchOptions = async () => {
     formatoOptions.value = formatoResponse.data.map((item) => item.formato);
     const formatoResponseU = await axios.get(formatosLsURL);
     optionsu.value.formato = formatoResponseU.data.map((item) => ({
-      label: item.formato || item.nombre || item.label || String(item.id_formato || item.id || item.value),
-      value: item.id_formato ?? item.id ?? item.value ?? item.formato ?? item.nombre ?? item.label,
+      label: item.formato,
+      value: item.id_formato,
     }));
   } catch (error) {
     console.error("Error al obtener las opciones de los filtros:", error);
@@ -859,61 +819,7 @@ const handleImageUpload = (file) => {
   }
 };
 
-const uploadImage = async () => {
-  if (!imageFile.value) return;
-
-  uploadingImage.value = true;
-
-  try {
-    const formData = new FormData();
-    // Usamos el archivo original sin renombrar (el endpoint lo hará)
-    const f = Array.isArray(imageFile.value) ? imageFile.value[0] : imageFile.value;
-    formData.append("archivo", f);
-
-    // Usamos la URL del .env y el endpoint de prueba
-    console.log(`${import.meta.env.VITE_RV_UPLOAD_URL}/test-upload`);
-    const response = await axios.post(
-      `${import.meta.env.VITE_RV_UPLOAD_URL}/test-upload`,
-      formData
-    );
-
-    Notify.create({
-      type: "positive",
-      message: "Portada subida correctamente",
-    });
-
-    // Actualizar la vista previa con la nueva URL
-    // El endpoint devuelve el nombre del archivo en response.data.filename
-    const timestamp = Date.now();
-    imagePreview.value = `${import.meta.env.VITE_IMAGE_BASE_URL}${
-      response.data.filename
-    }?t=${timestamp}`;
-    editForm.value.portada = imagePreview.value;
-    return response;
-  } catch (error) {
-    console.error("Error al subir la imagen:", error);
-
-    let errorMessage = "Error al subir la portada";
-    if (error.response) {
-      // Manejo de errores específicos del servidor
-      if (error.response.data.error) {
-        errorMessage = error.response.data.error;
-      } else if (error.response.status === 400) {
-        errorMessage = "Archivo no válido (solo JPG/PNG, máximo 5MB)";
-      }
-    }
-
-    Notify.create({
-      type: "negative",
-      message: errorMessage,
-    });
-  } finally {
-    uploadingImage.value = false;
-  }
-};
-///////////////////////////////////////
 // Función para abrir el modal de edición
-///////////////////////
 const openEditModal = async (journal) => {
   try {
     const response = await axios.get(`${revistaDetailURL}${journal.id}`);
@@ -932,114 +838,96 @@ const openEditModal = async (journal) => {
     console.error("Error al obtener los datos de la revista:", error);
   }
 };
-////////////////////////
+
 // Función para cerrar el modal de edición
 const closeEditModal = () => {
   editDialog.value = false;
 };
-// Función para guardar los cambios
+
+// Función para guardar los cambios (Refactorizada)
 const saveChanges = async () => {
-  // Validar campos requeridos
-  if (!editForm.value.revista) {
-    Notify.create({
-      type: "negative",
-      message: "El nombre de la revista es requerido",
-    });
+  // 1. Validaciones
+  if (!editForm.value.revista || !editForm.value.idioma) {
+    Notify.create({ type: "negative", message: "Revista e Idioma son requeridos" });
     return;
   }
 
-  if (!editForm.value.idioma) {
-    Notify.create({
-      type: "negative",
-      message: "El idioma es requerido",
-    });
-    return;
-  }
-
-  // Extraer IDs de los objetos seleccionados, manejando casos donde el valor puede ser null
-  const areaConocimientoId = editForm.value.area_conocimiento?.value || null;
-  const indiceId = editForm.value.indice?.value || null;
-  const idiomaId = editForm.value.idioma?.value || null;
-  const editorialId = editForm.value.editorial?.value || null;
-  const periodicidadId = editForm.value.periodicidad?.value || null;
-  const formatoId = editForm.value.formato?.value || null;
-  const estadoId = editForm.value.estado?.value || null;
-
-  const revistaData = {
-    area_conocimiento_id: areaConocimientoId,
-    indice_id: indiceId,
-    idioma_id: idiomaId,
-    revista: editForm.value.revista,
-    correo_revista: editForm.value.correo_revista,
-    editorial_id: editorialId,
-    periodicidad_id: periodicidadId,
-    formato_id: formatoId,
-    estado_id: estadoId,
-    nombres_editor: editForm.value.nombres_editor,
-    apellidos_editor: editForm.value.apellidos_editor,
-    correo_editor: editForm.value.correo_editor,
-    deposito_legal_impreso: editForm.value.deposito_legal_impreso,
-    deposito_legal_digital: editForm.value.deposito_legal_digital,
-    issn_impreso: editForm.value.issn_impreso,
-    issn_digital: editForm.value.issn_digital,
-    url: editForm.value.url,
-    anio_inicial: editForm.value.anio_inicial,
-    direccion: editForm.value.direccion,
-    telefono: editForm.value.telefono,
-    resumen: editForm.value.resumen,
-    portada: null, // Se asigna después del upload
+  // 2. Construir FormData
+  const formData = new FormData();
+  
+  // Helper para añadir campos, evitando valores nulos o indefinidos
+  const appendIfDefined = (key, value) => {
+    if (value !== null && value !== undefined) {
+      formData.append(key, value);
+    }
   };
 
-  // Debug: mostrar los valores que se van a enviar
-  console.log('Datos a enviar:', revistaData);
-  if (isEditing.value) {
-    await axios.patch(`${updateURL}${editForm.value.id}`, revistaData);
-    Notify.create({
-      type: "positive",
-      message: "Los cambios se han guardado correctamente.",
-    });
-    // Subir la portada si hay imagen seleccionada
-    if (imageFile.value && editForm.value.id) {
-      const uploadResp = await uploadImage();
-      // Actualizar la revista con el nombre de la portada subida
-      if (uploadResp && uploadResp.data && uploadResp.data.filename) {
-        await axios.patch(`${updateURL}${editForm.value.id}`, { portada: uploadResp.data.filename });
-      }
-    }
-  } else {
-    // Subir portada primero (si existe)
-    let uploadedFilename = null;
-    if (imageFile.value) {
-      const uploadResp = await uploadImage();
-      if (uploadResp && uploadResp.data && uploadResp.data.filename) {
-        uploadedFilename = uploadResp.data.filename; // Se guarda el archivo con su nombre original
-      }
-    }
-
-    // Insertar la revista estableciendo portada a la cadena PORTADA.JPG
-    const revistaDataToInsert = {
-      ...revistaData,
-      portada: 'PORTADA.JPG',
-    };
-
-    const response = await axios.post(insertURL, revistaDataToInsert);
-    const newId = response.data?.revista?.id || response.data?.id;
-    if (newId) {
-      editForm.value.id = newId;
-    }
-
-    Notify.create({
-      type: "positive",
-      message: "La revista se ha creado correctamente.",
-    });
+  // Añadir el archivo de imagen si existe
+  if (imageFile.value) {
+    const file = Array.isArray(imageFile.value) ? imageFile.value[0] : imageFile.value;
+    appendIfDefined('portadaFile', file);
   }
 
-  // Actualizar la lista de revistas
-  await fetchJournals();
-  closeEditModal();
+  // Añadir todos los demás campos del formulario
+  appendIfDefined('area_conocimiento_id', editForm.value.area_conocimiento?.value);
+  appendIfDefined('indice_id', editForm.value.indice?.value);
+  appendIfDefined('idioma_id', editForm.value.idioma?.value);
+  appendIfDefined('revista', editForm.value.revista);
+  appendIfDefined('correo_revista', editForm.value.correo_revista);
+  appendIfDefined('editorial_id', editForm.value.editorial?.value);
+  appendIfDefined('periodicidad_id', editForm.value.periodicidad?.value);
+  appendIfDefined('formato_id', editForm.value.formato?.value);
+  appendIfDefined('estado_id', editForm.value.estado?.value);
+  appendIfDefined('nombres_editor', editForm.value.nombres_editor);
+  appendIfDefined('apellidos_editor', editForm.value.apellidos_editor);
+  appendIfDefined('correo_editor', editForm.value.correo_editor);
+  appendIfDefined('deposito_legal_impreso', editForm.value.deposito_legal_impreso);
+  appendIfDefined('deposito_legal_digital', editForm.value.deposito_legal_digital);
+  appendIfDefined('issn_impreso', editForm.value.issn_impreso);
+  appendIfDefined('issn_digital', editForm.value.issn_digital);
+  appendIfDefined('url', editForm.value.url);
+  appendIfDefined('anio_inicial', editForm.value.anio_inicial);
+  appendIfDefined('direccion', editForm.value.direccion);
+  appendIfDefined('telefono', editForm.value.telefono);
+  appendIfDefined('resumen', editForm.value.resumen);
+
+  try {
+    if (isEditing.value) {
+      // Lógica de actualización (PATCH)
+      // La actualización de la portada se maneja por separado si es necesario
+      await axios.patch(`${updateURL}${editForm.value.id}`, Object.fromEntries(formData));
+      Notify.create({ type: "positive", message: "Cambios guardados correctamente." });
+
+      // Si se seleccionó una nueva imagen durante la edición, subirla por separado
+      if (imageFile.value && editForm.value.id) {
+        const imageFormData = new FormData();
+        const file = Array.isArray(imageFile.value) ? imageFile.value[0] : imageFile.value;
+        imageFormData.append('portadaFile', file);
+        await axios.post(`${import.meta.env.VITE_RV_UPLOAD_URL}/upload-portada/${editForm.value.id}`, imageFormData);
+        Notify.create({ type: "positive", message: "Portada actualizada." });
+      }
+
+    } else {
+      // Lógica de Creación (POST)
+      // Una sola llamada que envía todo
+      await axios.post(insertWithUploadURL, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      Notify.create({ type: "positive", message: "Revista creada correctamente." });
+    }
+
+    await fetchJournals();
+    closeEditModal();
+
+  } catch (error) {
+    console.error("Error al guardar la revista:", error);
+    Notify.create({ type: "negative", message: error.response?.data?.error || "Error al guardar la revista" });
+  }
 };
 
-////////////////
+
 // Observar cambios en la paginación
 watch(pagination, () => {}, { deep: true });
 
