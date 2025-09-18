@@ -581,79 +581,140 @@ exports.forceLogout = async (req, res) => {
 };
 
 // Insertar revista (con upload de portada opcional)
-exports.insertRevista = [
-  uploadAny,
-  async (req, res) => {
-    const insertFields = req.body || {};
+// exports.insertRevista = [
+//   uploadAny,
+//   async (req, res) => {
+//     const insertFields = req.body || {};
 
-    // Si viene archivo, usar su nombre como portada (el archivo ya fue guardado por multer)
-    const file = req.file || (Array.isArray(req.files) && req.files[0]);
-    if (file) {
-      insertFields.portada = file.originalname;
-    } else if (!("portada" in insertFields)) {
-      insertFields.portada = null;
-    }
+//     // Si viene archivo, usar su nombre como portada (el archivo ya fue guardado por multer)
+//     const file = req.file || (Array.isArray(req.files) && req.files[0]);
+//     if (file) {
+//       insertFields.portada = file.originalname;
+//     } else if (!("portada" in insertFields)) {
+//       insertFields.portada = null;
+//     }
 
-    // Campos a forzar en minúsculas
-    const columnasMinusculas = ["correo_revista", "correo_editor", "url"];
+//     // Campos a forzar en minúsculas
+//     const columnasMinusculas = ["correo_revista", "correo_editor", "url"];
 
-    for (const key in insertFields) {
-      if (typeof insertFields[key] === "string") {
-        if (columnasMinusculas.includes(key)) {
-          insertFields[key] = insertFields[key].toLowerCase();
-        } else {
-          insertFields[key] = insertFields[key].toUpperCase();
-        }
+//     for (const key in insertFields) {
+//       if (typeof insertFields[key] === "string") {
+//         if (columnasMinusculas.includes(key)) {
+//           insertFields[key] = insertFields[key].toLowerCase();
+//         } else {
+//           insertFields[key] = insertFields[key].toUpperCase();
+//         }
+//       }
+//     }
+
+//     const client = await pool.connect();
+//     try {
+//       const keys = Object.keys(insertFields);
+//       if (keys.length === 0) {
+//         return res
+//           .status(400)
+//           .json({ error: "No se proporcionaron campos para insertar." });
+//       }
+
+//       const columns = keys.join(", ");
+//       const placeholders = keys.map((_, index) => `${index + 1}`).join(", ");
+//       const values = keys.map((key) => insertFields[key]);
+
+//       const query = `
+//         INSERT INTO revistas (${columns})
+//         VALUES (${placeholders})
+//         RETURNING *;
+//       `;
+
+//       const result = await client.query(query, values);
+
+//       if (result.rows.length === 0) {
+//         return res.status(500).json({ error: "Error al insertar la revista." });
+//       }
+
+//       res.status(201).json({
+//         message: "Revista insertada exitosamente.",
+//         revista: result.rows[0],
+//         filename: file ? file.originalname : null,
+//       });
+//     } catch (err) {
+//       console.error("Error al insertar la revista:", err);
+//       // Si ocurrió un error y se subió archivo, eliminarlo
+//       try {
+//         if (file?.path && fs.existsSync(file.path)) {
+//           fs.unlinkSync(file.path);
+//         }
+//       } catch (unlinkErr) {
+//         console.error("[insertRevista] Error al eliminar archivo temporal:", unlinkErr);
+//       }
+//       res.status(500).json({ error: "Error al insertar la revista." });
+//     } finally {
+//       client.release();
+//     }
+//   },
+// ];
+exports.insertRevista = async (req, res) => {
+  const insertFields = req.body; // Campos a insertar
+
+  // Lista de columnas que deben estar en minúsculas
+  const columnasMinusculas = ["correo_revista", "correo_editor", "url"];
+
+  // Convertir cadenas a mayúsculas o minúsculas según corresponda
+  for (const key in insertFields) {
+    if (typeof insertFields[key] === "string") {
+      if (columnasMinusculas.includes(key)) {
+        // Forzar a minúsculas para columnas específicas
+        insertFields[key] = insertFields[key].toLowerCase();
+      } else {
+        // Convertir a mayúsculas para el resto de las columnas
+        insertFields[key] = insertFields[key].toUpperCase();
       }
     }
+  }
 
-    const client = await pool.connect();
-    try {
-      const keys = Object.keys(insertFields);
-      if (keys.length === 0) {
-        return res
-          .status(400)
-          .json({ error: "No se proporcionaron campos para insertar." });
-      }
-
-      const columns = keys.join(", ");
-      const placeholders = keys.map((_, index) => `${index + 1}`).join(", ");
-      const values = keys.map((key) => insertFields[key]);
-
-      const query = `
-        INSERT INTO revistas (${columns})
-        VALUES (${placeholders})
-        RETURNING *;
-      `;
-
-      const result = await client.query(query, values);
-
-      if (result.rows.length === 0) {
-        return res.status(500).json({ error: "Error al insertar la revista." });
-      }
-
-      res.status(201).json({
-        message: "Revista insertada exitosamente.",
-        revista: result.rows[0],
-        filename: file ? file.originalname : null,
-      });
-    } catch (err) {
-      console.error("Error al insertar la revista:", err);
-      // Si ocurrió un error y se subió archivo, eliminarlo
-      try {
-        if (file?.path && fs.existsSync(file.path)) {
-          fs.unlinkSync(file.path);
-        }
-      } catch (unlinkErr) {
-        console.error("[insertRevista] Error al eliminar archivo temporal:", unlinkErr);
-      }
-      res.status(500).json({ error: "Error al insertar la revista." });
-    } finally {
-      client.release();
+  const client = await pool.connect();
+  try {
+    // Construir la consulta dinámicamente
+    const keys = Object.keys(insertFields);
+    if (keys.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "No se proporcionaron campos para insertar." });
     }
-  },
-];
 
+    const columns = keys.join(", ");
+    // Corregir los placeholders para usar $1, $2, etc.
+    const placeholders = keys.map((_, index) => `$${index + 1}`).join(", ");
+    const values = keys.map((key) => insertFields[key]);
+
+    const query = `
+            INSERT INTO revistas (${columns})
+            VALUES (${placeholders})
+            RETURNING *;
+        `;
+
+    // console.log('Consulta SQL:', query); // Para depuración
+    // console.log('Valores:', values); // Para depuración
+
+    // Ejecutar la consulta
+    const result = await client.query(query, values);
+
+    if (result.rows.length === 0) {
+      console.log("No se pudo insertar la revista.");
+      return res.status(500).json({ error: "Error al insertar la revista." });
+    }
+
+    res.status(201).json({
+      message: "Revista insertada exitosamente.",
+      revista: result.rows[0],
+    });
+  } catch (err) {
+    console.error("Error al insertar la revista:", err);
+    res.status(500).json({ error: "Error al insertar la revista." });
+  } finally {
+    client.release();
+  }
+};
 // Actualizar revista (PATCH)
 exports.updateRevista = async (req, res) => {
   const { id } = req.params;

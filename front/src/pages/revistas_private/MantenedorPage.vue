@@ -939,13 +939,32 @@ const closeEditModal = () => {
 };
 // Función para guardar los cambios
 const saveChanges = async () => {
-  const areaConocimientoId = editForm.value.area_conocimiento?.value;
-  const indiceId = editForm.value.indice?.value;
-  const idiomaId = editForm.value.idioma?.value;
-  const editorialId = editForm.value.editorial?.value;
-  const periodicidadId = editForm.value.periodicidad?.value;
-  const formatoId = editForm.value.formato?.value;
-  const estadoId = editForm.value.estado?.value;
+  // Validar campos requeridos
+  if (!editForm.value.revista) {
+    Notify.create({
+      type: "negative",
+      message: "El nombre de la revista es requerido",
+    });
+    return;
+  }
+
+  if (!editForm.value.idioma) {
+    Notify.create({
+      type: "negative",
+      message: "El idioma es requerido",
+    });
+    return;
+  }
+
+  // Extraer IDs de los objetos seleccionados, manejando casos donde el valor puede ser null
+  const areaConocimientoId = editForm.value.area_conocimiento?.value || null;
+  const indiceId = editForm.value.indice?.value || null;
+  const idiomaId = editForm.value.idioma?.value || null;
+  const editorialId = editForm.value.editorial?.value || null;
+  const periodicidadId = editForm.value.periodicidad?.value || null;
+  const formatoId = editForm.value.formato?.value || null;
+  const estadoId = editForm.value.estado?.value || null;
+
   const revistaData = {
     area_conocimiento_id: areaConocimientoId,
     indice_id: indiceId,
@@ -970,6 +989,9 @@ const saveChanges = async () => {
     resumen: editForm.value.resumen,
     portada: null, // Se asigna después del upload
   };
+
+  // Debug: mostrar los valores que se van a enviar
+  console.log('Datos a enviar:', revistaData);
   if (isEditing.value) {
     await axios.patch(`${updateURL}${editForm.value.id}`, revistaData);
     Notify.create({
