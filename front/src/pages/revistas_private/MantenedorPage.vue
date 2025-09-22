@@ -825,11 +825,11 @@ const openEditModal = async (journal) => {
     const response = await axios.get(`${revistaDetailURL}${journal.id}`);
     editForm.value = { ...response.data };
 
-    // Cargar imagen existente si existe
-    if (editForm.value.id) {
-      imagePreview.value = `${imageBaseUrl}revistas/${
-        editForm.value.id
-      }/portada.jpg?t=${Date.now()}`;
+    // Mostrar la imagen de portada usando VITE_IMAGE_BASE_URL y el nombre de portada
+    if (editForm.value.portada) {
+      imagePreview.value = `${import.meta.env.VITE_IMAGE_BASE_URL}${editForm.value.portada}?t=${Date.now()}`;
+    } else {
+      imagePreview.value = null;
     }
 
     editDialog.value = true;
@@ -854,7 +854,7 @@ const saveChanges = async () => {
 
   // 2. Construir FormData
   const formData = new FormData();
-  
+
   // Helper para añadir campos, evitando valores nulos o indefinidos
   const appendIfDefined = (key, value) => {
     if (value !== null && value !== undefined) {
@@ -893,6 +893,7 @@ const saveChanges = async () => {
 
   try {
     if (isEditing.value) {
+      alert("Editando revista");
       // Lógica de actualización (PATCH)
       // La actualización de la portada se maneja por separado si es necesario
       await axios.patch(`${updateURL}${editForm.value.id}`, Object.fromEntries(formData));

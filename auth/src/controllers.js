@@ -1,3 +1,29 @@
+// Obtener una revista por ID
+exports.getRevista = async (req, res) => {
+  const { id } = req.params;
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM revistas WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Revista no encontrada' });
+    }
+    const revista = result.rows[0];
+    // Construir la URL pública de la portada si existe
+      let portadaUrl = null;
+        if (revista.portada) {
+          // Usar la variable VITE_IMAGE_BASE_URL para la URL pública
+          portadaUrl = `${process.env.VITE_IMAGE_BASE_URL}${revista.portada}`;
+    } else {
+      revista.portadaUrl = null;
+    }
+      res.json({ ...revista, portadaUrl });
+  } catch (err) {
+    console.error('Error al obtener la revista por ID:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  } finally {
+    client.release();
+  }
+};
 const jwt = require("jsonwebtoken");
 const pool = require("./db");
 const {

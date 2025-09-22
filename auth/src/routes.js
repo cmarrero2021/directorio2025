@@ -27,6 +27,7 @@ const {
   assignPermissionToRole,
   testUpload,
   insertRevistaWithUpload,
+  getRevista
 } = require("./controllers");
 const { authenticate, authorize, checkBlacklist } = require("./middlewares");
 
@@ -126,6 +127,7 @@ router.post('/assign-userpermission', assignPermissionToRole); // Asignar permis
 /////////MANTENEDORES
 // router.patch('/revistas/:id', authenticate, authorize('update_revista'), updateRevista);
 router.post("/upload-portada/:id", uploadPortada);
+router.get("/revistas/:id", getRevista);
 router.patch("/revistas/:id", updateRevista);
 router.post("/revista", insertRevista);
 router.post("/revista-con-portada", insertRevistaWithUpload);
