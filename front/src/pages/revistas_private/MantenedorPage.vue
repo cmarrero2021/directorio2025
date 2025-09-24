@@ -110,15 +110,45 @@
             </div>
           </div>
         </div>
-        <div class="col-xs-2 col-sm-1">
+        <div class="col-xs-12 col-sm-3 export-btns-group row items-center no-wrap">
           <q-btn
             icon="add"
             title="Agregar nueva revista"
             @click="openNewModal"
             color="positive"
-            size="sm"
-            class="full-width"
+            size="md"
+            class="q-mb-xs add-btn-responsive"
+            style="min-width: 180px; width: 100%;"
           />
+          <div class="row export-btns-responsive q-mt-xs q-ml-none q-ml-sm-md">
+            <q-btn
+              color="blue-8"
+              size="sm"
+              class="export-btn-desktop q-mr-xs"
+              @click="exportExcel"
+              title="Exportar a Excel"
+            >
+              <q-icon name="mdi-file-excel" />
+            </q-btn>
+            <q-btn
+              color="amber-7"
+              size="sm"
+              class="export-btn-desktop q-mr-xs"
+              @click="exportCSV"
+              title="Exportar a CSV"
+            >
+              <q-icon name="mdi-file-delimited" />
+            </q-btn>
+            <q-btn
+              color="deep-orange-5"
+              size="sm"
+              class="export-btn-desktop"
+              @click="exportJSON"
+              title="Exportar a JSON"
+            >
+              <q-icon name="mdi-code-json" />
+            </q-btn>
+          </div>
         </div>
       </template>
 
@@ -179,6 +209,32 @@
 </template>
 
 <script setup>
+import { exportToExcel, exportToCSV, exportToJSON } from 'src/helpers/exportHelpers';
+// Generar timestamp para nombre de archivo
+function getTimestamp() {
+  const now = new Date();
+  const pad = n => n.toString().padStart(2, '0');
+  return `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+}
+
+function getExportFilename(ext) {
+  return `${getTimestamp()}_directorio_revistas_cientificas_venezolanas.${ext}`;
+}
+
+function getExportData() {
+  // filteredJournals es un computed, convertir a array plano
+  return filteredJournals.value.map(j => ({ ...j }));
+}
+
+function exportExcel() {
+  exportToExcel(getExportData(), getExportFilename('xlsx').replace('.xlsx',''));
+}
+function exportCSV() {
+  exportToCSV(getExportData(), getExportFilename('csv').replace('.csv',''));
+}
+function exportJSON() {
+  exportToJSON(getExportData(), getExportFilename('json').replace('.json',''));
+}
 import RevistaModal from 'src/components/RevistaModal.vue';
 import { ref, onMounted, computed, watch } from "vue";
 import { LocalStorage, Notify } from "quasar";
@@ -736,6 +792,56 @@ onMounted(async () => {
 .responsive-table {
   max-width: 100%;
   overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+  .export-btns-group {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .add-btn-responsive {
+    width: 100% !important;
+    margin-right: 0 !important;
+    margin-bottom: 8px !important;
+  }
+  .export-btns-responsive {
+    width: 100% !important;
+    margin: 0 !important;
+    flex-wrap: nowrap !important;
+    justify-content: stretch !important;
+  }
+  .export-btns-responsive .export-btn-desktop {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+@media (min-width: 601px) {
+  .export-btns-group {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+  .add-btn-responsive {
+    width: auto !important;
+    margin-bottom: 0 !important;
+    margin-right: 12px !important;
+  }
+  .export-btns-responsive {
+    flex-direction: row !important;
+    width: auto !important;
+    margin-top: 0 !important;
+  }
+  .export-btns-responsive .export-btn-desktop {
+    width: 36px !important;
+    min-width: 36px !important;
+    margin-right: 8px !important;
+    margin-bottom: 0 !important;
+  }
+  .export-btns-responsive .export-btn-desktop:last-child {
+    margin-right: 0 !important;
+  }
 }
 
 @media (max-width: 768px) {

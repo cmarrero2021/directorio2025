@@ -47,6 +47,10 @@
                 <div class="col-12 col-md-6"><q-input v-model="localForm.correo_editor" label="Correo Editor" type="email" filled @input="localForm.correo_editor = $event.toLowerCase()" class="lowercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.telefono" label="Teléfono Editor" filled @input="localForm.telefono = $event.toUpperCase()" class="uppercase-input" /></div>
               </div>
+              <div class="row justify-end q-mt-md">
+                <q-btn icon="cancel" color="negative" type="reset" @click="onClose" />
+                <q-btn icon="save" color="primary" type="submit" class="q-ml-sm" />
+              </div>
             </q-tab-panel>
           </q-tab-panels>
           <!-- Fuera del tab panel -->
@@ -65,10 +69,7 @@
               <q-img v-if="imagePreview" :src="imagePreview" style="max-width: 200px; max-height: 200px; margin-top: 10px" class="q-mt-sm" />
             </div>
           </div>
-          <div class="row justify-end">
-            <q-btn icon="cancel" color="negative" type="reset" @click="onClose" />
-            <q-btn icon="save" color="primary" type="submit" class="q-ml-sm" />
-          </div>
+          <!-- Botones de acción movidos al tab EDITORIAL -->
         </q-form>
       </q-card-section>
     </q-card>
