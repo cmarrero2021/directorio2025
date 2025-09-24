@@ -183,6 +183,7 @@
               title="Eliminar Revista"
               size="xs"
               class="q-mr-xs"
+              @click.stop="() => deleteRevista(props.row)"
             />
           </div>
         </q-td>
@@ -217,6 +218,7 @@
 
 <script setup>
 import { exportToExcel, exportToCSV, exportToJSON } from 'src/helpers/exportHelpers';
+import Swal from 'sweetalert2';
 // Generar timestamp para nombre de archivo
 function getTimestamp() {
   const now = new Date();
@@ -377,6 +379,7 @@ const revistaDetailURL = import.meta.env.VITE_REVISTA_URL;
 const updateURL = import.meta.env.VITE_RV_UPDATE_URL;
 const insertURL = import.meta.env.VITE_RV_INSERT_URL;
 const insertWithUploadURL = import.meta.env.VITE_RV_INSERT_WITH_UPLOAD_URL;
+const deleteUrl = import.meta.env.VITE_RV_DELETE_URL;
 
 const areasLsURL = import.meta.env.VITE_LS_AREAS_URL;
 const idiomasLsURL = import.meta.env.VITE_LS_IDIOMAS_URL;
@@ -784,6 +787,28 @@ const saveChanges = async (updatedForm, updatedImageFile) => {
   }
 };
 
+// Eliminar revista con confirmación
+const deleteRevista = async (row) => {
+  const result = await Swal.fire({
+    title: '¿Eliminar revista?',
+    text: `¿Estás seguro de eliminar la revista "${row.revista}"? Esta acción no se puede deshacer.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+  });
+  if (result.isConfirmed) {
+    try {
+      await axios.delete(`${deleteUrl}${row.id}`);
+      await fetchJournals();
+      Swal.fire('Eliminada', 'La revista ha sido eliminada.', 'success');
+    } catch (error) {
+      Swal.fire('Error', 'No se pudo eliminar la revista.', 'error');
+    }
+  }
+};
 
 // Definir función como variable para evitar problemas de contexto en slots
 const openViewModalFn = (row) => {
