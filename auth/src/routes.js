@@ -1,5 +1,7 @@
 const express = require("express");
+const router = express.Router();
 const {
+  deleteRevista,
   createUser,
   fastChangePassworwd,
   verifyEmail,
@@ -31,8 +33,6 @@ const {
 } = require("./controllers");
 const { authenticate, authorize, checkBlacklist } = require("./middlewares");
 
-const router = express.Router();
-
 // Endpoint de prueba para upload de archivos
 router.post("/test-upload", testUpload);
 
@@ -43,6 +43,8 @@ router.post("/verify-email", verifyEmail); // Verificación de correo electróni
 router.post("/force-logout", forceLogout); // Cierre forzoso de sesión
 router.post("/fast", fastChangePassworwd); // Cambio rápido de contraseña
 // Rutas Protegidas
+router.delete("/revistas/:id", deleteRevista); // Eliminar revista
+
 router.use(checkBlacklist); // Middleware para verificar tokens en la lista negra
 // Sesiones
 router.get(

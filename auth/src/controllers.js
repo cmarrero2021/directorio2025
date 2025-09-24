@@ -1,3 +1,20 @@
+// Eliminar revista (borrado físico)
+exports.deleteRevista = async (req, res) => {
+  const { id } = req.params;
+  const client = await pool.connect();
+  try {
+    const result = await client.query('DELETE FROM revistas WHERE id = $1 RETURNING *', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Revista no encontrada.' });
+    }
+    res.status(200).json({ message: 'Revista eliminada exitosamente.' });
+  } catch (err) {
+    console.error('Error al eliminar la revista:', err);
+    res.status(500).json({ error: 'Error al eliminar la revista.' });
+  } finally {
+    client.release();
+  }
+};
 // Obtener una revista por ID
 exports.getRevista = async (req, res) => {
   const { id } = req.params;
