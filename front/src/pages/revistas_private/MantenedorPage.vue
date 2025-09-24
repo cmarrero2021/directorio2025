@@ -170,7 +170,7 @@
       :optionsu="optionsu"
       :imagePreview="imagePreview"
       :imageFile="imageFile"
-      @save="saveChanges"
+  @save="saveChanges"
       @close="closeEditModal"
       @update:imageFile="val => imageFile = val"
       @update:imagePreview="val => imagePreview = val"
@@ -616,10 +616,10 @@ const closeEditModal = () => {
   editDialog.value = false;
 };
 
-// Función para guardar los cambios (Refactorizada)
-const saveChanges = async () => {
+// Función para guardar los cambios (recibe el formulario actualizado desde el modal)
+const saveChanges = async (updatedForm, updatedImageFile) => {
   // 1. Validaciones
-  if (!editForm.value.revista || !editForm.value.idioma) {
+  if (!updatedForm.revista || !updatedForm.idioma) {
     Notify.create({ type: "negative", message: "Revista e Idioma son requeridos" });
     return;
   }
@@ -631,41 +631,39 @@ const saveChanges = async () => {
       patchData[key] = value;
     }
   };
-  setIfDefined('area_conocimiento_id', editForm.value.area_conocimiento?.value);
-  setIfDefined('indice_id', editForm.value.indice?.value);
-  setIfDefined('idioma_id', editForm.value.idioma?.value);
-  setIfDefined('revista', editForm.value.revista);
-  setIfDefined('correo_revista', editForm.value.correo_revista);
-  setIfDefined('editorial_id', editForm.value.editorial?.value);
-  setIfDefined('periodicidad_id', editForm.value.periodicidad?.value);
-  setIfDefined('formato_id', editForm.value.formato?.value);
-  setIfDefined('estado_id', editForm.value.estado?.value);
-  setIfDefined('nombres_editor', editForm.value.nombres_editor);
-  setIfDefined('apellidos_editor', editForm.value.apellidos_editor);
-  setIfDefined('correo_editor', editForm.value.correo_editor);
-  setIfDefined('deposito_legal_impreso', editForm.value.deposito_legal_impreso);
-  setIfDefined('deposito_legal_digital', editForm.value.deposito_legal_digital);
-  setIfDefined('issn_impreso', editForm.value.issn_impreso);
-  setIfDefined('issn_digital', editForm.value.issn_digital);
-  setIfDefined('url', editForm.value.url);
-  setIfDefined('anio_inicial', editForm.value.anio_inicial);
-  setIfDefined('direccion', editForm.value.direccion);
-  setIfDefined('telefono', editForm.value.telefono);
-  setIfDefined('resumen', editForm.value.resumen);
+  setIfDefined('area_conocimiento_id', updatedForm.area_conocimiento?.value);
+  setIfDefined('indice_id', updatedForm.indice?.value);
+  setIfDefined('idioma_id', updatedForm.idioma?.value);
+  setIfDefined('revista', updatedForm.revista);
+  setIfDefined('correo_revista', updatedForm.correo_revista);
+  setIfDefined('editorial_id', updatedForm.editorial?.value);
+  setIfDefined('periodicidad_id', updatedForm.periodicidad?.value);
+  setIfDefined('formato_id', updatedForm.formato?.value);
+  setIfDefined('estado_id', updatedForm.estado?.value);
+  setIfDefined('nombres_editor', updatedForm.nombres_editor);
+  setIfDefined('apellidos_editor', updatedForm.apellidos_editor);
+  setIfDefined('correo_editor', updatedForm.correo_editor);
+  setIfDefined('deposito_legal_impreso', updatedForm.deposito_legal_impreso);
+  setIfDefined('deposito_legal_digital', updatedForm.deposito_legal_digital);
+  setIfDefined('issn_impreso', updatedForm.issn_impreso);
+  setIfDefined('issn_digital', updatedForm.issn_digital);
+  setIfDefined('url', updatedForm.url);
+  setIfDefined('anio_inicial', updatedForm.anio_inicial);
+  setIfDefined('direccion', updatedForm.direccion);
+  setIfDefined('telefono', updatedForm.telefono);
+  setIfDefined('resumen', updatedForm.resumen);
 
   try {
     if (isEditing.value) {
-      alert("Editando revista");
-      // PATCH solo con los datos de la revista
-      await axios.patch(`${updateURL}${editForm.value.id}`, patchData);
+      await axios.patch(`${updateURL}${updatedForm.id}`, patchData);
       Notify.create({ type: "positive", message: "Cambios guardados correctamente." });
 
       // Si se seleccionó una nueva imagen durante la edición, subirla por separado
-      if (imageFile.value && editForm.value.id) {
+      if (updatedImageFile && updatedForm.id) {
         const imageFormData = new FormData();
-        const file = Array.isArray(imageFile.value) ? imageFile.value[0] : imageFile.value;
+        const file = Array.isArray(updatedImageFile) ? updatedImageFile[0] : updatedImageFile;
         imageFormData.append('portadaFile', file);
-        await axios.post(`${import.meta.env.VITE_RV_UPLOAD_URL}/upload-portada/${editForm.value.id}`, imageFormData);
+        await axios.post(`${import.meta.env.VITE_RV_UPLOAD_URL}/upload-portada/${updatedForm.id}`, imageFormData);
         Notify.create({ type: "positive", message: "Portada actualizada." });
       }
 
@@ -678,31 +676,31 @@ const saveChanges = async () => {
           formData.append(key, value);
         }
       };
-      if (imageFile.value) {
-        const file = Array.isArray(imageFile.value) ? imageFile.value[0] : imageFile.value;
+      if (updatedImageFile) {
+        const file = Array.isArray(updatedImageFile) ? updatedImageFile[0] : updatedImageFile;
         appendIfDefined('portadaFile', file);
       }
-      appendIfDefined('area_conocimiento_id', editForm.value.area_conocimiento?.value);
-      appendIfDefined('indice_id', editForm.value.indice?.value);
-      appendIfDefined('idioma_id', editForm.value.idioma?.value);
-      appendIfDefined('revista', editForm.value.revista);
-      appendIfDefined('correo_revista', editForm.value.correo_revista);
-      appendIfDefined('editorial_id', editForm.value.editorial?.value);
-      appendIfDefined('periodicidad_id', editForm.value.periodicidad?.value);
-      appendIfDefined('formato_id', editForm.value.formato?.value);
-      appendIfDefined('estado_id', editForm.value.estado?.value);
-      appendIfDefined('nombres_editor', editForm.value.nombres_editor);
-      appendIfDefined('apellidos_editor', editForm.value.apellidos_editor);
-      appendIfDefined('correo_editor', editForm.value.correo_editor);
-      appendIfDefined('deposito_legal_impreso', editForm.value.deposito_legal_impreso);
-      appendIfDefined('deposito_legal_digital', editForm.value.deposito_legal_digital);
-      appendIfDefined('issn_impreso', editForm.value.issn_impreso);
-      appendIfDefined('issn_digital', editForm.value.issn_digital);
-      appendIfDefined('url', editForm.value.url);
-      appendIfDefined('anio_inicial', editForm.value.anio_inicial);
-      appendIfDefined('direccion', editForm.value.direccion);
-      appendIfDefined('telefono', editForm.value.telefono);
-      appendIfDefined('resumen', editForm.value.resumen);
+      appendIfDefined('area_conocimiento_id', updatedForm.area_conocimiento?.value);
+      appendIfDefined('indice_id', updatedForm.indice?.value);
+      appendIfDefined('idioma_id', updatedForm.idioma?.value);
+      appendIfDefined('revista', updatedForm.revista);
+      appendIfDefined('correo_revista', updatedForm.correo_revista);
+      appendIfDefined('editorial_id', updatedForm.editorial?.value);
+      appendIfDefined('periodicidad_id', updatedForm.periodicidad?.value);
+      appendIfDefined('formato_id', updatedForm.formato?.value);
+      appendIfDefined('estado_id', updatedForm.estado?.value);
+      appendIfDefined('nombres_editor', updatedForm.nombres_editor);
+      appendIfDefined('apellidos_editor', updatedForm.apellidos_editor);
+      appendIfDefined('correo_editor', updatedForm.correo_editor);
+      appendIfDefined('deposito_legal_impreso', updatedForm.deposito_legal_impreso);
+      appendIfDefined('deposito_legal_digital', updatedForm.deposito_legal_digital);
+      appendIfDefined('issn_impreso', updatedForm.issn_impreso);
+      appendIfDefined('issn_digital', updatedForm.issn_digital);
+      appendIfDefined('url', updatedForm.url);
+      appendIfDefined('anio_inicial', updatedForm.anio_inicial);
+      appendIfDefined('direccion', updatedForm.direccion);
+      appendIfDefined('telefono', updatedForm.telefono);
+      appendIfDefined('resumen', updatedForm.resumen);
       await axios.post(insertWithUploadURL, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'

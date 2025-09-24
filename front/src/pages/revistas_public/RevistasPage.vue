@@ -316,7 +316,7 @@ const exportToPdf = async () => {
       console.error("El contenedor del diálogo no está disponible.");
       return;
     } else {
-      console.log(dialogContent.value)
+      // console.log(dialogContent.value)
     }
     // Acceder al nodo DOM real usando $el
     const dialogElement = dialogContent.value.$el;

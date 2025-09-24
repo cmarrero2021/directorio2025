@@ -278,16 +278,16 @@ onMounted(async () => {
     }
   };
   socket.addEventListener("message", socketMessageHandler);
-  // socket.addEventListener("message", async () => {
-  //   try {
-  //     // await cargarSecciones(false);
-  //     await cargarSecciones();
-  //     Notify.create({ message: "Contenido actualizado", color: "positive", timeout: 2000 });
-  //   } catch (error) {
-  //     console.error('Error en WebSocket:', error);
-  //     Notify.create({ message: "Error al actualizar", color: "negative", timeout: 3000 });
-  //   }
-  // });
+  socket.addEventListener("message", async () => {
+    try {
+      // await cargarSecciones(false);
+      await cargarSecciones();
+      Notify.create({ message: "Contenido actualizado", color: "positive", timeout: 2000 });
+    } catch (error) {
+      console.error('Error en WebSocket:', error);
+      Notify.create({ message: "Error al actualizar", color: "negative", timeout: 3000 });
+    }
+  });
 });
 onUnmounted(() => {
   if (socketMessageHandler) {

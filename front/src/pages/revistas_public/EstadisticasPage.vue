@@ -85,8 +85,8 @@ const customTitles1 = {
   cant_idiomas: "IDIOMA",
   cant_editoriales: "EDITORIAL",
 };
-console.table(customTitles)
-console.table(customTitles1)
+// console.table(customTitles)
+// console.table(customTitles1)
 // Mapeo de claves a imágenes
 const imageMap = {
   revistas: "/img/cant_revistas.png",
@@ -125,7 +125,7 @@ const fetchData = async () => {
 
 // Función para obtener el título personalizado basado en el valor
 const getCustomTitle = (key, value) => {
-  console.log(`Key: ${key}, Value: ${value}`);
+  // console.log(`Key: ${key}, Value: ${value}`);
   if (value === "1") {
     return customTitles1[key] || formatKey(key); // Usar customTitles1 si value es 1
   } else {
