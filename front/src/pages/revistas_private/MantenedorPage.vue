@@ -173,6 +173,7 @@
               title="Ver revista"
               size="xs"
               class="q-mr-xs"
+              @click.stop="() => openViewModalFn(props.row)"
             />
 
             <!-- Botón Borrar -->
@@ -200,10 +201,16 @@
       :optionsu="optionsu"
       :imagePreview="imagePreview"
       :imageFile="imageFile"
-  @save="saveChanges"
+      @save="saveChanges"
       @close="closeEditModal"
       @update:imageFile="val => imageFile = val"
       @update:imagePreview="val => imagePreview = val"
+    />
+    <RevistaViewModal
+      v-model="viewDialog"
+      :revista="selectedRevista"
+      :imageBaseUrl="imageBaseUrl"
+      @close="closeViewModal"
     />
   </div>
 </template>
@@ -236,6 +243,7 @@ function exportJSON() {
   exportToJSON(getExportData(), getExportFilename('json').replace('.json',''));
 }
 import RevistaModal from 'src/components/RevistaModal.vue';
+import RevistaViewModal from 'src/components/RevistaViewModal.vue';
 import { ref, onMounted, computed, watch } from "vue";
 import { LocalStorage, Notify } from "quasar";
 import axios from "axios";
@@ -424,6 +432,8 @@ const formatoOptions = ref([]);
 
 // Estado del modal de edición
 const editDialog = ref(false);
+const viewDialog = ref(false);
+const selectedRevista = ref(null);
 const editForm = ref({});
 
 // Función para obtener los datos de las revistas
@@ -774,6 +784,12 @@ const saveChanges = async (updatedForm, updatedImageFile) => {
   }
 };
 
+
+// Definir función como variable para evitar problemas de contexto en slots
+const openViewModalFn = (row) => {
+  selectedRevista.value = { ...row };
+  viewDialog.value = true;
+};
 
 // Observar cambios en la paginación
 watch(pagination, () => {}, { deep: true });
