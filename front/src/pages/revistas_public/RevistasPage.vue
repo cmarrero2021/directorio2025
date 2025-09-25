@@ -121,6 +121,7 @@ import { Notify } from "quasar";
 import FilterDrawer from "components/FilterDrawer.vue";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
+import socket from "src/services/websocket.js";
 const imageBaseUrl = ref("");
 const revistas = ref([]);
 const dialogContent = ref(null);
@@ -244,6 +245,18 @@ onMounted(async () => {
   } catch (error) {
     console.error("Error fetching states:", error);
   }
+  // WebSocket: refrescar revistas al recibir mensaje
+  socket.addEventListener("message", async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await axios.get(apiUrl);
+      revistas.value = response.data;
+      Notify.create({ message: "Contenido actualizado", color: "positive", timeout: 2000 });
+    } catch (error) {
+      console.error('Error en WebSocket:', error);
+      Notify.create({ message: "Error al actualizar", color: "negative", timeout: 3000 });
+    }
+  });
 });
 const filteredRevistas = computed(() => {
   return revistas.value.filter((revista) => {
