@@ -114,6 +114,7 @@ const renderChart = (type) => {
 
   // Configuración del gráfico
   const isBarChart = type === "bar" || type === "column";
+  const isPieChart = type === "pie" || type === "doughnut";
   const chartType = isBarChart ? "bar" : type; // "bar" para barras, otro tipo para pie/doughnut
   const indexAxis = type === "bar" ? "y" : type === "column" ? "x" : undefined; // "y" para barras horizontales, "x" para columnas
   const labels = chartData.value.map(
@@ -142,6 +143,13 @@ const renderChart = (type) => {
     dynamicTitle += ` EDO. ${selectedStateStore.selectedState.toUpperCase()}`;
   }
   dynamicTitle += `\n${formattedDate}`;
+
+  // Ajustar altura del canvas y leyenda según el tipo de gráfico
+  if (isPieChart) {
+    chartCanvas.value.style.height = '800px';
+  } else {
+    chartCanvas.value.style.height = '400px';
+  }
   chartInstance = new Chart(ctx, {
     type: chartType,
     data: {
@@ -163,9 +171,15 @@ const renderChart = (type) => {
         title: {
           display: true,
           text: dynamicTitle,
+          padding: 10,
         },
         legend: {
           display: chartType === 'pie' || chartType === 'doughnut',
+          position: chartType === 'pie' || chartType === 'doughnut' ? 'right' : 'top',
+          labels: {
+            padding: 10,
+            boxWidth: 20,
+          }
         },
       },
       scales: {
