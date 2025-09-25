@@ -1,6 +1,7 @@
 <template>
-  <q-page>
-    <div class="q-pa-md row items-start q-gutter-md bg-white justify-center flex flex-center">
+  <q-page class="q-pa-md">
+    <!-- Cards para Desktop (se oculta en móvil) -->
+    <div class="q-pa-md row items-start q-gutter-md bg-white justify-center flex flex-center gt-sm">
       <div class="row">
         <div v-for="(value, key) in data" :key="key" class="md-2 q-mb-sm">
           <q-img :src="imageMap[key]" style="width: 20px; height: 20px" :alt="`Icono de ${key}`" />
@@ -10,41 +11,68 @@
         </div>
       </div>
     </div>
+
     <!-- Contenido principal: Mapa -->
-    <div class="map-container">
+    <div class="map-container q-mb-md alto-tabla">
       <MapComponent />
     </div>
 
+    <!-- Cards para Móvil (se oculta en desktop) -->
+    <!-- <div class="q-pa-md row items-start q-gutter-md bg-white justify-center flex flex-center lt-md">
+      <div class="row">
+        <div v-for="(value, key) in data" :key="key" class="md-2 q-mb-sm">
+          <q-img :src="imageMap[key]" style="width: 20px; height: 20px" :alt="`Icono de ${key}`" />
+          <label class="q-ml-sm q-mr-md text-caption text-weight-medium">
+            {{ value }} {{ getCustomTitle(key, value) }}
+          </label>
+        </div>
+      </div>
+    </div> -->
+
     <!-- Contenido principal: Gráficos -->
-    <div class="charts-container row justify-center flex flex-center">
-      <div class="row" style="width: 100%; max-width: 1600px; margin: 0 auto">
+    <div class="charts-container alto-mapa"  >
+      <div class="row q-col-gutter-md">
         <!-- Gráfico 1: Áreas de Conocimiento -->
-        <ChartComponent title="REVISTAS POR ÁREA DE CONOCIMIENTO" :endpoint="grAreasUrl" dataKey="area_conocimiento"
-          valueKey="cant_area" :tableColumns="tableColumns1" />
+        <div class="col-12 col-md-6">
+          <ChartComponent title="REVISTAS POR ÁREA DE CONOCIMIENTO" :endpoint="grAreasUrl" dataKey="area_conocimiento"
+            valueKey="cant_area" :tableColumns="tableColumns1" />
+        </div>
 
         <!-- Gráfico 2: Índices -->
-        <ChartComponent title="REVISTAS POR ÍNDICE" :endpoint="grIndicesUrl" dataKey="indice" valueKey="cant_inddice"
-          :tableColumns="tableColumns2" />
+        <div class="col-12 col-md-6">
+          <ChartComponent title="REVISTAS POR ÍNDICE" :endpoint="grIndicesUrl" dataKey="indice" valueKey="cant_inddice"
+            :tableColumns="tableColumns2" />
+        </div>
 
         <!-- Gráfico 3: Idiomas -->
-        <ChartComponent title="REVISTAS POR IDIOMA" :endpoint="grIdiomasUrl" dataKey="idioma" valueKey="cant_idioma"
-          :tableColumns="tableColumns3" />
+        <div class="col-12 col-md-6">
+          <ChartComponent title="REVISTAS POR IDIOMA" :endpoint="grIdiomasUrl" dataKey="idioma" valueKey="cant_idioma"
+            :tableColumns="tableColumns3" />
+        </div>
 
         <!-- Gráfico 4: Editoriales -->
-        <ChartComponent title="REVISTAS POR EDITORIAL" :endpoint="grEditorialesUrl" dataKey="editorial"
-          valueKey="cant_editorial" :tableColumns="tableColumns4" />
+        <div class="col-12 col-md-6">
+          <ChartComponent title="REVISTAS POR EDITORIAL" :endpoint="grEditorialesUrl" dataKey="editorial"
+            valueKey="cant_editorial" :tableColumns="tableColumns4" />
+        </div>
 
         <!-- Gráfico 5: Periodicidades -->
-        <ChartComponent title="REVISTAS POR PERIODICIDAD" :endpoint="grPeriodicidadesUrl" dataKey="periodicidad"
-          valueKey="cant_periodicidad" :tableColumns="tableColumns5" />
+        <div class="col-12 col-md-6">
+          <ChartComponent title="REVISTAS POR PERIODICIDAD" :endpoint="grPeriodicidadesUrl" dataKey="periodicidad"
+            valueKey="cant_periodicidad" :tableColumns="tableColumns5" />
+        </div>
 
         <!-- Gráfico 6: Formatos -->
-        <ChartComponent title="REVISTAS POR FORMATO" :endpoint="grFormatosUrl" dataKey="formato" valueKey="cant_formato"
-          :tableColumns="tableColumns6" />
+        <div class="col-12 col-md-6">
+          <ChartComponent title="REVISTAS POR FORMATO" :endpoint="grFormatosUrl" dataKey="formato" valueKey="cant_formato"
+            :tableColumns="tableColumns6" />
+        </div>
 
         <!-- Gráfico 7: Estados -->
-        <ChartComponent title="REVISTAS POR ESTADO" :endpoint="grEstadosUrl" dataKey="estado" valueKey="cant_estado"
-          :tableColumns="tableColumns7" />
+        <div class="col-12 col-md-6">
+          <ChartComponent title="REVISTAS POR ESTADO" :endpoint="grEstadosUrl" dataKey="estado" valueKey="cant_estado"
+            :tableColumns="tableColumns7" />
+        </div>
       </div>
     </div>
   </q-page>
@@ -221,14 +249,21 @@ onUnmounted(() => {
 .map-container {
   height: 400px;
   width: 100%;
-  margin-bottom: 20px;
-  /* Separación vertical de 5px */
 }
 
-.charts-container {
-  margin-top: 20px;
-  /* Separación vertical de 5px */
+@media only screen and (max-width: 768px) and (orientation: portrait) {
+  .alto-mapa {
+    margin-top:100% !Important;
+  }
 }
+
+
+@media only screen and (max-width: 768px) and (orientation: landscape) {
+  .alto-mapa {
+    margin-top:60% !Important;
+  }
+}
+
 
 /* .btn-content {
   padding: "4px 16px" !important;

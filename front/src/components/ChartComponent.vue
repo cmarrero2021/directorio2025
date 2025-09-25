@@ -114,6 +114,7 @@ const renderChart = (type) => {
 
   // Configuración del gráfico
   const isBarChart = type === "bar" || type === "column";
+  const isPieChart = type === "pie" || type === "doughnut";
   const chartType = isBarChart ? "bar" : type; // "bar" para barras, otro tipo para pie/doughnut
   const indexAxis = type === "bar" ? "y" : type === "column" ? "x" : undefined; // "y" para barras horizontales, "x" para columnas
   const labels = chartData.value.map(
@@ -131,10 +132,24 @@ const renderChart = (type) => {
   const backgroundColors = generateGradientColors(dataValues);
   // Construir el título dinámico
   let dynamicTitle = props.title;
-  if (selectedStateStore.selectedState) {
+  // Solo agregar el nombre del estado si el endpoint NO es grEstadosUrl
+  const estadosEndpoints = [
+    import.meta.env.VITE_GR_ESTADOS_URL,
+    '/gr_estados',
+    'gr_estados',
+  ];
+  const isEstadosChart = estadosEndpoints.some(e => props.endpoint.includes(e));
+  if (selectedStateStore.selectedState && !isEstadosChart) {
     dynamicTitle += ` EDO. ${selectedStateStore.selectedState.toUpperCase()}`;
   }
   dynamicTitle += `\n${formattedDate}`;
+
+  // Ajustar altura del canvas y leyenda según el tipo de gráfico
+  if (isPieChart) {
+    chartCanvas.value.style.height = '800px';
+  } else {
+    chartCanvas.value.style.height = '400px';
+  }
   chartInstance = new Chart(ctx, {
     type: chartType,
     data: {
@@ -156,6 +171,23 @@ const renderChart = (type) => {
         title: {
           display: true,
           text: dynamicTitle,
+          padding: 10,
+        },
+        legend: {
+          display: chartType === 'pie' || chartType === 'doughnut',
+          position: chartType === 'pie' || chartType === 'doughnut' ? 'right' : 'top',
+          labels: {
+            padding: 10,
+            boxWidth: 20,
+          }
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+        },
+        y: {
+          grid: { display: false },
         },
       },
     },
@@ -165,16 +197,13 @@ const renderChart = (type) => {
 // Obtener datos para la gráfica
 const fetchChartData = async () => {
   try {
-    const response = await axios.get(props.endpoint);
-    let data = response.data;
+    let url = props.endpoint;
     if (selectedStateStore.selectedState) {
-      // Filtra por estado si está seleccionado
-      data = data.filter(
-        (item) =>
-          item.estado?.toLowerCase() === selectedStateStore.selectedState
-      );
+      // Agrega el parámetro estado si está seleccionado
+      url += `?estado=${encodeURIComponent(selectedStateStore.selectedState)}`;
     }
-    chartData.value = data;
+    const response = await axios.get(url);
+    chartData.value = response.data;
     await nextTick(); // Esperar a que Vue actualice el DOM
     renderChart(currentChartType.value);
   } catch (error) {
