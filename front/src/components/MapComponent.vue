@@ -284,14 +284,19 @@ const formatKey = (key) => {
 };
 </script>
 <style scoped>
+
 .map-container {
   height: 300px;
   background-color: #ffffff !important;
+  border: 3px solid #273984;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(39, 57, 132, 0.08);
 }
 
 @media (min-width: 768px) {
   .map-container {
     height: 400px;
+    border-width: 4px;
   }
 }
 
