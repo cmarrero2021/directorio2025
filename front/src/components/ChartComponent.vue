@@ -131,7 +131,14 @@ const renderChart = (type) => {
   const backgroundColors = generateGradientColors(dataValues);
   // Construir el título dinámico
   let dynamicTitle = props.title;
-  if (selectedStateStore.selectedState) {
+  // Solo agregar el nombre del estado si el endpoint NO es grEstadosUrl
+  const estadosEndpoints = [
+    import.meta.env.VITE_GR_ESTADOS_URL,
+    '/gr_estados',
+    'gr_estados',
+  ];
+  const isEstadosChart = estadosEndpoints.some(e => props.endpoint.includes(e));
+  if (selectedStateStore.selectedState && !isEstadosChart) {
     dynamicTitle += ` EDO. ${selectedStateStore.selectedState.toUpperCase()}`;
   }
   dynamicTitle += `\n${formattedDate}`;
@@ -156,6 +163,17 @@ const renderChart = (type) => {
         title: {
           display: true,
           text: dynamicTitle,
+        },
+        legend: {
+          display: chartType === 'pie' || chartType === 'doughnut',
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+        },
+        y: {
+          grid: { display: false },
         },
       },
     },
