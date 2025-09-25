@@ -293,7 +293,7 @@ const formatKey = (key) => {
   box-shadow: 0 2px 8px rgba(39, 57, 132, 0.08);
   margin-bottom: 32px;
   margin-right: 32px;
-  margin-left: 16px;
+  margin-left: -16px;
   max-width: 600px;
   width: 100%;
   float: left;
