@@ -165,16 +165,13 @@ const renderChart = (type) => {
 // Obtener datos para la gráfica
 const fetchChartData = async () => {
   try {
-    const response = await axios.get(props.endpoint);
-    let data = response.data;
+    let url = props.endpoint;
     if (selectedStateStore.selectedState) {
-      // Filtra por estado si está seleccionado
-      data = data.filter(
-        (item) =>
-          item.estado?.toLowerCase() === selectedStateStore.selectedState
-      );
+      // Agrega el parámetro estado si está seleccionado
+      url += `?estado=${encodeURIComponent(selectedStateStore.selectedState)}`;
     }
-    chartData.value = data;
+    const response = await axios.get(url);
+    chartData.value = response.data;
     await nextTick(); // Esperar a que Vue actualice el DOM
     renderChart(currentChartType.value);
   } catch (error) {

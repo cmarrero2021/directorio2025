@@ -296,7 +296,16 @@ app.get('/cantidades', async (req, res) => {
 app.get('/gr_areas', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT area_conocimiento, COUNT(area_conocimiento) AS cant_area FROM revistas_data GROUP BY area_conocimiento ORDER BY COUNT(area_conocimiento) DESC');
+    const estado = req.query.estado;
+    let query, params;
+    if (estado) {
+      query = 'SELECT area_conocimiento, COUNT(area_conocimiento) AS cant_area FROM revistas_data WHERE LOWER(estado) = $1 GROUP BY area_conocimiento ORDER BY COUNT(area_conocimiento) DESC';
+      params = [estado.toLowerCase()];
+    } else {
+      query = 'SELECT area_conocimiento, COUNT(area_conocimiento) AS cant_area FROM revistas_data GROUP BY area_conocimiento ORDER BY COUNT(area_conocimiento) DESC';
+      params = [];
+    }
+    const result = await client.query(query, params);
     client.release(); // Liberar el cliente
     res.json(result.rows);
   } catch (err) {
@@ -334,7 +343,16 @@ app.get('/data_estados', async (req, res) => {
 app.get('/gr_indices', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT indice, COUNT(indice) AS cant_inddice FROM revistas_data GROUP BY indice ORDER BY COUNT(indice) DESC');
+    const estado = req.query.estado;
+    let query, params;
+    if (estado) {
+      query = 'SELECT indice, COUNT(indice) AS cant_inddice FROM revistas_data WHERE LOWER(estado) = $1 GROUP BY indice ORDER BY COUNT(indice) DESC';
+      params = [estado.toLowerCase()];
+    } else {
+      query = 'SELECT indice, COUNT(indice) AS cant_inddice FROM revistas_data GROUP BY indice ORDER BY COUNT(indice) DESC';
+      params = [];
+    }
+    const result = await client.query(query, params);
     client.release(); // Liberar el cliente
     res.json(result.rows);
   } catch (err) {
@@ -347,7 +365,16 @@ app.get('/gr_indices', async (req, res) => {
 app.get('/gr_idiomas', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT idioma, COUNT(idioma) AS cant_idioma FROM revistas_data GROUP BY idioma ORDER BY COUNT(idioma) DESC');
+    const estado = req.query.estado;
+    let query, params;
+    if (estado) {
+      query = 'SELECT idioma, COUNT(idioma) AS cant_idioma FROM revistas_data WHERE LOWER(estado) = $1 GROUP BY idioma ORDER BY COUNT(idioma) DESC';
+      params = [estado.toLowerCase()];
+    } else {
+      query = 'SELECT idioma, COUNT(idioma) AS cant_idioma FROM revistas_data GROUP BY idioma ORDER BY COUNT(idioma) DESC';
+      params = [];
+    }
+    const result = await client.query(query, params);
     client.release(); // Liberar el cliente
     res.json(result.rows);
   } catch (err) {
@@ -360,7 +387,16 @@ app.get('/gr_idiomas', async (req, res) => {
 app.get('/gr_editoriales', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT editorial, COUNT(editorial) AS cant_editorial FROM revistas_data GROUP BY editorial ORDER BY COUNT(editorial) DESC');
+    const estado = req.query.estado;
+    let query, params;
+    if (estado) {
+      query = 'SELECT editorial, COUNT(editorial) AS cant_editorial FROM revistas_data WHERE LOWER(estado) = $1 GROUP BY editorial ORDER BY COUNT(editorial) DESC';
+      params = [estado.toLowerCase()];
+    } else {
+      query = 'SELECT editorial, COUNT(editorial) AS cant_editorial FROM revistas_data GROUP BY editorial ORDER BY COUNT(editorial) DESC';
+      params = [];
+    }
+    const result = await client.query(query, params);
     client.release(); // Liberar el cliente
     res.json(result.rows);
   } catch (err) {
@@ -373,7 +409,16 @@ app.get('/gr_editoriales', async (req, res) => {
 app.get('/gr_periodicidades', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT periodicidad, COUNT(periodicidad) AS cant_periodicidad FROM revistas_data GROUP BY periodicidad ORDER BY COUNT(periodicidad) DESC');
+    const estado = req.query.estado;
+    let query, params;
+    if (estado) {
+      query = 'SELECT periodicidad, COUNT(periodicidad) AS cant_periodicidad FROM revistas_data WHERE LOWER(estado) = $1 GROUP BY periodicidad ORDER BY COUNT(periodicidad) DESC';
+      params = [estado.toLowerCase()];
+    } else {
+      query = 'SELECT periodicidad, COUNT(periodicidad) AS cant_periodicidad FROM revistas_data GROUP BY periodicidad ORDER BY COUNT(periodicidad) DESC';
+      params = [];
+    }
+    const result = await client.query(query, params);
     client.release(); // Liberar el cliente
     res.json(result.rows);
   } catch (err) {
@@ -386,7 +431,16 @@ app.get('/gr_periodicidades', async (req, res) => {
 app.get('/gr_formatos', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT formato, COUNT(formato) AS cant_formato FROM revistas_data GROUP BY formato ORDER BY COUNT(formato) DESC');
+    const estado = req.query.estado;
+    let query, params;
+    if (estado) {
+      query = 'SELECT formato, COUNT(formato) AS cant_formato FROM revistas_data WHERE LOWER(estado) = $1 GROUP BY formato ORDER BY COUNT(formato) DESC';
+      params = [estado.toLowerCase()];
+    } else {
+      query = 'SELECT formato, COUNT(formato) AS cant_formato FROM revistas_data GROUP BY formato ORDER BY COUNT(formato) DESC';
+      params = [];
+    }
+    const result = await client.query(query, params);
     client.release(); // Liberar el cliente
     res.json(result.rows);
   } catch (err) {
