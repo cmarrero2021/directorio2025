@@ -11,12 +11,12 @@
       </div>
     </div>
     <!-- Contenido principal: Mapa -->
-    <div class="map-container">
+    <div class="map-container" style="margin-left:32px;">
       <MapComponent />
     </div>
 
     <!-- Contenido principal: Gráficos -->
-    <div class="charts-container row justify-center flex flex-center">
+    <div class="charts-container row justify-center flex flex-center" style="margin-right:32px;">
       <div class="row" style="width: 100%; max-width: 1600px; margin: 0 auto">
         <!-- Gráfico 1: Áreas de Conocimiento -->
         <ChartComponent title="REVISTAS POR ÁREA DE CONOCIMIENTO" :endpoint="grAreasUrl" dataKey="area_conocimiento"

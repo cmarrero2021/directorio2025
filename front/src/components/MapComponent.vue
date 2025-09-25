@@ -9,7 +9,7 @@
         class="cards-container"
         :class="{ visible: showTable }"
       >
-        <q-card class="q-ma-md">
+  <q-card class="q-ma-md" style="margin-right:160px;">
           <!-- Botón de cerrar -->
           <q-btn
             icon="cleaning_services"
@@ -291,12 +291,22 @@ const formatKey = (key) => {
   border: 3px solid #273984;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(39, 57, 132, 0.08);
+  margin-bottom: 32px;
+  margin-right: 32px;
+  margin-left: 16px;
+  max-width: 600px;
+  width: 100%;
+  float: left;
 }
 
 @media (min-width: 768px) {
   .map-container {
     height: 400px;
     border-width: 4px;
+    margin-bottom: 40px;
+    margin-right: 64px;
+    margin-left: 48px;
+    max-width: 700px;
   }
 }
 
