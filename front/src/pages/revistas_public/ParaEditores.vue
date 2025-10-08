@@ -442,7 +442,6 @@ a:visited {
   }
 
   .sections-wrapper {
-    background-color: #273984;
     padding: 15px !important;
   }
 

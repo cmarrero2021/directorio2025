@@ -21,7 +21,7 @@
             :class="{'q-ml-xl': $q.screen.gt.sm, 'q-ml-none': !$q.screen.gt.sm}"
             :style="!$q.screen.gt.sm ? 'font-size:15px;' : ''"
           >
-            El Directorio Nacional de Revistas Científicas y Tecnológicas, como un proyecto de divulgación científica del Observatorio Nacional de ciencia, Tecnología e Innovación (OMCTI) a través de la Gerencia de Divulgación está dirigido por:
+            El Directorio Nacional de Revistas Científicas y Tecnológicas, como un proyecto de divulgación científica del Observatorio Nacional de Ciencia, Tecnología e Innovación (ONCTI) a través de la Gerencia de Divulgación está dirigido por:
           </p>
           <div class="row q-col-gutter-md vcard-row-mobile-fix" :class="{'q-ml-xl': $q.screen.gt.sm}">
             <div class="col-12 col-md-6">
@@ -30,11 +30,11 @@
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
                       <q-img src="http://localhost:3000/portadas/betancourt.png" alt="Foto Betancourt" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
-                      <div class="vcard-email-align text-body2 text-bold">robertoabetancourt@gmail.com</div>
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Dr. Roberto Betancourt A.</div>
                       <div class="text-body2">Presidente del Observatorio Nacional de Ciencia, Tecnología e Innovación</div>
+                      <div class="vcard-email-align text-body2 text-bold">robertoabetancourt@gmail.com</div>
                     </div>
                   </div>
                 </q-card-section>
@@ -46,11 +46,11 @@
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
                       <q-img src="http://localhost:3000/portadas/ortuzar.png" alt="Foto Ortúzar" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
-                      <div class="vcard-email-align text-body2 text-bold">divulgacion@oncti.gob.ve</div>
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Lic. Fabiola Ortúzar</div>
                       <div class="text-body2">Gerente de Divulgación</div>
+                      <div class="vcard-email-align text-body2 text-bold">divulgacion@oncti.gob.ve</div>
                     </div>
                   </div>
                 </q-card-section>
@@ -62,11 +62,11 @@
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
                       <q-img src="http://localhost:3000/portadas/araujo.png" alt="Foto Araujo" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
-                      <div class="vcard-email-align text-body2 text-bold">zaraujo@oncti.gob.ve</div>
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Lic. Zenaida Araujo</div>
                       <div class="text-body2">Coordinadora de Publicaciones</div>
+                      <div class="vcard-email-align text-body2 text-bold">zaraujo@oncti.gob.ve</div>
                     </div>
                   </div>
                 </q-card-section>
@@ -78,11 +78,11 @@
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
                       <q-img src="http://localhost:3000/portadas/arvelo.png" alt="Foto Arvelo" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
-                      <div class="vcard-email-align text-body2 text-bold">marvelo@oncti.gob.ve</div>
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Ing. Mónica Arvelo</div>
                       <div class="text-body2">Directora Oficina de Tecnologías de la Información y la Comunicación</div>
+                      <div class="vcard-email-align text-body2 text-bold">marvelo@oncti.gob.ve</div>
                     </div>
                   </div>
                 </q-card-section>
@@ -94,11 +94,11 @@
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
                       <q-img src="http://localhost:3000/portadas/morales.png" alt="Foto Morales" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
-                      <div class="vcard-email-align text-body2 text-bold">gmorales@oncti.gob.ve</div>
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Dr. Gregorio Morales</div>
                       <div class="text-body2">Asesor</div>
+                      <div class="vcard-email-align text-body2 text-bold">gmorales@oncti.gob.ve</div>
                     </div>
                   </div>
                 </q-card-section>
@@ -521,7 +521,6 @@ a:visited {
   }
 
   .sections-wrapper {
-    background-color: #273984;
     padding: 15px !important;
   }
 
