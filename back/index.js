@@ -109,7 +109,7 @@ app.use('/portadas', (req, res, next) => {
 app.get('/', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT * FROM revistas_data ORDER BY revista');
+    const result = await client.query('SELECT * FROM revistas_data ORDER BY id DESC');
     client.release(); // Liberar el cliente
     res.json(result.rows);
   } catch (err) {

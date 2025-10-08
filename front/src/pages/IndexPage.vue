@@ -11,38 +11,49 @@
       <q-spinner-hourglass color="primary" size="3em" />
       <p>Cargando contenido...</p>
     </div>
+<div v-else>
+    <!-- Fondo ABSOLUTO, fuera del row -->
+    <div class="desktop-background" :style="backgroundStyle"></div>
 
-    <div v-else class="row items-stretch no-wrap">
-      <!-- (Mantener estructura de secciones existente) -->
-      <div class="desktop-background" :style="backgroundStyle"></div>
-
-      <div class="col-md-6 q-px-sm section-container" :ref="(el) => { if (el) sectionRefs[0] = el }">
-        <div class="content-wrapper text-left">
-          <p style="font-family: Gotham Bold;font-size:36px;">{{ secciones[0].titulo }}</p>
-          <p :id="`seccion${secciones[0].orden}`" class="animated">
-            {{ secciones[0].contenido }}
+    <!-- Row SIN no-wrap, SIN elementos extra -->
+    <div class="row items-stretch q-col-gutter-md">
+      <div class="col-12 col-md-4 section-container" :ref="(el) => { if (el) sectionRefs[0] = el }">
+        <div class="content-wrapper text-left q-pa-md">
+          <p style="font-family: Gotham Bold; font-size: 36px;">{{ secciones[0]?.titulo }}</p>
+          <p :id="`seccion${secciones[0]?.orden}`" class="animated">
+            {{ secciones[0]?.contenido }}
           </p>
         </div>
       </div>
 
-      <div class="col-md-6 q-px-sm section-container" :ref="(el) => { if (el) sectionRefs[1] = el }">
-        <div class="content-wrapper text-right">
-          <p style="font-family: Gotham Bold;font-size:36px;">{{ secciones[1].titulo }}</p>
-          <p :id="`seccion${secciones[1].orden}`" class="animated">
-            {{ secciones[1].contenido }}
+      <div class="col-12 col-md-4 section-container" :ref="(el) => { if (el) sectionRefs[1] = el }">
+        <div class="content-wrapper text-center q-pa-md">
+          <p style="font-family: Gotham Bold; font-size: 36px;">{{ secciones[1]?.titulo }}</p>
+          <p :id="`seccion${secciones[1]?.orden}`" class="animated">
+            {{ secciones[1]?.contenido }}
+          </p>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4 section-container">
+        <div class="content-wrapper text-right q-pa-md">
+          <p class="baseLegal" style="font-family: Gotham Bold; font-size: 36px;">Base Legal</p>
+          <p class="animated" style="opacity:1; ">
+            El ONCTI a través de la Ley Orgánica de Ciencia, Tecnología e Innovación en su artículo 22, le confiere la cualidad para recolectar datos de la productividad científica del país para su divulgación. El Directorio Venezolano de Revistas Científicas y Tecnológicas será el primer proceso de acreditación nacional de las publicaciones venezolanas existentes en el país. Con criterios de inclusión y democratización de la información.
           </p>
         </div>
       </div>
     </div>
   </div>
+</div>
   <div class="flex justify-center items-center" style="margin-top: 20px; gap: 60px;">
-    <div class="image-container" @click="$router.push('/estadisticas')" style="cursor: pointer;">
-      <img alt="Estadísticas" :src="estadisticas" style="width: 150px; height: 150px;margin-left:25px;" />
-      <p style="font-weight: bold; text-align: center; margin-top: 10px;font-size:24px !important;">Estadísticas</p>
-    </div>
     <div class="image-container" @click="$router.push('/revistas')" style="cursor: pointer;">
       <img alt="Publicaciones" :src="publicaciones" style="width: 150px; height: 150px;margin-left:20px;" />
       <p style="font-weight: bold; text-align: center; margin-top: 10px;font-size:24px !important;">Publicaciones</p>
+    </div>
+    <div class="image-container" @click="$router.push('/estadisticas')" style="cursor: pointer;">
+      <img alt="Estadísticas" :src="estadisticas" style="width: 150px; height: 150px;margin-left:25px;" />
+      <p style="font-weight: bold; text-align: center; margin-top: 10px;font-size:24px !important;">Estadísticas</p>
     </div>
   </div>
   <div class="flex justify-center items-center"
@@ -149,7 +160,7 @@ const VITE_RECIENTES_URL = import.meta.env.VITE_RECIENTES_URL;
 const VITE_IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 const VITE_SC_INSERT_URL = import.meta.env.VITE_SC_INSERT_URL;
 const secciones = ref([]);
-const sectionRefs = ref([]);
+const sectionRefs = ref([null,null,null]);
 const recientes = ref([]);
 const portada1 = ref();
 const portada2 = ref();
@@ -405,11 +416,17 @@ a:visited {
   }
 
   .section-container {
-    width: calc(50% - 10px);
+    /* width: calc(50% - 10px); */
+    /* flex: 0 0 33.3333%;
+    max-width: 33.3333%; */
+    flex: 0 0 32.5%;
+    max-width: 32.5%;
     margin: 0 5px;
     padding: 0;
   }
-
+  .baseLegal {
+    /* margin-top:-18%; */
+  }
   .content-wrapper {
     width: 95%;
     padding: 25px;
