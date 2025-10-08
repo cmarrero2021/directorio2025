@@ -16,6 +16,8 @@
         <q-route-tab to="/" label="Inicio" />
         <q-route-tab to="/revistas" label="Publicaciones" />
         <q-route-tab to="/estadisticas" label="Estadísticas" />
+        <q-route-tab to="/editores" label="Para Editores" />
+        <q-route-tab to="/somos" label="Quienes Somos" />
       </q-tabs>
     </q-header>
     <q-page-container>

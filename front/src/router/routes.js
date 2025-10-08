@@ -17,6 +17,16 @@ const routes = [
         component: () => import("pages/login/LoginPage.vue"),
         meta: { requiresGuest: true },
       },
+      {
+        path: "/editores",
+        component: () => import("pages/revistas_public/ParaEditores.vue"),
+        meta: { requiresGuest: true },
+      },
+      {
+        path: "/somos",
+        component: () => import("pages/revistas_public/QuienesPage.vue"),
+        meta: { requiresGuest: true },
+      },
     ],
   },
   {
