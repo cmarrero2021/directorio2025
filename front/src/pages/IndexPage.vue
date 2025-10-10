@@ -37,7 +37,7 @@
 
       <div class="col-12 col-md-4 section-container">
         <div class="content-wrapper text-right q-pa-md">
-          <p class="baseLegal" style="font-family: Gotham Bold; font-size: 36px;">Base Legal</p>
+          <p style="font-family: Gotham Bold; font-size: 36px;">Base Legal</p>
           <p class="animated" style="opacity:1; ">
             El ONCTI a través de la Ley Orgánica de Ciencia, Tecnología e Innovación en su artículo 22, le confiere la cualidad para recolectar datos de la productividad científica del país para su divulgación. El Directorio Venezolano de Revistas Científicas y Tecnológicas será el primer proceso de acreditación nacional de las publicaciones venezolanas existentes en el país. Con criterios de inclusión y democratización de la información.
           </p>
@@ -337,7 +337,7 @@ onUnmounted(() => {
   z-index: 1;
   min-height: 300px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .content-wrapper {
@@ -424,9 +424,7 @@ a:visited {
     margin: 0 5px;
     padding: 0;
   }
-  .baseLegal {
-    /* margin-top:-18%; */
-  }
+
   .content-wrapper {
     width: 95%;
     padding: 25px;

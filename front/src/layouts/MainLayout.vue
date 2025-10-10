@@ -34,12 +34,12 @@
           </q-item-section>
           <q-item-section>Revistas</q-item-section>
         </q-item>
-        <q-item clickable v-ripple to="/admin/test-upload">
+        <!-- <q-item clickable v-ripple to="/admin/test-upload">
           <q-item-section avatar>
             <q-icon name="cloud_upload" />
           </q-item-section>
           <q-item-section>Test Upload</q-item-section>
-        </q-item>
+        </q-item> -->
       </q-list>
     </q-drawer>
 

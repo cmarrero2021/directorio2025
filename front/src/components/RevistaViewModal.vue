@@ -4,7 +4,7 @@
       <!-- Toolbar -->
       <q-toolbar class="bg-primary text-white">
         <q-toolbar-title class="text-center text-responsive">
-          Directorio de Revistas Científicas - ONCTI
+          Directorio de Revistas Científicas - ONCTI1
         </q-toolbar-title>
         <q-btn :icon="isMaximized ? 'fullscreen_exit' : 'fullscreen'" flat round dense @click="toggleMaximized"
           :title="isMaximized ? 'Salir de pantalla completa' : 'Pantalla completa'" />

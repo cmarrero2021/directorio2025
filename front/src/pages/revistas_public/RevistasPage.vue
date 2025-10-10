@@ -55,9 +55,14 @@
           <!-- Contenido del diálogo con scroll -->
           <q-card-section class="scrollable-content" ref="dialogContent">
             <div>
-              <div>
-                <q-img src="img/cintillo.jpg" />
-              </div>
+            <div class="row justify-between items-center full-width q-px-md">
+              <q-img src="img/logo-nobg1.png" style="width: 30%" />
+              <q-img src="img/oncti-nobg.png" style="width: 10%" />
+            </div>
+              <!-- <div> -->
+                <!-- <q-img src="img/oncti-nobg.png" style="width: 10%"/> -->
+                <!-- <q-img src="img/cintillo.jpg" /> -->
+              <!-- </div> -->
             </div>
             <div v-if="selectedRevista" class="row q-col-gutter-md" id="contenidoRevista">
               <!-- Columna de la Imagen -->
@@ -100,7 +105,7 @@
             <!-- Contenedor para el Resumen -->
             <div class="col-12 q-mt-lg">
               <div v-if="selectedRevista.resumen" class="resumen-container">
-                <label class="resumen-title">RESÚMEN</label>
+                <label class="etq">RESÚMEN</label>
                 <div class="resumen-content" v-html="selectedRevista.resumen"></div>
               </div>
               <div v-else class="resumen-container">
@@ -529,6 +534,7 @@ const handleFilterChange = (newFilters) => {
 .etq {
   font-size: 10px;
   font-weight: bolder;
+  color: rgb(7, 7, 185);
 }
 
 .contenido {
