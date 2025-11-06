@@ -2,6 +2,7 @@
   <q-page class="stats-page">
     <div class="q-pa-md">
       <!-- Sección de Filtros -->
+      
       <div class="filters-section">
         <div class="row q-col-gutter-md items-center">
           <div class="col-12 col-md-3">
@@ -70,18 +71,33 @@
               <q-btn
                 color="accent"
                 icon="download"
-                @click="descargarDatos"
                 flat
                 round
                 dense
               >
                 <q-tooltip>Descargar</q-tooltip>
+                <q-menu>
+                  <q-list style="min-width: 150px">
+                    <q-item clickable v-close-popup @click="descargarPNG">
+                      <q-item-section avatar>
+                        <q-icon name="image" color="primary" />
+                      </q-item-section>
+                      <q-item-section>PNG</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click="descargarPDF">
+                      <q-item-section avatar>
+                        <q-icon name="picture_as_pdf" color="negative" />
+                      </q-item-section>
+                      <q-item-section>PDF</q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
               </q-btn>
             </div>
           </div>
         </div>
       </div>
-
+      
       <!-- Tarjetas de Estadísticas Principales -->
       <div class="row q-col-gutter-md q-mb-md">
         <div v-for="(stat, index) in mainStats" :key="index" class="col-12 col-sm-6 col-md-4 col-lg">
@@ -189,6 +205,8 @@
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { Notify } from "quasar";
 import axios from "axios";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import ChartComponent from "src/components/ChartComponent.vue";
 import MapComponent from 'src/components/MapComponent.vue';
 import socket from "src/services/websocket.js";
@@ -318,14 +336,130 @@ const verActivos = () => {
   // Aquí puedes implementar la lógica para ver activos
 };
 
-const descargarDatos = () => {
-  Notify.create({
-    message: "Descargando datos...",
-    color: "primary",
-    position: "top",
-    timeout: 2000,
-  });
-  // Aquí puedes implementar la lógica de descarga
+const descargarPNG = async () => {
+  try {
+    Notify.create({
+      message: "Generando imagen PNG...",
+      color: "primary",
+      position: "top",
+      timeout: 2000,
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const pageElement = document.querySelector('.stats-page');
+    
+    if (!pageElement) {
+      throw new Error('No se encontró el elemento de la página');
+    }
+
+    const canvas = await html2canvas(pageElement, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#F5F5F5',
+      windowWidth: pageElement.scrollWidth,
+      windowHeight: pageElement.scrollHeight,
+      scrollY: -window.scrollY,
+      scrollX: -window.scrollX,
+    });
+
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        throw new Error('Error al generar la imagen');
+      }
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      link.download = `estadisticas-oncti-${timestamp}.png`;
+      link.href = url;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      Notify.create({
+        message: "PNG descargado exitosamente",
+        color: "positive",
+        position: "top",
+        timeout: 2000,
+        icon: "check_circle"
+      });
+    }, 'image/png');
+
+  } catch (error) {
+    console.error("Error al descargar PNG:", error);
+    Notify.create({
+      message: "Error al generar la imagen PNG",
+      color: "negative",
+      position: "top",
+      timeout: 3000,
+    });
+  }
+};
+
+const descargarPDF = async () => {
+  try {
+    Notify.create({
+      message: "Generando documento PDF...",
+      color: "primary",
+      position: "top",
+      timeout: 2000,
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const pageElement = document.querySelector('.stats-page');
+    
+    if (!pageElement) {
+      throw new Error('No se encontró el elemento de la página');
+    }
+
+    const canvas = await html2canvas(pageElement, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#F5F5F5',
+      windowWidth: pageElement.scrollWidth,
+      windowHeight: pageElement.scrollHeight,
+      scrollY: -window.scrollY,
+      scrollX: -window.scrollX,
+    });
+
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+
+    const pdf = new jsPDF({
+      orientation: imgWidth > imgHeight ? 'landscape' : 'portrait',
+      unit: 'px',
+      format: [imgWidth, imgHeight]
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    pdf.save(`estadisticas-oncti-${timestamp}.pdf`);
+
+    Notify.create({
+      message: "PDF descargado exitosamente",
+      color: "positive",
+      position: "top",
+      timeout: 2000,
+      icon: "check_circle"
+    });
+
+  } catch (error) {
+    console.error("Error al descargar PDF:", error);
+    Notify.create({
+      message: "Error al generar el documento PDF",
+      color: "negative",
+      position: "top",
+      timeout: 3000,
+    });
+  }
 };
 
 // Columnas de las tablas
