@@ -103,7 +103,12 @@ const generateTimestamp = () => {
 
 // Renderizar la gráfica
 const renderChart = (type) => {
-  if (!chartCanvas.value) return;
+  if (!chartCanvas.value) {
+    console.log(`[ChartComponent - ${props.title}] ERROR: chartCanvas no disponible`);
+    return;
+  }
+
+  console.log(`[ChartComponent - ${props.title}] Renderizando gráfica. Datos:`, chartData.value.length, 'registros. Estado actual:', selectedStateStore.selectedState);
 
   // Destruir instancia anterior
   if (chartInstance) {
@@ -123,6 +128,10 @@ const renderChart = (type) => {
   const dataValues = chartData.value.map(
     (item) => parseInt(item[props.valueKey], 10) || 0
   );
+  
+  console.log(`[ChartComponent - ${props.title}] Labels:`, labels);
+  console.log(`[ChartComponent - ${props.title}] Values:`, dataValues);
+  
   // const backgroundColors = chartData.value.map((_, index) => predefinedColors[index % predefinedColors.length]);
   const formattedDate = new Date().toLocaleDateString("es-ES", {
     day: "2-digit",
@@ -143,6 +152,8 @@ const renderChart = (type) => {
     dynamicTitle += ` EDO. ${selectedStateStore.selectedState.toUpperCase()}`;
   }
   dynamicTitle += `\n${formattedDate}`;
+  
+  console.log(`[ChartComponent - ${props.title}] Título dinámico:`, dynamicTitle);
 
   // Ajustar altura del canvas y leyenda según el tipo de gráfico
   if (isPieChart) {
@@ -198,12 +209,42 @@ const renderChart = (type) => {
 const fetchChartData = async () => {
   try {
     let url = props.endpoint;
+    const timestamp = new Date().getTime();
+    const separator = url.includes('?') ? '&' : '?';
+    
     if (selectedStateStore.selectedState) {
       // Agrega el parámetro estado si está seleccionado
-      url += `?estado=${encodeURIComponent(selectedStateStore.selectedState)}`;
+      url += `?estado=${encodeURIComponent(selectedStateStore.selectedState)}&_t=${timestamp}`;
+      console.log(`[ChartComponent - ${props.title}] Consultando estado:`, selectedStateStore.selectedState, 'URL:', url);
+    } else {
+      url += `${separator}_t=${timestamp}`;
+      console.log(`[ChartComponent - ${props.title}] Consultando data nacional. URL:`, url);
     }
+    
     const response = await axios.get(url);
-    chartData.value = response.data;
+    
+    // Agregar datos duplicados (consolidar por dataKey)
+    const aggregatedData = {};
+    response.data.forEach(item => {
+      const key = item[props.dataKey];
+      const value = parseInt(item[props.valueKey], 10) || 0;
+      
+      if (aggregatedData[key]) {
+        // Si ya existe, sumar el valor
+        aggregatedData[key] += value;
+      } else {
+        // Si no existe, crear nueva entrada
+        aggregatedData[key] = value;
+      }
+    });
+    
+    // Convertir el objeto agregado de vuelta a array
+    chartData.value = Object.keys(aggregatedData).map(key => ({
+      [props.dataKey]: key,
+      [props.valueKey]: aggregatedData[key]
+    }));
+    
+    console.log(`[ChartComponent - ${props.title}] Datos recibidos:`, response.data.length, 'registros. Después de agregar:', chartData.value.length, 'registros');
     await nextTick(); // Esperar a que Vue actualice el DOM
     renderChart(currentChartType.value);
   } catch (error) {
@@ -410,9 +451,11 @@ onUnmounted(() => {
 // Watch para actualizar el gráfico al cambiar el estado seleccionado
 watch(
   () => selectedStateStore.selectedState,
-  () => {
+  (newState, oldState) => {
+    console.log(`[ChartComponent - ${props.title}] Watch activado. Estado anterior:`, oldState, '-> Nuevo estado:', newState);
     fetchChartData();
-  }
+  },
+  { immediate: false, deep: true }
 );
 </script>
 

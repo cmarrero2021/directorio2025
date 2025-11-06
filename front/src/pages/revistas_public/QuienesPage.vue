@@ -21,7 +21,7 @@
             :class="{'q-ml-xl': $q.screen.gt.sm, 'q-ml-none': !$q.screen.gt.sm}"
             :style="!$q.screen.gt.sm ? 'font-size:15px;' : ''"
           >
-            El Directorio Nacional de Revistas Científicas y Tecnológicas, como un proyecto de divulgación científica del Observatorio Nacional de Ciencia, Tecnología e Innovación (ONCTI) a través de la Gerencia de Divulgación está dirigido por:
+            El «Directorio Nacional de Revistas Científicas» constituye un proyecto de divulgación científica de excepcional relevancia, liderado por el Observatorio Nacional de Ciencia, Tecnología e Innovación (Oncti), ente que se erige como instrumento sustantivo del órgano competente en materia de ciencia, tecnología, innovación y sus aplicaciones, el Ministerio del Poder Popular para Ciencia y Tecnología (Mincyt). El equipo responsable de la dirección y supervisión del proyecto está compuesto por los siguientes miembros:
           </p>
           <div class="row q-col-gutter-md vcard-row-mobile-fix" :class="{'q-ml-xl': $q.screen.gt.sm}">
             <div class="col-12 col-md-6">
@@ -34,7 +34,7 @@
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Dr. Roberto Betancourt A.</div>
                       <div class="text-body2">Presidente del Observatorio Nacional de Ciencia, Tecnología e Innovación</div>
-                      <div class="vcard-email-align text-body2 text-bold">robertoabetancourt@gmail.com</div>
+                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:robertoabetancourt@gmail.com" style="color:blue;">robertoabetancourt@gmail.com</a></div>
                     </div>
                   </div>
                 </q-card-section>
@@ -50,7 +50,7 @@
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Lic. Fabiola Ortúzar</div>
                       <div class="text-body2">Gerente de Divulgación</div>
-                      <div class="vcard-email-align text-body2 text-bold">divulgacion@oncti.gob.ve</div>
+                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:divulgación@oncti.gob.ve" style="color:blue;">divulgación@oncti.gob.ve</a></div>
                     </div>
                   </div>
                 </q-card-section>
@@ -66,7 +66,7 @@
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Lic. Zenaida Araujo</div>
                       <div class="text-body2">Coordinadora de Publicaciones</div>
-                      <div class="vcard-email-align text-body2 text-bold">zaraujo@oncti.gob.ve</div>
+                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:zaraujo@oncti.gob.ve" style="color:blue;">zaraujo@oncti.gob.ve</a></div>
                     </div>
                   </div>
                 </q-card-section>
@@ -81,8 +81,8 @@
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Ing. Mónica Arvelo</div>
-                      <div class="text-body2">Directora Oficina de Tecnologías de la Información y la Comunicación</div>
-                      <div class="vcard-email-align text-body2 text-bold">marvelo@oncti.gob.ve</div>
+                      <div class="text-body2">Gerente Oficina de Tecnologías de la Información y la Comunicación</div>
+                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:marvelo@oncti.gob.ve" style="color:blue;">marvelo@oncti.gob.ve</a></div>
                     </div>
                   </div>
                 </q-card-section>
@@ -98,7 +98,7 @@
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Dr. Gregorio Morales</div>
                       <div class="text-body2">Asesor</div>
-                      <div class="vcard-email-align text-body2 text-bold">gmorales@oncti.gob.ve</div>
+                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:gmorales@oncti.gob.ve" style="color:blue;">gmorales@oncti.gob.ve</a></div>
                     </div>
                   </div>
                 </q-card-section>

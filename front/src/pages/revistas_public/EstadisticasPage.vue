@@ -128,7 +128,9 @@ const imageMap = {
 // Función para obtener los datos desde la API (para las cards)
 const fetchData = async () => {
   try {
-    const response = await axios.get("http://poi-r.vps.co.ve:3000/cantidades");
+    const timestamp = new Date().getTime();
+    const url = `http://poi-r.vps.co.ve:3000/cantidades?_t=${timestamp}`;
+    const response = await axios.get(url);
     // Asignar el primer objeto del array a data.value
     const newData = response.data[0];
     // Actualizar cada clave de data.value individualmente para forzar la reactividad

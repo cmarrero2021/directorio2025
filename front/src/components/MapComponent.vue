@@ -67,6 +67,7 @@ const mostrarDataNacional = async () => {
   selectedStateData.value = paisInfo;
   showTable.value = true;
   selectedStateStore.selectedState = null;
+  console.log('[MapComponent] Estado limpiado - mostrando data nacional');
 };
 // const selectedStateStore = useSelectedStateStore();
 
@@ -87,7 +88,10 @@ const colorScale = generateColorScale();
 // Función para cargar los datos del mapa
 const fetchEstadoData = async () => {
   try {
-    const response = await axios.get(VITE_GR_ESTADOS_URL);
+    const timestamp = new Date().getTime();
+    const separator = VITE_GR_ESTADOS_URL.includes('?') ? '&' : '?';
+    const url = `${VITE_GR_ESTADOS_URL}${separator}_t=${timestamp}`;
+    const response = await axios.get(url);
     return response.data;
   } catch (error) {
     Notify.create({
@@ -206,10 +210,12 @@ const updateMap = async () => {
           selectedStateData.value = paisInfo;
           showTable.value = true;
           selectedStateStore.selectedState = null; // nacional
+          console.log('[MapComponent] Click en estado sin datos - mostrando data nacional');
         } else {
           selectedStateData.value = estadoInfo;
           showTable.value = true;
           selectedStateStore.selectedState = estadoName; // estado seleccionado
+          console.log('[MapComponent] Estado seleccionado:', estadoName);
         }
       });
     },
@@ -218,7 +224,10 @@ const updateMap = async () => {
 // Función para obtener la información nacional
 const fetchPaisInfo = async () => {
   try {
-    const response = await axios.get(VITE_DATA_NACIONAL_BASE_URL);
+    const timestamp = new Date().getTime();
+    const separator = VITE_DATA_NACIONAL_BASE_URL.includes('?') ? '&' : '?';
+    const url = `${VITE_DATA_NACIONAL_BASE_URL}${separator}_t=${timestamp}`;
+    const response = await axios.get(url);
     const paisInfo = response.data[0];
     return paisInfo || {};
   } catch (error) {
@@ -234,7 +243,10 @@ const fetchPaisInfo = async () => {
 // Función para obtener la información de un estado específico
 const fetchEstadoInfo = async (estadoName) => {
   try {
-    const response = await axios.get(VITE_DATA_ESTADOS_BASE_URL);
+    const timestamp = new Date().getTime();
+    const separator = VITE_DATA_ESTADOS_BASE_URL.includes('?') ? '&' : '?';
+    const url = `${VITE_DATA_ESTADOS_BASE_URL}${separator}_t=${timestamp}`;
+    const response = await axios.get(url);
     const estadoInfo = response.data.find(
       (item) => item.estado.toLowerCase() === estadoName
     );

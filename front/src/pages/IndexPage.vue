@@ -39,7 +39,7 @@
         <div class="content-wrapper text-right q-pa-md">
           <p style="font-family: Gotham Bold; font-size: 36px;">Base Legal</p>
           <p class="animated" style="opacity:1; ">
-            El ONCTI a través de la Ley Orgánica de Ciencia, Tecnología e Innovación en su artículo 22, le confiere la cualidad para recolectar datos de la productividad científica del país para su divulgación. El Directorio Venezolano de Revistas Científicas y Tecnológicas será el primer proceso de acreditación nacional de las publicaciones venezolanas existentes en el país. Con criterios de inclusión y democratización de la información.
+            La Ley Orgánica de Ciencia, Tecnología e Innovación (2022), en su artículo 22, establece que el Oncti «recaba la información relacionada con las actividades de ciencia y tecnología», y que «divulga la información sobre las actividades del Sistema Nacional de Ciencia, Tecnología e Innovación» para «publicarla y desarrollar las fuerzas productivas». Este directorio será el primer proceso de acreditación nacional de las publicaciones venezolanas, basado en criterios de inclusión y democratización de la información.
           </p>
         </div>
       </div>

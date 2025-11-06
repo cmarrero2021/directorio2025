@@ -1,9 +1,7 @@
 <template>
   <div class="column">
     <!-- Botón para abrir/cerrar el drawer -->
-    <q-btn flat dense round v-if="!drawerVisible" @click="toggleDrawer(true)" class="drawer-toggle-btn">
-      <img src="/icons/abrir_drwawer.png" class="responsive-image" />
-    </q-btn>
+    <q-btn flat dense round icon="filter_alt" v-if="!drawerVisible" @click="toggleDrawer(true)" class="drawer-toggle-btn" title="Abrir filtros" />
 
     <q-drawer v-model="drawerVisible" side="left" bordered :width="300" :breakpoint="700" behavior="mobile">
       <div class="column">
@@ -14,10 +12,7 @@
           <div>
             <q-btn flat dense round icon="delete_sweep" color="negative" @click="clearAllFilters"
               title="Limpiar todos los filtros" class="q-mr-sm" />
-            <!-- <q-btn flat dense round icon="keyboard_double_arrow_left" @click="toggleDrawer(false)" /> -->
-            <q-btn flat dense round @click="toggleDrawer(false)">
-              <img src="/icons/cerrar_drwawer.png" class="responsive-image" />
-            </q-btn>
+            <q-btn flat dense round icon="close" @click="toggleDrawer(false)" title="Cerrar filtros" />
           </div>
           <!--  -->
         </div>
