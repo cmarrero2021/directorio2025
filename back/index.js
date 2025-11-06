@@ -464,6 +464,231 @@ app.get('/gr_estados', async (req, res) => {
     res.status(500).send('Error interno del servidor');
   }
 });
+
+// ============================================
+// ENDPOINTS CON FILTROS ACUMULATIVOS (AND)
+// ============================================
+
+// Función helper para construir la cláusula WHERE con filtros
+function buildWhereClause(filters) {
+  const conditions = [];
+  const params = [];
+  let paramIndex = 1;
+
+  if (filters.estado) {
+    conditions.push(`LOWER(estado) = $${paramIndex}`);
+    params.push(filters.estado.toLowerCase());
+    paramIndex++;
+  }
+  if (filters.area) {
+    conditions.push(`LOWER(area_conocimiento) = $${paramIndex}`);
+    params.push(filters.area.toLowerCase());
+    paramIndex++;
+  }
+  if (filters.indice) {
+    conditions.push(`LOWER(indice) = $${paramIndex}`);
+    params.push(filters.indice.toLowerCase());
+    paramIndex++;
+  }
+  if (filters.idioma) {
+    conditions.push(`LOWER(idioma) = $${paramIndex}`);
+    params.push(filters.idioma.toLowerCase());
+    paramIndex++;
+  }
+  if (filters.editorial) {
+    conditions.push(`LOWER(editorial) = $${paramIndex}`);
+    params.push(filters.editorial.toLowerCase());
+    paramIndex++;
+  }
+  if (filters.periodicidad) {
+    conditions.push(`LOWER(periodicidad) = $${paramIndex}`);
+    params.push(filters.periodicidad.toLowerCase());
+    paramIndex++;
+  }
+  if (filters.formato) {
+    conditions.push(`LOWER(formato) = $${paramIndex}`);
+    params.push(filters.formato.toLowerCase());
+    paramIndex++;
+  }
+
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  return { whereClause, params };
+}
+
+// Ruta GET para obtener áreas con filtros acumulativos
+app.get('/gr_areas_filtrado', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const filters = {
+      estado: req.query.estado,
+      indice: req.query.indice,
+      idioma: req.query.idioma,
+      editorial: req.query.editorial,
+      periodicidad: req.query.periodicidad,
+      formato: req.query.formato
+    };
+    
+    const { whereClause, params } = buildWhereClause(filters);
+    const query = `SELECT area_conocimiento, COUNT(area_conocimiento) AS cant_area FROM revistas_data ${whereClause} GROUP BY area_conocimiento ORDER BY COUNT(area_conocimiento) DESC`;
+    
+    const result = await client.query(query, params);
+    client.release();
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al ejecutar la consulta:', err);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
+// Ruta GET para obtener índices con filtros acumulativos
+app.get('/gr_indices_filtrado', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const filters = {
+      estado: req.query.estado,
+      area: req.query.area,
+      idioma: req.query.idioma,
+      editorial: req.query.editorial,
+      periodicidad: req.query.periodicidad,
+      formato: req.query.formato
+    };
+    
+    const { whereClause, params } = buildWhereClause(filters);
+    const query = `SELECT indice, COUNT(indice) AS cant_inddice FROM revistas_data ${whereClause} GROUP BY indice ORDER BY COUNT(indice) DESC`;
+    
+    const result = await client.query(query, params);
+    client.release();
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al ejecutar la consulta:', err);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
+// Ruta GET para obtener idiomas con filtros acumulativos
+app.get('/gr_idiomas_filtrado', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const filters = {
+      estado: req.query.estado,
+      area: req.query.area,
+      indice: req.query.indice,
+      editorial: req.query.editorial,
+      periodicidad: req.query.periodicidad,
+      formato: req.query.formato
+    };
+    
+    const { whereClause, params } = buildWhereClause(filters);
+    const query = `SELECT idioma, COUNT(idioma) AS cant_idioma FROM revistas_data ${whereClause} GROUP BY idioma ORDER BY COUNT(idioma) DESC`;
+    
+    const result = await client.query(query, params);
+    client.release();
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al ejecutar la consulta:', err);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
+// Ruta GET para obtener editoriales con filtros acumulativos
+app.get('/gr_editoriales_filtrado', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const filters = {
+      estado: req.query.estado,
+      area: req.query.area,
+      indice: req.query.indice,
+      idioma: req.query.idioma,
+      periodicidad: req.query.periodicidad,
+      formato: req.query.formato
+    };
+    
+    const { whereClause, params } = buildWhereClause(filters);
+    const query = `SELECT editorial, COUNT(editorial) AS cant_editorial FROM revistas_data ${whereClause} GROUP BY editorial ORDER BY COUNT(editorial) DESC`;
+    
+    const result = await client.query(query, params);
+    client.release();
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al ejecutar la consulta:', err);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
+// Ruta GET para obtener periodicidades con filtros acumulativos
+app.get('/gr_periodicidades_filtrado', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const filters = {
+      estado: req.query.estado,
+      area: req.query.area,
+      indice: req.query.indice,
+      idioma: req.query.idioma,
+      editorial: req.query.editorial,
+      formato: req.query.formato
+    };
+    
+    const { whereClause, params } = buildWhereClause(filters);
+    const query = `SELECT periodicidad, COUNT(periodicidad) AS cant_periodicidad FROM revistas_data ${whereClause} GROUP BY periodicidad ORDER BY COUNT(periodicidad) DESC`;
+    
+    const result = await client.query(query, params);
+    client.release();
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al ejecutar la consulta:', err);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
+// Ruta GET para obtener formatos con filtros acumulativos
+app.get('/gr_formatos_filtrado', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const filters = {
+      estado: req.query.estado,
+      area: req.query.area,
+      indice: req.query.indice,
+      idioma: req.query.idioma,
+      editorial: req.query.editorial,
+      periodicidad: req.query.periodicidad
+    };
+    
+    const { whereClause, params } = buildWhereClause(filters);
+    const query = `SELECT formato, COUNT(formato) AS cant_formato FROM revistas_data ${whereClause} GROUP BY formato ORDER BY COUNT(formato) DESC`;
+    
+    const result = await client.query(query, params);
+    client.release();
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al ejecutar la consulta:', err);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
+// Ruta GET para obtener estados con filtros acumulativos
+app.get('/gr_estados_filtrado', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const filters = {
+      area: req.query.area,
+      indice: req.query.indice,
+      idioma: req.query.idioma,
+      editorial: req.query.editorial,
+      periodicidad: req.query.periodicidad,
+      formato: req.query.formato
+    };
+    
+    const { whereClause, params } = buildWhereClause(filters);
+    const query = `SELECT estado, COUNT(estado) AS cant_estado FROM revistas_data ${whereClause} GROUP BY estado ORDER BY COUNT(estado) DESC`;
+    
+    const result = await client.query(query, params);
+    client.release();
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al ejecutar la consulta:', err);
+    res.status(500).send('Error interno del servidor');
+  }
+});
 // Ruta GET para obtener todos los estados
 app.get('/lista_estados', async (req, res) => {
   try {
@@ -476,72 +701,77 @@ app.get('/lista_estados', async (req, res) => {
     res.status(500).send('Error interno del servidor');
   }
 });
-// Ruta GET para obtener todos las áreas de conocimiento
+// Ruta GET para obtener áreas de conocimiento EN USO (solo las que tienen revistas)
 app.get('/lista_areas', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT id as id_area_conocimiento,area_conocimiento FROM areas_conocimiento ORDER BY area_conocimiento');
-    client.release(); // Liberar el cliente
+    const result = await client.query('SELECT DISTINCT area_conocimiento FROM revistas_data WHERE area_conocimiento IS NOT NULL AND area_conocimiento != \'\' ORDER BY area_conocimiento');
+    client.release();
     res.json(result.rows);
   } catch (err) {
     console.error('Error al ejecutar la consulta:', err);
     res.status(500).send('Error interno del servidor');
   }
 });
-// Ruta GET para obtener todos indices
+
+// Ruta GET para obtener índices EN USO
 app.get('/lista_indices', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT id AS id_indice, indice FROM indices ORDER BY indice');
-    client.release(); // Liberar el cliente
+    const result = await client.query('SELECT DISTINCT indice FROM revistas_data WHERE indice IS NOT NULL AND indice != \'\' ORDER BY indice');
+    client.release();
     res.json(result.rows);
   } catch (err) {
     console.error('Error al ejecutar la consulta:', err);
     res.status(500).send('Error interno del servidor');
   }
 });
-// Ruta GET para obtener todos editoriales
+
+// Ruta GET para obtener editoriales EN USO
 app.get('/lista_editoriales', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT id AS id_editorial, editorial FROM editoriales ORDER BY editorial');
-    client.release(); // Liberar el cliente
+    const result = await client.query('SELECT DISTINCT editorial FROM revistas_data WHERE editorial IS NOT NULL AND editorial != \'\' ORDER BY editorial');
+    client.release();
     res.json(result.rows);
   } catch (err) {
     console.error('Error al ejecutar la consulta:', err);
     res.status(500).send('Error interno del servidor');
   }
 });
-// Ruta GET para obtener todos periodicidad
+
+// Ruta GET para obtener periodicidades EN USO
 app.get('/lista_periodicidad', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT id AS id_periodicidad, periodicidad FROM periodicidad ORDER BY periodicidad');
-    client.release(); // Liberar el cliente
+    const result = await client.query('SELECT DISTINCT periodicidad FROM revistas_data WHERE periodicidad IS NOT NULL AND periodicidad != \'\' ORDER BY periodicidad');
+    client.release();
     res.json(result.rows);
   } catch (err) {
     console.error('Error al ejecutar la consulta:', err);
     res.status(500).send('Error interno del servidor');
   }
 });
-// Ruta GET para obtener todos formatos
+
+// Ruta GET para obtener formatos EN USO
 app.get('/lista_formatos', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT id AS id_formato, formato FROM formatos ORDER BY formato');
-    client.release(); // Liberar el cliente
+    const result = await client.query('SELECT DISTINCT formato FROM revistas_data WHERE formato IS NOT NULL AND formato != \'\' ORDER BY formato');
+    client.release();
     res.json(result.rows);
   } catch (err) {
     console.error('Error al ejecutar la consulta:', err);
     res.status(500).send('Error interno del servidor');
   }
 });
-// Ruta GET para obtener todos idiomas
+
+// Ruta GET para obtener idiomas EN USO
 app.get('/lista_idiomas', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT id AS id_idioma, idioma FROM idiomas ORDER BY idioma');
-    client.release(); // Liberar el cliente
+    const result = await client.query('SELECT DISTINCT idioma FROM revistas_data WHERE idioma IS NOT NULL AND idioma != \'\' ORDER BY idioma');
+    client.release();
     res.json(result.rows);
   } catch (err) {
     console.error('Error al ejecutar la consulta:', err);

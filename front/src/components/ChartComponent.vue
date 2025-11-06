@@ -41,14 +41,19 @@ import jsPDF from "jspdf";
 import * as XLSX from "xlsx";
 import { useQuasar } from "quasar";
 import ChartToolbar from "src/components/ChartToolbar.vue";
-import socket from "src/services/websocket.js"; // Importar el servicio de WebSocket
+import socket from "src/services/websocket.js";
 import { useSelectedStateStore } from "src/stores/selectedState";
+import { useFiltersStore } from "src/stores/filters";
 
 // Inicializar Quasar
 const $q = useQuasar();
 
 // Registrar todas las funcionalidades necesarias de Chart.js
 Chart.register(...registerables);
+
+// Stores
+const selectedStateStore = useSelectedStateStore();
+const filtersStore = useFiltersStore();
 
 // Props
 const props = defineProps({
@@ -81,7 +86,6 @@ const chartContainer = ref(null);
 let chartInstance = null;
 const currentChartType = ref("bar");
 const isTableVisible = ref(false);
-const selectedStateStore = useSelectedStateStore();
 
 // Función para generar el timestamp en formato YYYYMMDDHHmmss
 const generateTimestamp = () => {
@@ -204,13 +208,34 @@ const fetchChartData = async () => {
   try {
     let url = props.endpoint;
     const timestamp = new Date().getTime();
-    const separator = url.includes('?') ? '&' : '?';
     
-    if (selectedStateStore.selectedState) {
-      // Agrega el parámetro estado si está seleccionado
-      url += `?estado=${encodeURIComponent(selectedStateStore.selectedState)}&_t=${timestamp}`;
+    // Verificar si hay filtros activos
+    const hasFilters = filtersStore.hasActiveFilters();
+    
+    if (hasFilters) {
+      // Determinar si usar endpoint filtrado
+      // Extraer el nombre base del endpoint (ej: gr_areas, gr_indices)
+      const urlParts = url.split('/');
+      const endpointName = urlParts[urlParts.length - 1].split('?')[0];
+      
+      // Construir el endpoint filtrado
+      const baseUrlParts = url.split('/');
+      baseUrlParts[baseUrlParts.length - 1] = endpointName + '_filtrado';
+      const filteredEndpoint = baseUrlParts.join('/');
+      
+      // Construir query string con filtros
+      const queryString = filtersStore.buildQueryString();
+      url = `${filteredEndpoint}?${queryString}&_t=${timestamp}`;
+      
+      console.log(`[ChartComponent - ${props.title}] Consultando con filtros:`, filtersStore.getActiveFilters(), 'URL:', url);
+    } else if (selectedStateStore.selectedState) {
+      // Solo filtro de estado (desde el mapa)
+      const separator = url.includes('?') ? '&' : '?';
+      url += `${separator}estado=${encodeURIComponent(selectedStateStore.selectedState)}&_t=${timestamp}`;
       console.log(`[ChartComponent - ${props.title}] Consultando estado:`, selectedStateStore.selectedState, 'URL:', url);
     } else {
+      // Sin filtros
+      const separator = url.includes('?') ? '&' : '?';
       url += `${separator}_t=${timestamp}`;
       console.log(`[ChartComponent - ${props.title}] Consultando data nacional. URL:`, url);
     }
@@ -450,6 +475,24 @@ watch(
     fetchChartData();
   },
   { immediate: false, deep: true }
+);
+
+// Watch para actualizar el gráfico al cambiar los filtros
+watch(
+  [
+    () => filtersStore.selectedArea,
+    () => filtersStore.selectedIndice,
+    () => filtersStore.selectedIdioma,
+    () => filtersStore.selectedEditorial,
+    () => filtersStore.selectedPeriodicidad,
+    () => filtersStore.selectedFormato,
+    () => filtersStore.selectedEstado
+  ],
+  (newValues, oldValues) => {
+    console.log(`[ChartComponent - ${props.title}] Filtros cambiados`);
+    fetchChartData();
+  },
+  { immediate: false }
 );
 </script>
 

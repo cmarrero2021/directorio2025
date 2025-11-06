@@ -9,8 +9,8 @@
       </div>
       
       <div class="row relative-position">
-        <!-- Escala de colores -->
-        <div class="color-scale">
+        <!-- Escala de colores (solo mostrar si hay datos) -->
+        <div class="color-scale" v-if="uniqueValues.length > 0">
           <div class="scale-gradient" :style="{ background: gradientStyle }"></div>
           <div class="scale-labels" v-if="uniqueValues.length > 1">
             <div class="scale-value">{{ maxValue }}</div>
@@ -32,16 +32,6 @@
           :class="{ visible: showTable }"
         >
           <q-card class="q-ma-md" style="margin-right:160px;">
-            <!-- Botón de cerrar -->
-            <q-btn
-              icon="cleaning_services"
-              flat
-              round
-              dense
-              @click="mostrarDataNacional"
-              title="Mostrar data nacional"
-              class="close-btn"
-            />
             <!-- Cards con la data del estado -->
             <div class="q-pa-md cards-grid">
               <q-card
@@ -62,27 +52,30 @@
   </q-page>
 </template>
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import { Notify } from "quasar";
 import axios from "axios";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import venezuelaGeoJsonData from "../geojson/Venezuela.json";
-import socket from "src/services/websocket"; // Importar el servicio de WebSocket
+import socket from "src/services/websocket";
 import { useSelectedStateStore } from "src/stores/selectedState";
+import { useFiltersStore } from "src/stores/filters";
 
 const mapContainer = ref(null);
 const cardsContainer = ref(null);
 const VITE_GR_ESTADOS_URL = import.meta.env.VITE_GR_ESTADOS_URL;
+const VITE_GR_ESTADOS_FILTRADO_URL = import.meta.env.VITE_GR_ESTADOS_FILTRADO_URL;
 const VITE_DATA_ESTADOS_BASE_URL = import.meta.env.VITE_DATA_ESTADOS_BASE_URL;
 const VITE_DATA_NACIONAL_BASE_URL = import.meta.env.VITE_DATA_NACIONAL_BASE_URL;
 const showTable = ref(false);
 const selectedStateData = ref({});
 const estadoData = ref([]);
 const paisData = ref([]);
-let map = null; // Referencia al mapa de Leaflet
-let geoJsonLayer = null; // Referencia a la capa GeoJSON
+let map = null;
+let geoJsonLayer = null;
 const selectedStateStore = useSelectedStateStore();
+const filtersStore = useFiltersStore();
 
 // Variables para la escala de colores
 const minValue = ref(0);
@@ -98,6 +91,7 @@ const mostrarDataNacional = async () => {
   selectedStateData.value = paisInfo;
   showTable.value = true;
   selectedStateStore.selectedState = null;
+  filtersStore.selectedEstado = null; // Sincronizar con el store de filtros
   console.log('[MapComponent] Estado limpiado - mostrando data nacional');
 };
 // const selectedStateStore = useSelectedStateStore();
@@ -120,8 +114,34 @@ const colorScale = generateColorScale();
 const fetchEstadoData = async () => {
   try {
     const timestamp = new Date().getTime();
-    const separator = VITE_GR_ESTADOS_URL.includes('?') ? '&' : '?';
-    const url = `${VITE_GR_ESTADOS_URL}${separator}_t=${timestamp}`;
+    
+    // Verificar si hay filtros activos (excluyendo el filtro de estado)
+    const activeFilters = filtersStore.getActiveFilters();
+    const hasNonStateFilters = Object.keys(activeFilters).some(key => key !== 'estado');
+    
+    let url;
+    if (hasNonStateFilters) {
+      // Usar endpoint filtrado (sin incluir el filtro de estado en la query)
+      const filtersWithoutState = { ...activeFilters };
+      delete filtersWithoutState.estado;
+      
+      const params = new URLSearchParams();
+      Object.keys(filtersWithoutState).forEach(key => {
+        if (filtersWithoutState[key]) {
+          params.append(key, filtersWithoutState[key]);
+        }
+      });
+      params.append('_t', timestamp);
+      
+      url = `${VITE_GR_ESTADOS_FILTRADO_URL}?${params.toString()}`;
+      console.log('[MapComponent] Consultando mapa con filtros:', filtersWithoutState, 'URL:', url);
+    } else {
+      // Sin filtros, usar endpoint normal
+      const separator = VITE_GR_ESTADOS_URL.includes('?') ? '&' : '?';
+      url = `${VITE_GR_ESTADOS_URL}${separator}_t=${timestamp}`;
+      console.log('[MapComponent] Consultando mapa sin filtros. URL:', url);
+    }
+    
     const response = await axios.get(url);
     return response.data;
   } catch (error) {
@@ -199,24 +219,34 @@ const updateMap = async () => {
   // Obtener valores únicos y ordenarlos
   uniqueValues.value = [...new Set(valores)].sort((a, b) => a - b);
   
-  const realMin = Math.min(...valores);
-  const realMax = Math.max(...valores);
-  
-  // Lógica especial para 2 valores consecutivos
-  if (uniqueValues.value.length === 2 && (uniqueValues.value[1] - uniqueValues.value[0] === 1)) {
-    // Si son consecutivos (ej: 6,7 o 1,2)
-    minValue.value = Math.max(0, realMin - 1); // Restar 1 pero no bajar de 0
-    middleValue.value = realMin;
-    maxValue.value = realMax;
+  // Verificar si hay datos válidos
+  if (valores.length === 0 || valores.every(v => v === 0)) {
+    // No hay datos o todos son 0
+    minValue.value = 0;
+    maxValue.value = 0;
+    middleValue.value = 0;
+    uniqueValues.value = []; // Vaciar para que no se muestre la escala
+    gradientStyle.value = `linear-gradient(to bottom, rgb(255, 255, 255), rgb(255, 255, 255))`;
   } else {
-    // Para todos los demás casos
-    minValue.value = realMin;
-    maxValue.value = realMax;
-    middleValue.value = Math.floor((minValue.value + maxValue.value) / 2);
+    const realMin = Math.min(...valores);
+    const realMax = Math.max(...valores);
+    
+    // Lógica especial para 2 valores consecutivos
+    if (uniqueValues.value.length === 2 && (uniqueValues.value[1] - uniqueValues.value[0] === 1)) {
+      // Si son consecutivos (ej: 6,7 o 1,2)
+      minValue.value = Math.max(0, realMin - 1); // Restar 1 pero no bajar de 0
+      middleValue.value = realMin;
+      maxValue.value = realMax;
+    } else {
+      // Para todos los demás casos
+      minValue.value = realMin;
+      maxValue.value = realMax;
+      middleValue.value = Math.floor((minValue.value + maxValue.value) / 2);
+    }
+    
+    // Generar gradiente dinámico
+    gradientStyle.value = `linear-gradient(to bottom, rgb(0, 0, 180), rgb(180, 180, 255), rgb(255, 255, 255))`;
   }
-  
-  // Generar gradiente dinámico
-  gradientStyle.value = `linear-gradient(to bottom, rgb(0, 0, 180), rgb(180, 180, 255), rgb(255, 255, 255))`;
   
   // Eliminar la capa GeoJSON existente si hay una
   if (geoJsonLayer) {
@@ -311,12 +341,14 @@ const updateMap = async () => {
         if (JSON.stringify(estadoInfo).length == 2) {
           selectedStateData.value = paisInfo;
           showTable.value = true;
-          selectedStateStore.selectedState = null; // nacional
+          selectedStateStore.selectedState = null;
+          filtersStore.selectedEstado = null; // Sincronizar con el store de filtros
           console.log('[MapComponent] Click en estado sin datos - mostrando data nacional');
         } else {
           selectedStateData.value = estadoInfo;
           showTable.value = true;
-          selectedStateStore.selectedState = estadoName; // estado seleccionado
+          selectedStateStore.selectedState = estadoName;
+          filtersStore.selectedEstado = estadoName; // Sincronizar con el store de filtros
           console.log('[MapComponent] Estado seleccionado:', estadoName);
         }
       });
@@ -389,6 +421,54 @@ onUnmounted(() => {
   // Limpiar el listener del WebSocket
   socket.onmessage = null;
 });
+
+// Watch para actualizar el mapa cuando cambien los filtros (excluyendo estado)
+watch(
+  [
+    () => filtersStore.selectedArea,
+    () => filtersStore.selectedIndice,
+    () => filtersStore.selectedIdioma,
+    () => filtersStore.selectedEditorial,
+    () => filtersStore.selectedPeriodicidad,
+    () => filtersStore.selectedFormato
+  ],
+  (newValues, oldValues) => {
+    console.log('[MapComponent] Filtros (sin estado) cambiados');
+    updateMap();
+  },
+  { immediate: false }
+);
+
+// Watch para sincronizar el filtro de estado del store con el mapa
+watch(
+  () => filtersStore.selectedEstado,
+  async (newEstado, oldEstado) => {
+    console.log('[MapComponent] Filtro de estado cambiado:', oldEstado, '->', newEstado);
+    
+    // Actualizar el selectedStateStore
+    selectedStateStore.selectedState = newEstado;
+    
+    // Actualizar la ficha con la información del estado
+    if (newEstado) {
+      const estadoInfo = await fetchEstadoInfo(newEstado);
+      if (JSON.stringify(estadoInfo).length > 2) {
+        selectedStateData.value = estadoInfo;
+        showTable.value = true;
+      } else {
+        // Si no hay datos para ese estado, mostrar data nacional
+        const paisInfo = await fetchPaisInfo();
+        selectedStateData.value = paisInfo;
+        showTable.value = true;
+      }
+    } else {
+      // Si se limpia el filtro, mostrar data nacional
+      const paisInfo = await fetchPaisInfo();
+      selectedStateData.value = paisInfo;
+      showTable.value = true;
+    }
+  },
+  { immediate: false }
+);
 // Función para formatear las claves de la data
 const formatKey = (key) => {
   const formattedKey = key
