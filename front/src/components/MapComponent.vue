@@ -1,39 +1,62 @@
 <template>
   <q-page>
-    <div class="row relative-position">
-      <!-- Mapa -->
-      <div ref="mapContainer" class="col-xs-12 col-md-6 map-container"></div>
-      <!-- Contenedor de cards (fuera del flujo normal) -->
-      <div
-        ref="cardsContainer"
-        class="cards-container"
-        :class="{ visible: showTable }"
-      >
-  <q-card class="q-ma-md" style="margin-right:160px;">
-          <!-- Botón de cerrar -->
-          <q-btn
-            icon="cleaning_services"
-            flat
-            round
-            dense
-            @click="mostrarDataNacional"
-            title="Mostrar data nacional"
-            class="close-btn"
-          />
-          <!-- Cards con la data del estado -->
-          <div class="q-pa-md cards-grid">
-            <q-card
-              v-for="(value, key) in selectedStateData"
-              :key="key"
-              class="small-card q-mb-sm"
-            >
-              <q-card-section class="small-section">
-                <div class="text-h6 small-title">{{ formatKey(key) }}</div>
-                <div class="text-subtitle1 small-text">{{ value }}</div>
-              </q-card-section>
-            </q-card>
+    <div class="map-wrapper">
+      <!-- Título del mapa con indicador de zoom -->
+      <div class="map-header">
+      
+        <h6 class="map-title">Distribución nacional de registros</h6>
+        <span class="zoom-indicator">Zoom: {{ currentZoom }}</span>
+      </div>
+      
+      <div class="row relative-position">
+        <!-- Escala de colores -->
+        <div class="color-scale">
+          <div class="scale-gradient" :style="{ background: gradientStyle }"></div>
+          <div class="scale-labels" v-if="uniqueValues.length > 1">
+            <div class="scale-value">{{ maxValue }}</div>
+            <div class="scale-value scale-middle">{{ middleValue }}</div>
+            <div class="scale-value">{{ minValue }}</div>
           </div>
-        </q-card>
+          <div class="scale-labels scale-single" v-else>
+            <div class="scale-value">{{ maxValue }}</div>
+          </div>
+        </div>
+        
+        <!-- Mapa -->
+        <div ref="mapContainer" class="col-xs-12 col-md-6 map-container"></div>
+        
+        <!-- Contenedor de cards (fuera del flujo normal) -->
+        <div
+          ref="cardsContainer"
+          class="cards-container"
+          :class="{ visible: showTable }"
+        >
+          <q-card class="q-ma-md" style="margin-right:160px;">
+            <!-- Botón de cerrar -->
+            <q-btn
+              icon="cleaning_services"
+              flat
+              round
+              dense
+              @click="mostrarDataNacional"
+              title="Mostrar data nacional"
+              class="close-btn"
+            />
+            <!-- Cards con la data del estado -->
+            <div class="q-pa-md cards-grid">
+              <q-card
+                v-for="(value, key) in selectedStateData"
+                :key="key"
+                class="small-card q-mb-sm"
+              >
+                <q-card-section class="small-section">
+                  <div class="text-h6 small-title">{{ formatKey(key) }}</div>
+                  <div class="text-subtitle1 small-text">{{ value }}</div>
+                </q-card-section>
+              </q-card>
+            </div>
+          </q-card>
+        </div>
       </div>
     </div>
   </q-page>
@@ -60,6 +83,14 @@ const paisData = ref([]);
 let map = null; // Referencia al mapa de Leaflet
 let geoJsonLayer = null; // Referencia a la capa GeoJSON
 const selectedStateStore = useSelectedStateStore();
+
+// Variables para la escala de colores
+const minValue = ref(0);
+const maxValue = ref(0);
+const middleValue = ref(0);
+const uniqueValues = ref([]); // Valores únicos reales de los datos
+const gradientStyle = ref('');
+const currentZoom = ref(6); // Zoom inicial para desktop
 
 // Función para mostrar la data nacional en la tabla y en los gráficos
 const mostrarDataNacional = async () => {
@@ -110,8 +141,20 @@ const initializeMap = () => {
     map.remove();
     map = null;
   }
+  
+  // Determinar el zoom inicial según el tamaño de pantalla
+  const isDesktop = window.innerWidth >= 1024;
+  const initialZoom = isDesktop ? 6 : 5;
+  currentZoom.value = initialZoom;
+  
   // Crear un nuevo mapa
-  map = L.map(mapContainer.value).setView([8.0, -66.0], 5);
+  map = L.map(mapContainer.value).setView([8.0, -66.0], initialZoom);
+  
+  // Actualizar el zoom cuando cambie
+  map.on('zoomend', () => {
+    currentZoom.value = map.getZoom();
+  });
+  
   // Agregar control de reinicio
   const resetControl = L.control({ position: "topright" });
   resetControl.onAdd = () => {
@@ -122,7 +165,9 @@ const initializeMap = () => {
       "background-color: rgb(0, 0, 255) !important; color: rgb(255, 255, 255) !important; padding: 5px !important; cursor: pointer !important";
     btn.title = "Recentrar Mapa";
     L.DomEvent.on(btn, "click", () => {
-      map.setView([8.0, -66.0], 5);
+      const isDesktop = window.innerWidth >= 1024;
+      const resetZoom = isDesktop ? 6 : 5;
+      map.setView([8.0, -66.0], resetZoom);
     });
     return container;
   };
@@ -147,12 +192,37 @@ const updateMap = async () => {
     acc[item.estado.toLowerCase().replace(/ /g, "")] = item.cant_estado;
     return acc;
   }, {});
-  const maxEstadoValue =
-    Math.max(...estadoData.value.map((item) => item.cant_estado || 0)) || 1;
+  
+  // Calcular valores mínimo y máximo
+  const valores = estadoData.value.map((item) => item.cant_estado || 0);
+  
+  // Obtener valores únicos y ordenarlos
+  uniqueValues.value = [...new Set(valores)].sort((a, b) => a - b);
+  
+  const realMin = Math.min(...valores);
+  const realMax = Math.max(...valores);
+  
+  // Lógica especial para 2 valores consecutivos
+  if (uniqueValues.value.length === 2 && (uniqueValues.value[1] - uniqueValues.value[0] === 1)) {
+    // Si son consecutivos (ej: 6,7 o 1,2)
+    minValue.value = Math.max(0, realMin - 1); // Restar 1 pero no bajar de 0
+    middleValue.value = realMin;
+    maxValue.value = realMax;
+  } else {
+    // Para todos los demás casos
+    minValue.value = realMin;
+    maxValue.value = realMax;
+    middleValue.value = Math.floor((minValue.value + maxValue.value) / 2);
+  }
+  
+  // Generar gradiente dinámico
+  gradientStyle.value = `linear-gradient(to bottom, rgb(0, 0, 180), rgb(180, 180, 255), rgb(255, 255, 255))`;
+  
   // Eliminar la capa GeoJSON existente si hay una
   if (geoJsonLayer) {
     map.removeLayer(geoJsonLayer);
   }
+  
   // Agregar una nueva capa GeoJSON con los datos actualizados
   geoJsonLayer = L.geoJSON(venezuelaGeoJsonData, {
     style(feature) {
@@ -160,7 +230,7 @@ const updateMap = async () => {
         .toLowerCase()
         .replace(/ /g, "");
       const cant_estado = estadoMap[normalizedEstado] || 0;
-      const normalizedValue = Math.min(cant_estado / maxEstadoValue, 1);
+      const normalizedValue = Math.min(cant_estado / maxValue.value, 1);
       const colorIndex = Math.floor(normalizedValue * 25);
       return {
         fillColor: colorScale[colorIndex] || colorScale[0],
@@ -174,10 +244,40 @@ const updateMap = async () => {
         .toLowerCase()
         .replace(/ /g, "");
       const cant_estado = estadoMap[normalizedEstado] || 0;
-      const normalizedValue = Math.min(cant_estado / maxEstadoValue, 1);
+      const normalizedValue = Math.min(cant_estado / maxValue.value, 1);
       const colorIndex = Math.floor(normalizedValue * 25);
       const fillColor = colorScale[colorIndex] || colorScale[0];
+      
+      // Agregar etiqueta con el número en el centro del estado
+      const bounds = layer.getBounds();
+      const center = bounds.getCenter();
+      
+      // Crear un marcador de texto personalizado con outline blanco
+      const label = L.marker(center, {
+        icon: L.divIcon({
+          className: 'state-label',
+          html: `<div style="
+            background: transparent;
+            font-weight: bold;
+            font-size: 14px;
+            color: #000000;
+            text-shadow: 
+              -3px -3px 0 #fff,
+              3px -3px 0 #fff,
+              -3px 3px 0 #fff,
+              3px 3px 0 #fff,
+              -3px 0 0 #fff,
+              3px 0 0 #fff,
+              0 -3px 0 #fff,
+              0 3px 0 #fff;
+          ">${cant_estado}</div>`,
+          iconSize: [40, 20],
+          iconAnchor: [20, 10]
+        })
+      }).addTo(map);
+      
       layer.bindTooltip(`${feature.properties.name}: ${cant_estado}`);
+      
       layer.on("mouseover", () => {
         layer.setStyle({
           fillColor: "rgb(0, 0, 255)",
@@ -192,6 +292,7 @@ const updateMap = async () => {
         layer._path.style.transformOrigin = `${centerPixel.x}px ${centerPixel.y}px`;
         layer._path.style.transform = "scale(1)";
       });
+      
       layer.on("mouseout", () => {
         layer.setStyle({
           fillColor,
@@ -202,6 +303,7 @@ const updateMap = async () => {
         layer._path.style.transform = "";
         layer._path.style.transformOrigin = "";
       });
+      
       layer.on("click", async () => {
         const estadoName = feature.properties.name.toLowerCase();
         const estadoInfo = await fetchEstadoInfo(estadoName);
@@ -296,46 +398,46 @@ const formatKey = (key) => {
 };
 </script>
 <style scoped>
-
 .map-container {
-  height: 300px;
-  background-color: #ffffff !important;
-  border: 3px solid #273984;
-  border-radius: 12px;
+  height: 400px;
+  background-color: var(--oncti-white);
+  border: 1px solid var(--oncti-blue);
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(39, 57, 132, 0.08);
-  margin-bottom: 32px;
-  margin-right: 32px;
-  margin-left: -16px;
-  max-width: 600px;
+  margin-bottom: 24px;
   width: 100%;
-  float: left;
+  padding: 5px;
 }
 
 @media (min-width: 768px) {
   .map-container {
-    height: 400px;
-    border-width: 4px;
-    margin-bottom: 40px;
-    margin-right: 64px;
-    margin-left: 48px;
-    max-width: 700px;
+    height: 500px;
+    float: left;
+    width: 45%;
+    margin-right: 2%;
+    padding: 8px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .map-container {
+    height: 550px;
+    width: 48%;
+    padding: 10px;
   }
 }
 
 /* Contenedor de cards (fuera del flujo normal) */
 .cards-container {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 50%;
-  max-height: 100%;
-  /* Limita la altura al 100% del contenedor padre */
+  position: relative;
+  width: 100%;
+  max-height: 400px;
   overflow-y: auto;
-  /* Permite el desplazamiento vertical si el contenido es demasiado grande */
   visibility: hidden;
   opacity: 0;
   transition: opacity 0.3s ease, visibility 0.3s ease;
   z-index: 10;
+  margin-top: 16px;
 }
 
 .cards-container.visible {
@@ -343,13 +445,20 @@ const formatKey = (key) => {
   opacity: 1;
 }
 
-@media (max-width: 767px) {
+@media (min-width: 768px) {
   .cards-container {
-    top: 100%;
-    left: 0;
-    width: 100%;
-    max-height: 300px;
-    /* Altura máxima para dispositivos móviles */
+    position: relative;
+    float: left;
+    width: 53%;
+    max-height: 500px;
+    margin-top: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cards-container {
+    max-height: 550px;
+    width: 50%;
   }
 }
 
@@ -359,61 +468,209 @@ const formatKey = (key) => {
   top: 10px;
   right: 10px;
   z-index: 20;
+  background-color: var(--oncti-blue) !important;
+  color: var(--oncti-white) !important;
+}
+
+.close-btn:hover {
+  background-color: var(--oncti-blue-dark) !important;
 }
 
 /* Nuevos estilos para las cards */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
 }
 
 .small-card {
-  max-width: 180px;
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
+  background: var(--oncti-white);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 4px rgba(39, 57, 132, 0.06);
+  transition: all 0.3s ease;
+}
+
+.small-card:hover {
+  box-shadow: 0 4px 12px rgba(39, 57, 132, 0.12);
+  transform: translateY(-2px);
 }
 
 .small-section {
-  padding: 0.5rem 0.75rem !important;
+  padding: 8px !important;
 }
 
 .small-title {
-  font-size: 0.8rem !important;
-  margin-bottom: 0.2rem !important;
+  font-size: 0.75rem !important;
+  margin-bottom: 4px !important;
+  color: var(--oncti-text-light);
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .small-text {
-  font-size: 0.7rem !important;
-  line-height: 1.1 !important;
+  font-size: 1.1rem !important;
+  line-height: 1.2 !important;
+  color: var(--oncti-blue);
+  font-weight: 700;
 }
 
 /* Ajustes responsive */
 @media (max-width: 767px) {
   .cards-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
+    gap: 8px;
   }
 
   .small-card {
-    max-width: 150px;
+    padding: 10px;
   }
 
   .small-title {
-    font-size: 0.7rem !important;
+    font-size: 0.65rem !important;
   }
 
   .small-text {
-    font-size: 0.6rem !important;
+    font-size: 0.95rem !important;
   }
 }
 
-/* Estilos para las cards individuales */
-.q-card {
-  transition: transform 0.2s ease;
+@media (max-width: 480px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .small-card {
+    padding: 8px;
+  }
+  
+  .small-title {
+    font-size: 0.6rem !important;
+  }
+
+  .small-text {
+    font-size: 0.85rem !important;
+  }
 }
 
-.q-card:hover {
-  transform: scale(1.02);
+/* Scrollbar personalizado */
+.cards-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cards-container::-webkit-scrollbar-track {
+  background: var(--oncti-gray-light);
+  border-radius: 4px;
+}
+
+.cards-container::-webkit-scrollbar-thumb {
+  background: var(--oncti-blue-light);
+  border-radius: 4px;
+}
+
+.cards-container::-webkit-scrollbar-thumb:hover {
+  background: var(--oncti-blue);
+}
+
+/* Estilos para el título del mapa */
+.map-wrapper {
+  position: relative;
+}
+
+.map-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.map-title {
+  color: var(--oncti-blue);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+}
+
+.zoom-indicator {
+  background-color: var(--oncti-blue);
+  color: var(--oncti-white);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Estilos para la escala de colores */
+.color-scale {
+  position: absolute;
+  left: 10px;
+  top: 60px;
+  z-index: 1000;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.scale-gradient {
+  width: 30px;
+  height: 200px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: linear-gradient(to bottom, rgb(0, 0, 180), rgb(180, 180, 255), rgb(255, 255, 255));
+}
+
+.scale-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
+.scale-labels.scale-single {
+  justify-content: center;
+}
+
+.scale-value {
+  font-size: 0.85rem;
+  color: var(--oncti-text-dark);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.scale-middle {
+  margin: auto 0;
+}
+
+/* Estilos para las etiquetas de los estados */
+:deep(.state-label) {
+  background: transparent !important;
+  border: none !important;
+}
+
+@media (max-width: 767px) {
+  .map-title {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+  
+  .color-scale {
+    left: 5px;
+    top: 50px;
+    padding: 8px;
+    min-width: 100px;
+  }
+  
+  .scale-gradient {
+    height: 120px;
+  }
+  
+  .scale-title {
+    font-size: 0.65rem;
+  }
+  
+  .scale-labels {
+    font-size: 0.6rem;
+  }
 }
 </style>

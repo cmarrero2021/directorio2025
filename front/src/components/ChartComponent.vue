@@ -1,38 +1,32 @@
 <template>
-  <div class="col-12 col-md-6 q-pa-md">
-    <ChartToolbar
-      @change-chart-type="changeChartType"
-      @export-excel="exportToExcel"
-      @export-png="exportToPng"
-      @export-pdf="exportToPdf"
-      @toggle-table="toggleTable"
-    />
-    <div v-if="!isTableVisible">
-      <div
-        ref="chartContainer"
-        style="
-          width: 100%;
-          background-color: white;
-          padding: 20px;
-          border-radius: 10px;
-          position: relative;
-        "
-      >
-        <div style="width: 100%; height: 200px; position: relative">
-          <canvas ref="chartCanvas" style="width: 100%; height: 600px"></canvas>
+  <div class="chart-component-wrapper">
+    <div class="oncti-card chart-card">
+      <ChartToolbar
+        @change-chart-type="changeChartType"
+        @export-excel="exportToExcel"
+        @export-png="exportToPng"
+        @export-pdf="exportToPdf"
+        @toggle-table="toggleTable"
+      />
+      <div v-if="!isTableVisible">
+        <div ref="chartContainer" class="chart-container">
+          <div class="chart-canvas-wrapper">
+            <canvas ref="chartCanvas"></canvas>
+          </div>
         </div>
       </div>
-    </div>
-    <div v-else>
-      <q-card>
-        <q-table
-          :title="title"
-          :rows="chartData"
-          :columns="tableColumns"
-          row-key="id"
-          :pagination="{ rowsPerPage: 10 }"
-        />
-      </q-card>
+      <div v-else>
+        <q-card flat class="table-card">
+          <q-table
+            :title="title"
+            :rows="chartData"
+            :columns="tableColumns"
+            row-key="id"
+            :pagination="{ rowsPerPage: 10 }"
+            flat
+          />
+        </q-card>
+      </div>
     </div>
   </div>
 </template>
@@ -460,8 +454,64 @@ watch(
 </script>
 
 <style scoped>
-canvas {
+.chart-component-wrapper {
   width: 100%;
-  height: 400px;
+}
+
+.chart-card {
+  padding: 20px;
+  min-height: 400px;
+}
+
+.chart-container {
+  width: 100%;
+  background-color: var(--oncti-white);
+  padding: 20px;
+  border-radius: 12px;
+  position: relative;
+}
+
+.chart-canvas-wrapper {
+  width: 100%;
+  min-height: 300px;
+  position: relative;
+}
+
+canvas {
+  width: 100% !important;
+  height: 400px !important;
+}
+
+.table-card {
+  background: transparent;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .chart-card {
+    padding: 16px;
+  }
+  
+  .chart-container {
+    padding: 16px;
+  }
+  
+  canvas {
+    height: 300px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-card {
+    padding: 12px;
+  }
+  
+  .chart-container {
+    padding: 12px;
+  }
+  
+  canvas {
+    height: 250px !important;
+  }
 }
 </style>
