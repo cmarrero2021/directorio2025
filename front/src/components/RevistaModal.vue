@@ -27,11 +27,11 @@
                 <div class="col-12 col-md-6"><q-input v-model="localForm.deposito_legal_digital" label="Depósito Legal Digital" filled @input="forceInputCase($event, 'deposito_legal_digital')" class="uppercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.issn_impreso" label="ISSN Impreso" filled @input="forceInputCase($event, 'issn_impreso')" class="uppercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.issn_digital" label="ISSN Digital" filled @input="forceInputCase($event, 'issn_digital')" class="uppercase-input" /></div>
-                <div class="col-12 col-md-6"><q-select v-model="localForm.area_conocimiento" :options="optionsu.area_conocimiento" label="Área de Conocimiento" filled option-label="label" option-value="value" emit-value map-options /></div>
-                <div class="col-12 col-md-6"><q-select v-model="localForm.indice" :options="optionsu.indice" label="Índice" filled option-label="label" option-value="value" emit-value map-options /></div>
-                <div class="col-12 col-md-6"><q-select v-model="localForm.idioma" :options="optionsu.idioma" label="Idioma" filled option-label="label" option-value="value" emit-value map-options /></div>
-                <div class="col-12 col-md-6"><q-select v-model="localForm.formato" :options="optionsu.formato" label="Formato" filled option-label="label" option-value="value" emit-value map-options /></div>
-                <div class="col-12 col-md-6"><q-select v-model="localForm.periodicidad" :options="optionsu.periodicidad" label="Periodicidad" filled option-label="label" option-value="value" emit-value map-options /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.area_conocimiento" :options="filteredAreas" label="Área de Conocimiento" filled option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterAreas" /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.indice" :options="filteredIndices" label="Índice" filled option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterIndices" /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.idioma" :options="filteredIdiomas" label="Idioma" filled option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterIdiomas" /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.formato" :options="filteredFormatos" label="Formato" filled option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterFormatos" /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.periodicidad" :options="filteredPeriodicidad" label="Periodicidad" filled option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterPeriodicidad" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.anio_inicial" label="Año Inicial" type="number" filled @input="localForm.anio_inicial = $event.toUpperCase()" class="uppercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.url" label="URL" type="url" filled @keyup="forceInputCase($event, 'url', 'lower')" class="lowercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.correo_revista" label="Correo Revista" type="email" filled @keyup="forceInputCase($event, 'correo_revista', 'lower')" class="lowercase-input" /></div>
@@ -40,8 +40,8 @@
             </q-tab-panel>
             <q-tab-panel name="editor">
               <div class="row q-col-gutter-md">
-                <div class="col-12 col-md-6"><q-select v-model="localForm.editorial" :options="optionsu.editorial" label="Editorial" filled option-label="label" option-value="value" emit-value map-options /></div>
-                <div class="col-12 col-md-6"><q-select v-model="localForm.estado" :options="optionsu.estado" label="Estado" filled option-label="label" option-value="value" emit-value map-options /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.editorial" :options="filteredEditoriales" label="Editorial" filled option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterEditoriales" /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.estado" :options="filteredEstados" label="Estado" filled option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterEstados" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.nombres_editor" label="Nombres Editor" filled @input="localForm.nombres_editor = $event.toUpperCase()" class="uppercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.apellidos_editor" label="Apellidos Editor" filled @input="localForm.apellidos_editor = $event.toUpperCase()" class="uppercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.correo_editor" label="Correo Editor" type="email" filled @input="localForm.correo_editor = $event.toLowerCase()" class="lowercase-input" /></div>
@@ -96,6 +96,52 @@ const imageFile = ref(props.imageFile || null);
 const imagePreview = ref(props.imagePreview || null);
 watch(() => props.imageFile, (val) => { imageFile.value = val; });
 watch(() => props.imagePreview, (val) => { imagePreview.value = val; });
+
+// Variables reactivas para opciones filtradas
+const filteredAreas = ref(props.optionsu?.area_conocimiento || []);
+const filteredIndices = ref(props.optionsu?.indice || []);
+const filteredIdiomas = ref(props.optionsu?.idioma || []);
+const filteredFormatos = ref(props.optionsu?.formato || []);
+const filteredPeriodicidad = ref(props.optionsu?.periodicidad || []);
+const filteredEditoriales = ref(props.optionsu?.editorial || []);
+const filteredEstados = ref(props.optionsu?.estado || []);
+
+// Watch para actualizar las opciones filtradas cuando cambian las props
+watch(() => props.optionsu, (val) => {
+  if (val) {
+    filteredAreas.value = val.area_conocimiento || [];
+    filteredIndices.value = val.indice || [];
+    filteredIdiomas.value = val.idioma || [];
+    filteredFormatos.value = val.formato || [];
+    filteredPeriodicidad.value = val.periodicidad || [];
+    filteredEditoriales.value = val.editorial || [];
+    filteredEstados.value = val.estado || [];
+  }
+}, { deep: true, immediate: true });
+
+// Función genérica de filtrado
+const filterFn = (val, update, fullOptions, filteredRef) => {
+  update(() => {
+    if (val === '') {
+      filteredRef.value = fullOptions || [];
+    } else {
+      const needle = val.toLowerCase();
+      filteredRef.value = (fullOptions || []).filter(
+        item => item.label.toLowerCase().indexOf(needle) > -1
+      );
+    }
+  });
+};
+
+// Funciones de filtrado para cada select
+const filterAreas = (val, update) => filterFn(val, update, props.optionsu?.area_conocimiento, filteredAreas);
+const filterIndices = (val, update) => filterFn(val, update, props.optionsu?.indice, filteredIndices);
+const filterIdiomas = (val, update) => filterFn(val, update, props.optionsu?.idioma, filteredIdiomas);
+const filterFormatos = (val, update) => filterFn(val, update, props.optionsu?.formato, filteredFormatos);
+const filterPeriodicidad = (val, update) => filterFn(val, update, props.optionsu?.periodicidad, filteredPeriodicidad);
+const filterEditoriales = (val, update) => filterFn(val, update, props.optionsu?.editorial, filteredEditoriales);
+const filterEstados = (val, update) => filterFn(val, update, props.optionsu?.estado, filteredEstados);
+
 const handleImageUpload = (file) => {
   if (file) {
     if (!['image/jpeg', 'image/jpg'].includes(file.type)) {

@@ -766,7 +766,17 @@ app.get('/lista_formatos', async (req, res) => {
 app.get('/lista_idiomas', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT id AS id_idioma, idioma FROM idiomas ORDER BY idioma');
+    const result = await client.query(`
+      SELECT id AS id_idioma, idioma 
+      FROM idiomas 
+      ORDER BY 
+        CASE 
+          WHEN UPPER(idioma) = 'ESPAÑOL' THEN 1
+          WHEN UPPER(idioma) = 'INGLÉS' OR UPPER(idioma) = 'INGLES' THEN 2
+          ELSE 3
+        END,
+        idioma
+    `);
     client.release();
     res.json(result.rows);
   } catch (err) {
