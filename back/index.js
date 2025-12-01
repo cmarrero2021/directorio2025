@@ -8,18 +8,14 @@ const WebSocket = require('ws');
 
 const app = express();
 const PORT = 3000;
-// const PORT = 4000;
 
 // Configuración CORS
-// app.use(cors({ origin: '*', methods: ['GET', 'OPTIONS'], allowedHeaders: ['Content-Type'] }));
-app.use(cors({ origin: '*' }));
-// Middleware adicional para encabezados CORS
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
+app.use(cors({ 
+  origin: '*', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false
+}));
 
 
 // Configurar conexión a PostgreSQL para consultas regulares

@@ -5,7 +5,7 @@
       <div class="map-header">
       
         <h6 class="map-title">Distribución nacional de registros</h6>
-        <span class="zoom-indicator">Zoom: {{ currentZoom }}</span>
+        <!-- <span class="zoom-indicator">Zoom: {{ currentZoom }}</span> -->
       </div>
       
       <div class="row relative-position">
@@ -104,7 +104,8 @@ const generateColorScale = () => {
       colorScale.push(`rgb(255,255,255)`);
     } else {
       const green = Math.round(180 - i * step);
-      colorScale.push(`rgb(${green}, ${green},255)`);
+      const blue = 180; // Usar 180 en lugar de 255 para que coincida con el color de referencia
+      colorScale.push(`rgb(${green}, ${green}, ${blue})`);
     }
   }
   return colorScale;
@@ -310,7 +311,7 @@ const updateMap = async () => {
       
       layer.on("mouseover", () => {
         layer.setStyle({
-          fillColor: "rgb(0, 0, 255)",
+          fillColor: "rgb(0, 0, 180)",
           weight: 1,
           color: "#000000",
           fillOpacity: 1,

@@ -191,12 +191,18 @@ const renderChart = (type) => {
           }
         },
       },
-      scales: {
+      scales: isPieChart ? undefined : {
         x: {
           grid: { display: false },
+          ticks: {
+            display: type !== 'bar', // Ocultar valores del eje X solo para barras horizontales
+          }
         },
         y: {
           grid: { display: false },
+          ticks: {
+            display: type === 'bar', // Mostrar valores del eje Y solo para barras horizontales
+          }
         },
       },
     },
@@ -447,6 +453,10 @@ const generateGradientColors = (values) => {
 ///////////////
 // Ciclo de vida
 onMounted(() => {
+  // Configurar la fuente Roboto como predeterminada para Chart.js
+  Chart.defaults.font.family = 'Roboto, sans-serif';
+  Chart.defaults.font.size = 12;
+  
   fetchChartData(); // Obtener los datos iniciales
 
   // Escuchar eventos de actualización desde WebSocket

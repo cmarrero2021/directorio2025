@@ -29,7 +29,7 @@
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img src="http://localhost:3000/portadas/betancourt.png" alt="Foto Betancourt" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
+                      <q-img :src="`${VITE_IMAGE_BASE_URL}betancourt.png`" alt="Foto Betancourt" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Dr. Roberto Betancourt A.</div>
@@ -45,7 +45,7 @@
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img src="http://localhost:3000/portadas/ortuzar.png" alt="Foto Ortúzar" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
+                      <q-img :src="`${VITE_IMAGE_BASE_URL}ortuzar.png`" alt="Foto Ortúzar" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Lic. Fabiola Ortúzar</div>
@@ -61,7 +61,7 @@
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img src="http://localhost:3000/portadas/araujo.png" alt="Foto Araujo" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
+                      <q-img :src="`${VITE_IMAGE_BASE_URL}araujo.png`" alt="Foto Araujo" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Lic. Zenaida Araujo</div>
@@ -77,11 +77,11 @@
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img src="http://localhost:3000/portadas/arvelo.png" alt="Foto Arvelo" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
+                      <q-img :src="`${VITE_IMAGE_BASE_URL}arvelo.png`" alt="Foto Arvelo" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Ing. Mónica Arvelo</div>
-                      <div class="text-body2">Gerente Oficina de Tecnologías de la Información y la Comunicación</div>
+                      <div class="text-body2">Directora de la Oficina de Tecnologías de la Información y la Comunicación</div>
                       <div class="vcard-email-align text-body2 text-bold"><a href="mailto:marvelo@oncti.gob.ve" style="color:blue;">marvelo@oncti.gob.ve</a></div>
                     </div>
                   </div>
@@ -93,7 +93,7 @@
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img src="http://localhost:3000/portadas/morales.png" alt="Foto Morales" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
+                      <q-img :src="`${VITE_IMAGE_BASE_URL}morales.png`" alt="Foto Morales" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Dr. Gregorio Morales</div>
