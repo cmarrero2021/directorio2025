@@ -80,7 +80,7 @@
                         <q-input v-model="userForm.email" label="Email" type="email"
                             :rules="[val => !!val || 'Requerido', val => /.+@.+\..+/.test(val) || 'Email inválido']" />
 
-                        <div v-if="!editingUser" class="q-mt-md">
+                        <div class="q-mt-md">
                             <div class="row items-center q-mb-sm">
                                 <q-btn label="Generar Clave" color="secondary" size="sm" @click="generatePassword"
                                     icon="vpn_key" class="q-mr-sm" />
@@ -89,7 +89,8 @@
 
                             <q-input v-model="userForm.password" label="Contraseña"
                                 :type="isPasswordVisible ? 'text' : 'password'"
-                                :rules="[val => !!val || 'Requerido', validatePasswordStrength]">
+                                :hint="editingUser ? 'Dejar en blanco para mantener la actual' : ''"
+                                :rules="[val => (!editingUser && !val) ? 'Requerido' : true, val => !val || validatePasswordStrength(val) === true || validatePasswordStrength(val)]">
                                 <template v-slot:append>
                                     <q-icon :name="isPasswordVisible ? 'visibility' : 'visibility_off'"
                                         class="cursor-pointer" @click="isPasswordVisible = !isPasswordVisible" />

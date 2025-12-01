@@ -263,14 +263,28 @@ exports.listUsers = async (req, res) => {
 // Actualizar Usuario
 exports.updateUser = async (req, res) => {
   const { userId } = req.params;
-  const { first_name, last_name, cedula, email } = req.body;
+  const { first_name, last_name, cedula, email, password } = req.body;
 
   const client = await pool.connect();
   try {
-    await client.query(
-      "UPDATE users SET first_name = $1, last_name = $2, cedula = $3, email = $4, updated_at = NOW() WHERE id = $5",
-      [first_name, last_name, cedula, email, userId]
-    );
+    if (password) {
+      // Validar fortaleza de la contraseña si se proporciona
+      const passwordErrors = validatePassword(password);
+      if (passwordErrors.length > 0) {
+        return res.status(400).json({ error: passwordErrors.join(" ") });
+      }
+      const hashedPassword = await hashPassword(password);
+
+      await client.query(
+        "UPDATE users SET first_name = $1, last_name = $2, cedula = $3, email = $4, password_hash = $5, updated_at = NOW() WHERE id = $6",
+        [first_name, last_name, cedula, email, hashedPassword, userId]
+      );
+    } else {
+      await client.query(
+        "UPDATE users SET first_name = $1, last_name = $2, cedula = $3, email = $4, updated_at = NOW() WHERE id = $5",
+        [first_name, last_name, cedula, email, userId]
+      );
+    }
     res.status(200).json({ message: "Usuario actualizado exitosamente." });
   } catch (err) {
     console.error("Error al actualizar usuario:", err);
