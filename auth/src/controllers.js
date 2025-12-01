@@ -26,14 +26,14 @@ exports.getRevista = async (req, res) => {
     }
     const revista = result.rows[0];
     // Construir la URL pública de la portada si existe
-      let portadaUrl = null;
-        if (revista.portada) {
-          // Usar la variable VITE_IMAGE_BASE_URL para la URL pública
-          portadaUrl = `${process.env.VITE_IMAGE_BASE_URL}${revista.portada}`;
+    let portadaUrl = null;
+    if (revista.portada) {
+      // Usar la variable VITE_IMAGE_BASE_URL para la URL pública
+      portadaUrl = `${process.env.VITE_IMAGE_BASE_URL}${revista.portada}`;
     } else {
       revista.portadaUrl = null;
     }
-      res.json({ ...revista, portadaUrl });
+    res.json({ ...revista, portadaUrl });
   } catch (err) {
     console.error('Error al obtener la revista por ID:', err);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -774,6 +774,31 @@ exports.updateRevista = async (req, res) => {
   const { id } = req.params;
   const updateFields = req.body;
 
+  console.log('🔍 [updateRevista] Datos recibidos ANTES de sanitizar:', JSON.stringify(updateFields, null, 2));
+
+  // Sanitizar campos que vienen de q-select (pueden venir como objetos {label, value})
+  const selectFields = [
+    'area_conocimiento_id',
+    'idioma_id',
+    'indice_id',
+    'editorial_id',
+    'periodicidad_id',
+    'formato_id',
+    'estado_id'
+  ];
+
+  selectFields.forEach(field => {
+    if (updateFields[field]) {
+      console.log(`🔍 Campo ${field}:`, typeof updateFields[field], updateFields[field]);
+      if (typeof updateFields[field] === 'object' && updateFields[field].value !== undefined) {
+        console.log(`✅ Extrayendo value de ${field}:`, updateFields[field].value);
+        updateFields[field] = updateFields[field].value;
+      }
+    }
+  });
+
+  console.log('🔍 [updateRevista] Datos DESPUÉS de sanitizar:', JSON.stringify(updateFields, null, 2));
+
   if (updateFields.portada) {
     const match = updateFields.portada.match(/\/([^\/?]+)\?/);
     if (match && match[1]) {
@@ -977,20 +1002,20 @@ exports.insertRevistaWithUpload = [
     console.log('📥 Datos recibidos en req.body:', Object.keys(req.body));
     console.log('📄 Valores completos de req.body:', req.body);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    
+
     const insertFields = req.body; // Datos de la revista
     const file = req.file || (Array.isArray(req.files) && req.files[0]);
 
     // VALIDAR CAMPOS OBLIGATORIOS ANTES DE PROCESAR
     if (!insertFields.area_conocimiento_id || insertFields.area_conocimiento_id === '') {
-      return res.status(400).json({ 
-        error: 'El campo "Área de Conocimiento" es obligatorio. Por favor selecciona un área de conocimiento.' 
+      return res.status(400).json({
+        error: 'El campo "Área de Conocimiento" es obligatorio. Por favor selecciona un área de conocimiento.'
       });
     }
-    
+
     if (!insertFields.idioma_id || insertFields.idioma_id === '') {
-      return res.status(400).json({ 
-        error: 'El campo "Idioma" es obligatorio. Por favor selecciona un idioma.' 
+      return res.status(400).json({
+        error: 'El campo "Idioma" es obligatorio. Por favor selecciona un idioma.'
       });
     }
 
@@ -1001,7 +1026,7 @@ exports.insertRevistaWithUpload = [
 
     // Limpiar y validar datos antes de insertar
     const columnasMinusculas = ["correo_revista", "correo_editor", "url", "portada"];
-    
+
     // Límites de longitud para campos varchar
     const fieldLimits = {
       'deposito_legal_impreso': 25,
@@ -1010,30 +1035,30 @@ exports.insertRevistaWithUpload = [
       'issn_digital': 25,
       'portada': 255
     };
-    
+
     for (const key in insertFields) {
       // Convertir cadenas vacías a null para campos numéricos
       if (insertFields[key] === '' || insertFields[key] === undefined) {
         insertFields[key] = null;
         continue;
       }
-      
+
       if (typeof insertFields[key] === "string") {
         // Trim para eliminar espacios
         insertFields[key] = insertFields[key].trim();
-        
+
         // Si después del trim queda vacío, convertir a null
         if (insertFields[key] === '') {
           insertFields[key] = null;
           continue;
         }
-        
+
         // Aplicar límites de longitud si existen
         if (fieldLimits[key] && insertFields[key].length > fieldLimits[key]) {
           console.warn(`Campo ${key} truncado de ${insertFields[key].length} a ${fieldLimits[key]} caracteres`);
           insertFields[key] = insertFields[key].substring(0, fieldLimits[key]);
         }
-        
+
         if (columnasMinusculas.includes(key)) {
           insertFields[key] = insertFields[key].toLowerCase();
         } else {
@@ -1051,7 +1076,7 @@ exports.insertRevistaWithUpload = [
           validFields[key] = insertFields[key];
         }
       }
-      
+
       const keys = Object.keys(validFields);
       if (keys.length === 0) {
         return res.status(400).json({ error: "No se proporcionaron campos válidos para insertar." });
@@ -1062,10 +1087,10 @@ exports.insertRevistaWithUpload = [
       const values = keys.map((key) => validFields[key]);
 
       const query = `INSERT INTO revistas (${columns}) VALUES (${placeholders}) RETURNING *;`;
-      
+
       console.log('Insertando revista con campos:', keys);
       console.log('Valores:', values);
-      
+
       const result = await client.query(query, values);
 
       if (result.rows.length === 0) {
@@ -1082,9 +1107,9 @@ exports.insertRevistaWithUpload = [
       if (file && fs.existsSync(file.path)) {
         fs.unlinkSync(file.path);
       }
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Error al insertar la revista.",
-        details: err.message 
+        details: err.message
       });
     } finally {
       client.release();

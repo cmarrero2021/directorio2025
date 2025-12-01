@@ -98,11 +98,11 @@ router.delete(
 router.post("/change-password", authenticate, changePassword); // Cambiar contraseña
 
 // Logout
-router.post("/logout", authenticate, logout); // Cerrar sesión
+router.post("/logout", logout); // Cerrar sesión
 
 // Roles
 router.get("/roles", authenticate, authorize("list_roles"), listRoles); // Listar roles
-router.post("/roles",  createRole); // Crear rol
+router.post("/roles", createRole); // Crear rol
 // router.post("/roles", authenticate, authorize("create_role"), createRole); // Crear rol
 // router.put('/roles/:roleId', authenticate, authorize('update_role'), updateRole); // Actualizar rol
 // router.delete('/roles/:roleId', authenticate, authorize('delete_role'), deleteRole); // Borrado lógico
