@@ -263,16 +263,17 @@ exports.listUsers = async (req, res) => {
 // Actualizar Usuario
 exports.updateUser = async (req, res) => {
   const { userId } = req.params;
-  const { username, email } = req.body;
+  const { first_name, last_name, cedula, email } = req.body;
 
   const client = await pool.connect();
   try {
     await client.query(
-      "UPDATE users SET username = $1, email = $2, updated_at = NOW() WHERE id = $3",
-      [username, email, userId]
+      "UPDATE users SET first_name = $1, last_name = $2, cedula = $3, email = $4, updated_at = NOW() WHERE id = $5",
+      [first_name, last_name, cedula, email, userId]
     );
     res.status(200).json({ message: "Usuario actualizado exitosamente." });
   } catch (err) {
+    console.error("Error al actualizar usuario:", err);
     res.status(500).json({ error: "Error al actualizar el usuario." });
   } finally {
     client.release();
@@ -337,7 +338,7 @@ exports.listRoles = async (req, res) => {
   const client = await pool.connect();
   try {
     const result = await client.query(
-      "SELECT id, name, description FROM roles WHERE deleted_at IS NULL"
+      "SELECT id, name, description FROM roles"
     );
     res.status(200).json(result.rows);
   } catch (err) {
@@ -385,6 +386,21 @@ exports.listUserssPermissions = async (req, res) => {
     res.status(200).json(result.rows);
   } catch (err) {
     res.status(500).json({ error: "Error al listar los permisos." });
+  } finally {
+    client.release();
+  }
+};
+
+exports.listUserRoles = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      "SELECT a.user_id, b.first_name, b.last_name, a.role_id, c.name as role_name FROM user_roles a JOIN users b ON a.user_id = b.id JOIN roles c ON a.role_id = c.id"
+    );
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error("Error al listar roles de usuarios:", err);
+    res.status(500).json({ error: "Error al listar roles de usuarios." });
   } finally {
     client.release();
   }
@@ -985,13 +1001,239 @@ exports.updateRoleSessionTimeout = async (req, res) => {
 // ================================
 
 exports.createUser = async (req, res) => {
-  res.status(501).json({ error: "createUser no implementado en este servidor." });
+  const { first_name, last_name, cedula, email, password } = req.body;
+
+  // Validar campos requeridos
+  if (!first_name || !last_name || !cedula || !email || !password) {
+    return res.status(400).json({ error: "Todos los campos son obligatorios." });
+  }
+
+  // Validar fortaleza de la contraseña
+  const passwordErrors = validatePassword(password);
+  if (passwordErrors.length > 0) {
+    return res.status(400).json({ error: passwordErrors.join(" ") });
+  }
+
+  const client = await pool.connect();
+  try {
+    // Verificar si el usuario ya existe
+    const userExist = await client.query(
+      "SELECT id FROM users WHERE email = $1 OR cedula = $2",
+      [email, cedula]
+    );
+    if (userExist.rows.length > 0) {
+      return res.status(409).json({ error: "El usuario ya existe (email o cédula)." });
+    }
+
+    // Hash password
+    const hashedPassword = await hashPassword(password);
+
+    // Insertar usuario
+    const newUser = await client.query(
+      "INSERT INTO users (first_name, last_name, cedula, email, password_hash, status) VALUES ($1, $2, $3, $4, $5, 'active') RETURNING id, first_name, last_name, email",
+      [first_name, last_name, cedula, email, hashedPassword]
+    );
+
+    res.status(201).json({
+      message: "Usuario creado exitosamente.",
+      user: newUser.rows[0],
+    });
+  } catch (err) {
+    console.error("Error al crear usuario:", err);
+    res.status(500).json({ error: "Error al crear el usuario." });
+  } finally {
+    client.release();
+  }
 };
 
+// Actualizar Rol
+exports.updateRole = async (req, res) => {
+  const { roleId } = req.params;
+  const { name, description } = req.body;
+
+  const client = await pool.connect();
+  try {
+    await client.query(
+      "UPDATE roles SET name = $1, description = $2, updated_at = NOW() WHERE id = $3",
+      [name, description, roleId]
+    );
+    res.status(200).json({ message: "Rol actualizado exitosamente." });
+  } catch (err) {
+    console.error("Error al actualizar rol:", err);
+    res.status(500).json({ error: "Error al actualizar el rol." });
+  } finally {
+    client.release();
+  }
+};
+
+// Eliminar Rol (Borrado Lógico) - No hay columna deleted_at en roles según dump, pero sí en users.
+// Revisando dump: roles tiene created_at, updated_at, session_timeout_min. NO tiene deleted_at.
+// Se hará borrado físico si no hay dependencias, o se agregará columna deleted_at si se requiere.
+// Por ahora, asumiremos borrado físico con validación de dependencias o borrado en cascada (user_roles tiene ON DELETE CASCADE).
+exports.deleteRole = async (req, res) => {
+  const { roleId } = req.params;
+  const client = await pool.connect();
+  try {
+    await client.query("DELETE FROM roles WHERE id = $1", [roleId]);
+    res.status(200).json({ message: "Rol eliminado exitosamente." });
+  } catch (err) {
+    console.error("Error al eliminar rol:", err);
+    res.status(500).json({ error: "Error al eliminar el rol." });
+  } finally {
+    client.release();
+  }
+};
+
+// Asignar Rol a Usuario
+exports.assignRoleToUser = async (req, res) => {
+  const { userId, roleId } = req.body;
+  console.log("Assigning role:", { userId, roleId }); // Debug log
+
+  if (!userId || !roleId) {
+    return res.status(400).json({ error: "userId y roleId son requeridos." });
+  }
+
+  const client = await pool.connect();
+  try {
+    // Verificar si ya existe la asignación
+    const check = await client.query(
+      "SELECT * FROM user_roles WHERE user_id = $1 AND role_id = $2",
+      [userId, roleId]
+    );
+
+    if (check.rows.length > 0) {
+      return res.status(200).json({ message: "El rol ya está asignado al usuario." });
+    }
+
+    // Insertar si no existe
+    await client.query(
+      "INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)",
+      [userId, roleId]
+    );
+    res.status(200).json({ message: "Rol asignado exitosamente." });
+  } catch (err) {
+    console.error("Error al asignar rol:", err);
+    res.status(500).json({ error: "Error al asignar el rol: " + err.message });
+  } finally {
+    client.release();
+  }
+};
+
+// Remover Rol de Usuario
+exports.removeRoleFromUser = async (req, res) => {
+  const { userId, roleId } = req.body;
+  const client = await pool.connect();
+  try {
+    await client.query(
+      "DELETE FROM user_roles WHERE user_id = $1 AND role_id = $2",
+      [userId, roleId]
+    );
+    res.status(200).json({ message: "Rol removido exitosamente." });
+  } catch (err) {
+    console.error("Error al remover rol:", err);
+    res.status(500).json({ error: "Error al remover el rol." });
+  } finally {
+    client.release();
+  }
+};
+
+// Asignar Permiso a Rol
 exports.assignPermissionToRole = async (req, res) => {
-  res
-    .status(501)
-    .json({ error: "assignPermissionToRole no implementado en este servidor." });
+  const { roleId, permissionId } = req.body;
+  console.log("Assigning permission to role:", { roleId, permissionId });
+
+  if (!roleId || !permissionId) {
+    return res.status(400).json({ error: "roleId y permissionId son requeridos." });
+  }
+
+  const client = await pool.connect();
+  try {
+    const check = await client.query(
+      "SELECT * FROM role_permissions WHERE role_id = $1 AND permission_id = $2",
+      [roleId, permissionId]
+    );
+
+    if (check.rows.length > 0) {
+      return res.status(200).json({ message: "El permiso ya está asignado al rol." });
+    }
+
+    await client.query(
+      "INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)",
+      [roleId, permissionId]
+    );
+    res.status(200).json({ message: "Permiso asignado al rol exitosamente." });
+  } catch (err) {
+    console.error("Error al asignar permiso a rol:", err);
+    res.status(500).json({ error: "Error al asignar permiso al rol: " + err.message });
+  } finally {
+    client.release();
+  }
+};
+
+// Remover Permiso de Rol
+exports.removePermissionFromRole = async (req, res) => {
+  const { roleId, permissionId } = req.body;
+  console.log("Removing permission from role:", { roleId, permissionId });
+
+  if (!roleId || !permissionId) {
+    return res.status(400).json({ error: "roleId y permissionId son requeridos." });
+  }
+
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      "DELETE FROM role_permissions WHERE role_id = $1 AND permission_id = $2",
+      [roleId, permissionId]
+    );
+
+    if (result.rowCount === 0) {
+      console.warn("No se encontró la asignación para eliminar:", { roleId, permissionId });
+      return res.status(404).json({ error: "No se encontró la asignación para eliminar." });
+    }
+
+    res.status(200).json({ message: "Permiso removido del rol exitosamente." });
+  } catch (err) {
+    console.error("Error al remover permiso de rol:", err);
+    res.status(500).json({ error: "Error al remover permiso del rol: " + err.message });
+  } finally {
+    client.release();
+  }
+};
+
+// Asignar Permiso a Usuario (Directo)
+exports.assignPermissionToUser = async (req, res) => {
+  const { userId, permissionId } = req.body;
+  const client = await pool.connect();
+  try {
+    await client.query(
+      "INSERT INTO user_permissions (user_id, permission_id) VALUES ($1, $2) ON CONFLICT (user_id, permission_id) DO NOTHING",
+      [userId, permissionId]
+    );
+    res.status(200).json({ message: "Permiso asignado al usuario exitosamente." });
+  } catch (err) {
+    console.error("Error al asignar permiso a usuario:", err);
+    res.status(500).json({ error: "Error al asignar permiso al usuario." });
+  } finally {
+    client.release();
+  }
+};
+
+// Remover Permiso de Usuario (Directo)
+exports.removePermissionFromUser = async (req, res) => {
+  const { userId, permissionId } = req.body;
+  const client = await pool.connect();
+  try {
+    await client.query(
+      "DELETE FROM user_permissions WHERE user_id = $1 AND permission_id = $2",
+      [userId, permissionId]
+    );
+    res.status(200).json({ message: "Permiso removido del usuario exitosamente." });
+  } catch (err) {
+    console.error("Error al remover permiso de usuario:", err);
+    res.status(500).json({ error: "Error al remover permiso del usuario." });
+  } finally {
+    client.release();
+  }
 };
 
 // Inserta una revista con su portada en una sola operación

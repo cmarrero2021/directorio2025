@@ -34,6 +34,13 @@
           </q-item-section>
           <q-item-section>Revistas</q-item-section>
         </q-item>
+
+        <q-item clickable v-ripple to="/admin/administracion" v-if="isAdmin() || hasPermission('view_admin_panel')">
+          <q-item-section avatar>
+            <q-icon name="admin_panel_settings" />
+          </q-item-section>
+          <q-item-section>Administración</q-item-section>
+        </q-item>
         <!-- <q-item clickable v-ripple to="/admin/test-upload">
           <q-item-section avatar>
             <q-icon name="cloud_upload" />
@@ -66,6 +73,11 @@ const toggleLeftDrawer = () => {
 const hasPermission = (permissionName) => {
   const permissions = LocalStorage.getItem('permissions') || []
   return permissions.some(p => p.name === permissionName)
+}
+
+const isAdmin = () => {
+  const role = LocalStorage.getItem('role')
+  return role && ['admin', 'administrador', 'administrator'].includes(role.toLowerCase())
 }
 
 const logout = async () => {

@@ -42,6 +42,10 @@ const routes = [
         path: "test-upload",
         component: () => import("pages/TestUploadPage.vue"),
       },
+      {
+        path: "administracion",
+        component: () => import("pages/admin/AdminPage.vue"),
+      },
     ],
   },
   {

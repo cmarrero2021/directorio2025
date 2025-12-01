@@ -28,17 +28,30 @@ import { boot } from "quasar/wrappers";
 import axios from "axios";
 import { LocalStorage } from "quasar";
 
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || '/api' });
+const authApi = axios.create({ baseURL: import.meta.env.VITE_AUTH_API_URL || '/auth' });
+
 export default boot(({ app }) => {
   // Interceptor para añadir token automáticamente
-  axios.interceptors.request.use((config) => {
+  api.interceptors.request.use((config) => {
     const token = LocalStorage.getItem("token");
-    if (token && config.url.includes("/api/")) {
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
+
+  authApi.interceptors.request.use((config) => {
+    const token = LocalStorage.getItem("token");
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   });
 
   app.config.globalProperties.$axios = axios;
+  app.config.globalProperties.$api = api;
+  app.config.globalProperties.$authApi = authApi;
 });
 
-export { axios };
+export { axios, api, authApi };

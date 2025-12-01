@@ -83,6 +83,7 @@ const handleLogin = async () => {
       // Almacenar token y permisos en LocalStorage (opcional)
       LocalStorage.set('token', response.data.token);
       LocalStorage.set('permissions', response.data.permissions);
+      LocalStorage.set('role', response.data.role);
 
       Notify.create({
         message: "Ingresó correctamente",

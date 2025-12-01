@@ -89,7 +89,7 @@ exports.authenticate = async (req, res, next) => {
     const expiresAt = new Date(sessionResult.rows[0].expires_at);
     const currentTime = new Date();
     // Restar 10 segundos a expiresAt
-    
+
     const expiresAtMinus10s = new Date(expiresAt.getTime() - (process.env.SESSION_PREVIOUS_TIME * 1000));
 
     if (currentTime > expiresAtMinus10s) {
@@ -137,6 +137,20 @@ exports.authorize = (requiredPermission) => {
 
     const client = await pool.connect();
     try {
+      // Verificar si el usuario es administrador (bypass de permisos)
+      const roleResult = await client.query(
+        `SELECT r.name 
+         FROM user_roles ur
+         JOIN roles r ON ur.role_id = r.id
+         WHERE ur.user_id = $1`,
+        [userId]
+      );
+
+      const roles = roleResult.rows.map(r => r.name.toLowerCase());
+      if (roles.includes('admin') || roles.includes('administrador')) {
+        return next();
+      }
+
       // Obtener los permisos del usuario a través de sus roles
       const result = await client.query(
         `

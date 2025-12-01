@@ -15,6 +15,7 @@ const {
   listPermissions,
   listRolesPermissions,
   listUserssPermissions,
+  listUserRoles,
   login,
   logout,
   forceLogout,
@@ -27,6 +28,13 @@ const {
   updateUserSessionTimeout,
   updateRoleSessionTimeout,
   assignPermissionToRole,
+  removePermissionFromRole,
+  assignPermissionToUser,
+  removePermissionFromUser,
+  assignRoleToUser,
+  removeRoleFromUser,
+  updateRole,
+  deleteRole,
   testUpload,
   insertRevistaWithUpload,
   getRevista
@@ -42,10 +50,12 @@ router.post("/login", login); // Inicio de sesión
 router.post("/verify-email", verifyEmail); // Verificación de correo electrónico
 router.post("/force-logout", forceLogout); // Cierre forzoso de sesión
 router.post("/fast", fastChangePassworwd); // Cambio rápido de contraseña
+
 // Rutas Protegidas
 router.delete("/revistas/:id", deleteRevista); // Eliminar revista
 
 router.use(checkBlacklist); // Middleware para verificar tokens en la lista negra
+
 // Sesiones
 router.get(
   "/session-settings/global",
@@ -102,35 +112,31 @@ router.post("/logout", logout); // Cerrar sesión
 
 // Roles
 router.get("/roles", authenticate, authorize("list_roles"), listRoles); // Listar roles
-router.post("/roles", createRole); // Crear rol
-// router.post("/roles", authenticate, authorize("create_role"), createRole); // Crear rol
-// router.put('/roles/:roleId', authenticate, authorize('update_role'), updateRole); // Actualizar rol
-// router.delete('/roles/:roleId', authenticate, authorize('delete_role'), deleteRole); // Borrado lógico
-// router.delete('/roles/:roleId/permanent', authenticate, authorize('delete_role_permanently'), deleteRolePermanently); // Borrado físico
+router.post("/roles", authenticate, authorize("create_role"), createRole); // Crear rol
+router.put('/roles/:roleId', authenticate, authorize('update_role'), updateRole); // Actualizar rol
+router.delete('/roles/:roleId', authenticate, authorize('delete_role'), deleteRole); // Borrado lógico/físico
 
 // Permisos
-// router.post('/permissions', authenticate, authorize('create_permission'), createPermission); // Crear permiso
 router.get("/permissions", listPermissions); // Listar permisos
-router.get("/roles_permissions", listRolesPermissions); // Listar permisos
-router.get("/users_permissions", listUserssPermissions); // Listar permisos
+router.get("/roles_permissions", listRolesPermissions); // Listar permisos roles
+router.get("/users_permissions", listUserssPermissions); // Listar permisos usuarios
+router.get("/users_roles", listUserRoles); // Listar roles usuarios
 
-// router.get('/permissions', authenticate, authorize('list_permissions'), listPermissions); // Listar permisos
-// router.put('/permissions/:permissionId', authenticate, authorize('update_permission'), updatePermission); // Actualizar permiso
-// router.delete('/permissions/:permissionId', authenticate, authorize('delete_permission'), deletePermission); // Borrado lógico
-// router.delete('/permissions/:permissionId/permanent', authenticate, authorize('delete_permission_permanently'), deletePermissionPermanently); // Borrado físico
+// Asignaciones
+router.post('/assign-role', authenticate, authorize('assign_role'), assignRoleToUser); // Asignar rol a usuario
+router.post('/remove-role', authenticate, authorize('remove_role'), removeRoleFromUser); // Remover rol de usuario
 
-// // Asignaciones
-// router.post('/assign-role', authenticate, authorize('assign_role'), assignRoleToUser); // Asignar rol a usuario
-// router.post('/remove-role', authenticate, authorize('remove_role'), removeRoleFromUser); // Remover rol de usuario
-router.post('/assign-rolepermission', assignPermissionToRole); // Asignar permiso a rol
-router.post('/assign-userpermission', assignPermissionToRole); // Asignar permiso a rol
-// router.post('/assign-permission', authenticate, authorize('assign_permission'), assignPermissionToRole); // Asignar permiso a rol
-// router.post('/remove-permission', authenticate, authorize('remove_permission'), removePermissionFromRole); // Remover permiso de rol
-/////////MANTENEDORES
-// router.patch('/revistas/:id', authenticate, authorize('update_revista'), updateRevista);
+router.post('/assign-rolepermission', authenticate, authorize('assign_permission'), assignPermissionToRole); // Asignar permiso a rol
+router.post('/remove-rolepermission', authenticate, authorize('remove_permission'), removePermissionFromRole); // Remover permiso de rol
+
+router.post('/assign-userpermission', authenticate, authorize('assign_permission'), assignPermissionToUser); // Asignar permiso a usuario
+router.post('/remove-userpermission', authenticate, authorize('remove_permission'), removePermissionFromUser); // Remover permiso de usuario
+
+// Mantenedores Revistas
 router.post("/upload-portada/:id", uploadPortada);
 router.get("/revistas/:id", getRevista);
 router.patch("/revistas/:id", updateRevista);
 router.post("/revista", insertRevista);
 router.post("/revista-con-portada", insertRevistaWithUpload);
+
 module.exports = router;

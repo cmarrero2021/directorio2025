@@ -2,108 +2,48 @@
   <div class="q-pa-md">
     <h4 class="q-mb-md">MANTENEDOR DE REVISTAS</h4>
 
-    <q-table
-      title="Lista de Revistas"
-      :rows="filteredJournals"
-      :columns="columns"
-      :rows-per-page-options="[10, 20, 50]"
-      row-key="id"
-      :pagination="pagination"
-      :loading="loading"
-      virtual-scroll
-      class="responsive-table"
-    >
+    <q-table title="Lista de Revistas" :rows="filteredJournals" :columns="columns" :rows-per-page-options="[10, 20, 50]"
+      row-key="id" :pagination="pagination" :loading="loading" virtual-scroll class="responsive-table">
       <!-- Búsqueda general y botón borrar filtros -->
       <template v-slot:top>
         <!-- Primera fila: Búsqueda general y botón borrar filtros -->
         <div class="full-width row wrap items-center q-mb-md">
           <!-- Búsqueda general -->
           <div class="col-xs-10 col-sm-5 q-pr-xs">
-            <q-input
-              outlined
-              dense
-              debounce="300"
-              v-model="searchQuery"
-              label="Búsqueda general"
-              placeholder="Buscar en todos los campos"
-            >
+            <q-input outlined dense debounce="300" v-model="searchQuery" label="Búsqueda general"
+              placeholder="Buscar en todos los campos">
               <template v-slot:append>
-                <q-icon
-                  v-if="searchQuery"
-                  name="clear"
-                  @click.stop="clearSearch"
-                  class="cursor-pointer"
-                  size="sm"
-                />
+                <q-icon v-if="searchQuery" name="clear" @click.stop="clearSearch" class="cursor-pointer" size="sm" />
               </template>
             </q-input>
           </div>
 
           <!-- Botón "Borrar todos los filtros" -->
           <div class="col-xs-2 col-sm-1">
-            <q-btn
-              icon="fas fa-trash"
-              title="Borrar todos los filtros"
-              @click="clearAllFilters"
-              color="negative"
-              flat
-              size="sm"
-              class="full-width"
-            />
+            <q-btn icon="fas fa-trash" title="Borrar todos los filtros" @click="clearAllFilters" color="negative" flat
+              size="sm" class="full-width" />
           </div>
         </div>
 
         <!-- Segunda fila: Filtros para las columnas -->
-        <div
-          class="full-width row wrap justify-between items-center content-center q-mb-md"
-        >
-          <div
-            class="col-xs-12 col-sm-6 col-md-3 q-pa-sm"
-            v-for="col in columns"
-            :key="col.name"
-          >
+        <div class="full-width row wrap justify-between items-center content-center q-mb-md">
+          <div class="col-xs-12 col-sm-6 col-md-3 q-pa-sm" v-for="col in columns" :key="col.name">
             <div v-if="col.filterable">
               <div v-if="col.type === 'select'">
-                <q-select
-                  :model-value="filters[col.name]"
-                  @update:model-value="(val) => updateFilter(col.name, val)"
-                  :options="getOptions(col.name)"
-                  :label="col.label"
-                  multiple
-                  outlined
-                  dense
-                  use-chips
-                  clearable
-                >
+                <q-select :model-value="filters[col.name]" @update:model-value="(val) => updateFilter(col.name, val)"
+                  :options="getOptions(col.name)" :label="col.label" multiple outlined dense use-chips clearable>
                   <template v-slot:append>
-                    <q-icon
-                      v-if="filters[col.name] && filters[col.name].length > 0"
-                      name="clear"
-                      @click.stop="clearFilter(col.name)"
-                      class="cursor-pointer"
-                      size="sm"
-                    />
+                    <q-icon v-if="filters[col.name] && filters[col.name].length > 0" name="clear"
+                      @click.stop="clearFilter(col.name)" class="cursor-pointer" size="sm" />
                   </template>
                 </q-select>
               </div>
               <div v-else>
-                <q-input
-                  :model-value="filters[col.name]"
-                  @update:model-value="(val) => updateFilter(col.name, val)"
-                  :label="col.label"
-                  placeholder="Filtrar"
-                  outlined
-                  dense
-                  debounce="300"
-                >
+                <q-input :model-value="filters[col.name]" @update:model-value="(val) => updateFilter(col.name, val)"
+                  :label="col.label" placeholder="Filtrar" outlined dense debounce="300">
                   <template v-slot:append>
-                    <q-icon
-                      v-if="filters[col.name]"
-                      name="clear"
-                      @click.stop="clearFilter(col.name)"
-                      class="cursor-pointer"
-                      size="sm"
-                    />
+                    <q-icon v-if="filters[col.name]" name="clear" @click.stop="clearFilter(col.name)"
+                      class="cursor-pointer" size="sm" />
                   </template>
                 </q-input>
               </div>
@@ -111,41 +51,20 @@
           </div>
         </div>
         <div class="col-xs-12 col-sm-3 export-btns-group row items-center no-wrap">
-          <q-btn
-            icon="add"
-            title="Agregar nueva revista"
-            @click="openNewModal"
-            color="positive"
-            size="md"
-            class="q-mb-xs add-btn-responsive"
-            style="min-width: 180px; width: 100%;"
-          />
+          <q-btn v-if="isAdmin() || hasPermission('create_revista')" icon="add" title="Agregar nueva revista"
+            @click="openNewModal" color="positive" size="md" class="q-mb-xs add-btn-responsive"
+            style="min-width: 180px; width: 100%;" />
           <div class="row export-btns-responsive q-mt-xs q-ml-none q-ml-sm-md">
-            <q-btn
-              color="blue-8"
-              size="sm"
-              class="export-btn-desktop q-mr-xs"
-              @click="exportExcel"
-              title="Exportar a Excel"
-            >
+            <q-btn color="blue-8" size="sm" class="export-btn-desktop q-mr-xs" @click="exportExcel"
+              title="Exportar a Excel">
               <q-icon name="mdi-file-excel" />
             </q-btn>
-            <q-btn
-              color="amber-7"
-              size="sm"
-              class="export-btn-desktop q-mr-xs"
-              @click="exportCSV"
-              title="Exportar a CSV"
-            >
+            <q-btn color="amber-7" size="sm" class="export-btn-desktop q-mr-xs" @click="exportCSV"
+              title="Exportar a CSV">
               <q-icon name="mdi-file-delimited" />
             </q-btn>
-            <q-btn
-              color="deep-orange-5"
-              size="sm"
-              class="export-btn-desktop"
-              @click="exportJSON"
-              title="Exportar a JSON"
-            >
+            <q-btn color="deep-orange-5" size="sm" class="export-btn-desktop" @click="exportJSON"
+              title="Exportar a JSON">
               <q-icon name="mdi-code-json" />
             </q-btn>
           </div>
@@ -157,34 +76,16 @@
         <q-td>
           <div class="row items-center">
             <!-- Botón Editar -->
-            <q-btn
-              icon="edit"
-              color="primary"
-              title="Editar revista"
-              size="xs"
-              @click.stop="openEditModal(props.row)"
-              class="q-mr-xs"
-            />
+            <q-btn v-if="isAdmin() || hasPermission('update_revista')" icon="edit" color="primary"
+              title="Editar revista" size="xs" @click.stop="openEditModal(props.row)" class="q-mr-xs" />
 
             <!-- Botón Ver -->
-            <q-btn
-              icon="visibility"
-              color="positive"
-              title="Ver revista"
-              size="xs"
-              class="q-mr-xs"
-              @click.stop="() => openViewModalFn(props.row)"
-            />
+            <q-btn icon="visibility" color="positive" title="Ver revista" size="xs" class="q-mr-xs"
+              @click.stop="() => openViewModalFn(props.row)" />
 
             <!-- Botón Borrar -->
-            <q-btn
-              icon="delete"
-              color="negative"
-              title="Eliminar Revista"
-              size="xs"
-              class="q-mr-xs"
-              @click.stop="() => deleteRevista(props.row)"
-            />
+            <q-btn v-if="isAdmin() || hasPermission('delete_revista')" icon="delete" color="negative"
+              title="Eliminar Revista" size="xs" class="q-mr-xs" @click.stop="() => deleteRevista(props.row)" />
           </div>
         </q-td>
       </template>
@@ -195,24 +96,11 @@
       </template>
     </q-table>
     <!-- Componente Modal -->
-    <RevistaModal
-      v-model="editDialog"
-      :editForm="editForm"
-      :isEditing="isEditing"
-      :optionsu="optionsu"
-      :imagePreview="imagePreview"
-      :imageFile="imageFile"
-      @save="saveChanges"
-      @close="closeEditModal"
-      @update:imageFile="val => imageFile = val"
-      @update:imagePreview="val => imagePreview = val"
-    />
-    <RevistaViewModal
-      v-model="viewDialog"
-      :revista="selectedRevista"
-      :imageBaseUrl="imageBaseUrl"
-      @close="closeViewModal"
-    />
+    <RevistaModal v-model="editDialog" :editForm="editForm" :isEditing="isEditing" :optionsu="optionsu"
+      :imagePreview="imagePreview" :imageFile="imageFile" @save="saveChanges" @close="closeEditModal"
+      @update:imageFile="val => imageFile = val" @update:imagePreview="val => imagePreview = val" />
+    <RevistaViewModal v-model="viewDialog" :revista="selectedRevista" :imageBaseUrl="imageBaseUrl"
+      @close="closeViewModal" />
   </div>
 </template>
 
@@ -223,7 +111,7 @@ import Swal from 'sweetalert2';
 function getTimestamp() {
   const now = new Date();
   const pad = n => n.toString().padStart(2, '0');
-  return `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 }
 
 function getExportFilename(ext) {
@@ -236,13 +124,13 @@ function getExportData() {
 }
 
 function exportExcel() {
-  exportToExcel(getExportData(), getExportFilename('xlsx').replace('.xlsx',''));
+  exportToExcel(getExportData(), getExportFilename('xlsx').replace('.xlsx', ''));
 }
 function exportCSV() {
-  exportToCSV(getExportData(), getExportFilename('csv').replace('.csv',''));
+  exportToCSV(getExportData(), getExportFilename('csv').replace('.csv', ''));
 }
 function exportJSON() {
-  exportToJSON(getExportData(), getExportFilename('json').replace('.json',''));
+  exportToJSON(getExportData(), getExportFilename('json').replace('.json', ''));
 }
 import RevistaModal from 'src/components/RevistaModal.vue';
 import RevistaViewModal from 'src/components/RevistaViewModal.vue';
@@ -753,11 +641,11 @@ const saveChanges = async (updatedForm, updatedImageFile) => {
       console.log('🔍 Datos del formulario antes de enviar:');
       console.log('  - area_conocimiento:', updatedForm.area_conocimiento);
       console.log('  - idioma:', updatedForm.idioma);
-      
+
       // Campos obligatorios - siempre deben enviarse (ahora son valores directos, no objetos)
       formData.append('area_conocimiento_id', updatedForm.area_conocimiento || '');
       formData.append('idioma_id', updatedForm.idioma || '');
-      
+
       // Campos opcionales (también son valores directos ahora)
       appendIfDefined('indice_id', updatedForm.indice);
       appendIfDefined('revista', updatedForm.revista);
@@ -795,6 +683,17 @@ const saveChanges = async (updatedForm, updatedImageFile) => {
   }
 };
 
+// Funciones de permisos
+const hasPermission = (permissionName) => {
+  const permissions = LocalStorage.getItem('permissions') || []
+  return permissions.some(p => p.name === permissionName)
+}
+
+const isAdmin = () => {
+  const role = LocalStorage.getItem('role')
+  return role && ['admin', 'administrador', 'administrator'].includes(role.toLowerCase())
+}
+
 // Eliminar revista con confirmación
 const deleteRevista = async (row) => {
   const result = await Swal.fire({
@@ -825,7 +724,7 @@ const openViewModalFn = (row) => {
 };
 
 // Observar cambios en la paginación
-watch(pagination, () => {}, { deep: true });
+watch(pagination, () => { }, { deep: true });
 
 // Obtener los datos al montar el componente
 onMounted(async () => {
@@ -848,17 +747,20 @@ onMounted(async () => {
     flex-direction: column !important;
     align-items: stretch !important;
   }
+
   .add-btn-responsive {
     width: 100% !important;
     margin-right: 0 !important;
     margin-bottom: 8px !important;
   }
+
   .export-btns-responsive {
     width: 100% !important;
     margin: 0 !important;
     flex-wrap: nowrap !important;
     justify-content: stretch !important;
   }
+
   .export-btns-responsive .export-btn-desktop {
     width: 100% !important;
     min-width: 0 !important;
@@ -872,22 +774,26 @@ onMounted(async () => {
     flex-direction: row !important;
     align-items: center !important;
   }
+
   .add-btn-responsive {
     width: auto !important;
     margin-bottom: 0 !important;
     margin-right: 12px !important;
   }
+
   .export-btns-responsive {
     flex-direction: row !important;
     width: auto !important;
     margin-top: 0 !important;
   }
+
   .export-btns-responsive .export-btn-desktop {
     width: 36px !important;
     min-width: 36px !important;
     margin-right: 8px !important;
     margin-bottom: 0 !important;
   }
+
   .export-btns-responsive .export-btn-desktop:last-child {
     margin-right: 0 !important;
   }
