@@ -700,15 +700,15 @@ const saveChanges = async (updatedForm, updatedImageFile) => {
       patchData[key] = value;
     }
   };
-  setIfDefined('area_conocimiento_id', updatedForm.area_conocimiento?.value);
-  setIfDefined('indice_id', updatedForm.indice?.value);
-  setIfDefined('idioma_id', updatedForm.idioma?.value);
+  setIfDefined('area_conocimiento_id', updatedForm.area_conocimiento);
+  setIfDefined('indice_id', updatedForm.indice);
+  setIfDefined('idioma_id', updatedForm.idioma);
   setIfDefined('revista', updatedForm.revista);
   setIfDefined('correo_revista', updatedForm.correo_revista);
-  setIfDefined('editorial_id', updatedForm.editorial?.value);
-  setIfDefined('periodicidad_id', updatedForm.periodicidad?.value);
-  setIfDefined('formato_id', updatedForm.formato?.value);
-  setIfDefined('estado_id', updatedForm.estado?.value);
+  setIfDefined('editorial_id', updatedForm.editorial);
+  setIfDefined('periodicidad_id', updatedForm.periodicidad);
+  setIfDefined('formato_id', updatedForm.formato);
+  setIfDefined('estado_id', updatedForm.estado);
   setIfDefined('nombres_editor', updatedForm.nombres_editor);
   setIfDefined('apellidos_editor', updatedForm.apellidos_editor);
   setIfDefined('correo_editor', updatedForm.correo_editor);
@@ -749,15 +749,23 @@ const saveChanges = async (updatedForm, updatedImageFile) => {
         const file = Array.isArray(updatedImageFile) ? updatedImageFile[0] : updatedImageFile;
         appendIfDefined('portadaFile', file);
       }
-      appendIfDefined('area_conocimiento_id', updatedForm.area_conocimiento?.value);
-      appendIfDefined('indice_id', updatedForm.indice?.value);
-      appendIfDefined('idioma_id', updatedForm.idioma?.value);
+      // Log para debugging
+      console.log('🔍 Datos del formulario antes de enviar:');
+      console.log('  - area_conocimiento:', updatedForm.area_conocimiento);
+      console.log('  - idioma:', updatedForm.idioma);
+      
+      // Campos obligatorios - siempre deben enviarse (ahora son valores directos, no objetos)
+      formData.append('area_conocimiento_id', updatedForm.area_conocimiento || '');
+      formData.append('idioma_id', updatedForm.idioma || '');
+      
+      // Campos opcionales (también son valores directos ahora)
+      appendIfDefined('indice_id', updatedForm.indice);
       appendIfDefined('revista', updatedForm.revista);
       appendIfDefined('correo_revista', updatedForm.correo_revista);
-      appendIfDefined('editorial_id', updatedForm.editorial?.value);
-      appendIfDefined('periodicidad_id', updatedForm.periodicidad?.value);
-      appendIfDefined('formato_id', updatedForm.formato?.value);
-      appendIfDefined('estado_id', updatedForm.estado?.value);
+      appendIfDefined('editorial_id', updatedForm.editorial);
+      appendIfDefined('periodicidad_id', updatedForm.periodicidad);
+      appendIfDefined('formato_id', updatedForm.formato);
+      appendIfDefined('estado_id', updatedForm.estado);
       appendIfDefined('nombres_editor', updatedForm.nombres_editor);
       appendIfDefined('apellidos_editor', updatedForm.apellidos_editor);
       appendIfDefined('correo_editor', updatedForm.correo_editor);

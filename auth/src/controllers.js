@@ -508,24 +508,35 @@ exports.login = async (req, res) => {
       [user.id, token, parseInt(timeoutMin, 10) || 20]
     );
 
-    // Permisos del usuario
+    // Permisos del usuario (combinando permisos directos y permisos del rol)
     const permissionsQuery = `
-      SELECT p.name, p.description, p.action 
+      SELECT DISTINCT p.name, p.description, p.action, p.resource
       FROM user_permissions up
       JOIN permissions p ON up.permission_id = p.id
       WHERE up.user_id = $1
       UNION
-      SELECT p.name, p.description, p.action 
+      SELECT DISTINCT p.name, p.description, p.action, p.resource
       FROM user_roles ur
       JOIN role_permissions rp ON ur.role_id = rp.role_id
       JOIN permissions p ON rp.permission_id = p.id
       WHERE ur.user_id = $1
-      AND NOT EXISTS (
-          SELECT 1 FROM user_permissions WHERE user_id = $1
-      )
+      ORDER BY resource, action
     `;
     const permissionsResult = await client.query(permissionsQuery, [user.id]);
     const permissions = permissionsResult.rows;
+
+    // Log de permisos del usuario
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(`✅ Usuario logueado: ${username} (ID: ${user.id})`);
+    console.log(`📋 Permisos del usuario (${permissions.length} permisos):`);
+    if (permissions.length > 0) {
+      permissions.forEach((perm, index) => {
+        console.log(`   ${index + 1}. ${perm.name} - ${perm.description || 'Sin descripción'} (Acción: ${perm.action})`);
+      });
+    } else {
+      console.log('   ⚠️  El usuario no tiene permisos asignados');
+    }
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     // Rol del usuario
     const roleQuery = `
@@ -962,18 +973,67 @@ exports.assignPermissionToRole = async (req, res) => {
 exports.insertRevistaWithUpload = [
   uploadAny, // Middleware de Multer para procesar el archivo
   async (req, res) => {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📥 Datos recibidos en req.body:', Object.keys(req.body));
+    console.log('📄 Valores completos de req.body:', req.body);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    
     const insertFields = req.body; // Datos de la revista
     const file = req.file || (Array.isArray(req.files) && req.files[0]);
+
+    // VALIDAR CAMPOS OBLIGATORIOS ANTES DE PROCESAR
+    if (!insertFields.area_conocimiento_id || insertFields.area_conocimiento_id === '') {
+      return res.status(400).json({ 
+        error: 'El campo "Área de Conocimiento" es obligatorio. Por favor selecciona un área de conocimiento.' 
+      });
+    }
+    
+    if (!insertFields.idioma_id || insertFields.idioma_id === '') {
+      return res.status(400).json({ 
+        error: 'El campo "Idioma" es obligatorio. Por favor selecciona un idioma.' 
+      });
+    }
 
     // Si se subió un archivo, usar su nombre como el valor para 'portada'
     if (file) {
       insertFields.portada = file.originalname;
     }
 
-    // Forzar a minúsculas/mayúsculas según las reglas existentes
+    // Limpiar y validar datos antes de insertar
     const columnasMinusculas = ["correo_revista", "correo_editor", "url", "portada"];
+    
+    // Límites de longitud para campos varchar
+    const fieldLimits = {
+      'deposito_legal_impreso': 25,
+      'deposito_legal_digital': 25,
+      'issn_impreso': 25,
+      'issn_digital': 25,
+      'portada': 255
+    };
+    
     for (const key in insertFields) {
+      // Convertir cadenas vacías a null para campos numéricos
+      if (insertFields[key] === '' || insertFields[key] === undefined) {
+        insertFields[key] = null;
+        continue;
+      }
+      
       if (typeof insertFields[key] === "string") {
+        // Trim para eliminar espacios
+        insertFields[key] = insertFields[key].trim();
+        
+        // Si después del trim queda vacío, convertir a null
+        if (insertFields[key] === '') {
+          insertFields[key] = null;
+          continue;
+        }
+        
+        // Aplicar límites de longitud si existen
+        if (fieldLimits[key] && insertFields[key].length > fieldLimits[key]) {
+          console.warn(`Campo ${key} truncado de ${insertFields[key].length} a ${fieldLimits[key]} caracteres`);
+          insertFields[key] = insertFields[key].substring(0, fieldLimits[key]);
+        }
+        
         if (columnasMinusculas.includes(key)) {
           insertFields[key] = insertFields[key].toLowerCase();
         } else {
@@ -984,16 +1044,28 @@ exports.insertRevistaWithUpload = [
 
     const client = await pool.connect();
     try {
-      const keys = Object.keys(insertFields);
+      // Filtrar campos null antes de construir la query
+      const validFields = {};
+      for (const key in insertFields) {
+        if (insertFields[key] !== null) {
+          validFields[key] = insertFields[key];
+        }
+      }
+      
+      const keys = Object.keys(validFields);
       if (keys.length === 0) {
-        return res.status(400).json({ error: "No se proporcionaron campos para insertar." });
+        return res.status(400).json({ error: "No se proporcionaron campos válidos para insertar." });
       }
 
       const columns = keys.join(", ");
       const placeholders = keys.map((_, index) => `$${index + 1}`).join(", ");
-      const values = keys.map((key) => insertFields[key]);
+      const values = keys.map((key) => validFields[key]);
 
       const query = `INSERT INTO revistas (${columns}) VALUES (${placeholders}) RETURNING *;`;
+      
+      console.log('Insertando revista con campos:', keys);
+      console.log('Valores:', values);
+      
       const result = await client.query(query, values);
 
       if (result.rows.length === 0) {
@@ -1010,7 +1082,10 @@ exports.insertRevistaWithUpload = [
       if (file && fs.existsSync(file.path)) {
         fs.unlinkSync(file.path);
       }
-      res.status(500).json({ error: "Error interno al procesar la solicitud." });
+      res.status(500).json({ 
+        error: "Error al insertar la revista.",
+        details: err.message 
+      });
     } finally {
       client.release();
     }

@@ -27,11 +27,11 @@
                 <div class="col-12 col-md-6"><q-input v-model="localForm.deposito_legal_digital" label="Depósito Legal Digital" filled @input="forceInputCase($event, 'deposito_legal_digital')" class="uppercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.issn_impreso" label="ISSN Impreso" filled @input="forceInputCase($event, 'issn_impreso')" class="uppercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.issn_digital" label="ISSN Digital" filled @input="forceInputCase($event, 'issn_digital')" class="uppercase-input" /></div>
-                <div class="col-12 col-md-6"><q-select v-model="localForm.area_conocimiento" :options="optionsu.area_conocimiento" label="Área de Conocimiento" filled option-label="label" option-value="value" /></div>
-                <div class="col-12 col-md-6"><q-select v-model="localForm.indice" :options="optionsu.indice" label="Índice" filled option-label="label" option-value="value" /></div>
-                <div class="col-12 col-md-6"><q-select v-model="localForm.idioma" :options="optionsu.idioma" label="Idioma" filled option-label="label" option-value="value" /></div>
-                <div class="col-12 col-md-6"><q-select v-model="localForm.formato" :options="optionsu.formato" label="Formato" filled option-label="label" option-value="value" /></div>
-                <div class="col-12 col-md-6"><q-select v-model="localForm.periodicidad" :options="optionsu.periodicidad" label="Periodicidad" filled option-label="label" option-value="value" /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.area_conocimiento" :options="optionsu.area_conocimiento" label="Área de Conocimiento" filled option-label="label" option-value="value" emit-value map-options /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.indice" :options="optionsu.indice" label="Índice" filled option-label="label" option-value="value" emit-value map-options /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.idioma" :options="optionsu.idioma" label="Idioma" filled option-label="label" option-value="value" emit-value map-options /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.formato" :options="optionsu.formato" label="Formato" filled option-label="label" option-value="value" emit-value map-options /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.periodicidad" :options="optionsu.periodicidad" label="Periodicidad" filled option-label="label" option-value="value" emit-value map-options /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.anio_inicial" label="Año Inicial" type="number" filled @input="localForm.anio_inicial = $event.toUpperCase()" class="uppercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.url" label="URL" type="url" filled @keyup="forceInputCase($event, 'url', 'lower')" class="lowercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.correo_revista" label="Correo Revista" type="email" filled @keyup="forceInputCase($event, 'correo_revista', 'lower')" class="lowercase-input" /></div>
@@ -40,8 +40,8 @@
             </q-tab-panel>
             <q-tab-panel name="editor">
               <div class="row q-col-gutter-md">
-                <div class="col-12 col-md-6"><q-select v-model="localForm.editorial" :options="optionsu.editorial" label="Editorial" filled option-label="label" option-value="value" /></div>
-                <div class="col-12 col-md-6"><q-select v-model="localForm.estado" :options="optionsu.estado" label="Estado" filled option-label="label" option-value="value" /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.editorial" :options="optionsu.editorial" label="Editorial" filled option-label="label" option-value="value" emit-value map-options /></div>
+                <div class="col-12 col-md-6"><q-select v-model="localForm.estado" :options="optionsu.estado" label="Estado" filled option-label="label" option-value="value" emit-value map-options /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.nombres_editor" label="Nombres Editor" filled @input="localForm.nombres_editor = $event.toUpperCase()" class="uppercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.apellidos_editor" label="Apellidos Editor" filled @input="localForm.apellidos_editor = $event.toUpperCase()" class="uppercase-input" /></div>
                 <div class="col-12 col-md-6"><q-input v-model="localForm.correo_editor" label="Correo Editor" type="email" filled @input="localForm.correo_editor = $event.toLowerCase()" class="lowercase-input" /></div>
@@ -91,7 +91,7 @@ const emit = defineEmits(['update:modelValue', 'save', 'close', 'update:imageFil
 const localForm = ref({ ...props.editForm });
 watch(() => props.editForm, (val) => {
   localForm.value = { ...val };
-});
+}, { deep: true, immediate: true });
 const imageFile = ref(props.imageFile || null);
 const imagePreview = ref(props.imagePreview || null);
 watch(() => props.imageFile, (val) => { imageFile.value = val; });
@@ -121,6 +121,10 @@ const handleImageUpload = (file) => {
 };
 const onSave = (e) => {
   e.preventDefault();
+  console.log('🔍 [RevistaModal] Datos en localForm antes de emitir:');
+  console.log('  - localForm.area_conocimiento:', localForm.value.area_conocimiento);
+  console.log('  - localForm.idioma:', localForm.value.idioma);
+  console.log('  - localForm completo:', localForm.value);
   emit('save', localForm.value, imageFile.value);
 };
 const onClose = () => {

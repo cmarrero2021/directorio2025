@@ -10,9 +10,9 @@ const app = express();
 const PORT = 3000;
 
 // Configuración CORS
-app.use(cors({ 
-  origin: '*', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: false
 }));
@@ -51,7 +51,7 @@ const server = app.listen(PORT, async () => {
 
 // Configurar WebSocket Server
 const wss = new WebSocket.Server({ server });
-wss.on('connection', (ws,req) => {
+wss.on('connection', (ws, req) => {
   const origin = req.headers.origin
   console.log('Nuevo cliente WebSocket conectado');
   ws.on('close', () => {
@@ -95,7 +95,7 @@ app.use('/portadas', express.static(portadasPath, {
 
 // Middleware para manejar errores cuando no se encuentra un archivo
 app.use('/portadas', (req, res, next) => {
-  res.status(404).json({ 
+  res.status(404).json({
     error: 'Archivo no encontrado',
     message: `La imagen ${req.path} no existe en el servidor`
   });
@@ -116,7 +116,7 @@ app.get('/', async (req, res) => {
 //Ruta GET de prueba
 app.get('/prueba', async (req, res) => {
   try {
-     res.status(200).json({ message: 'Prueba exitosa.' });
+    res.status(200).json({ message: 'Prueba exitosa.' });
   } catch (err) {
     res.status(500).send('Error interno del servidor');
   }
@@ -523,10 +523,10 @@ app.get('/gr_areas_filtrado', async (req, res) => {
       periodicidad: req.query.periodicidad,
       formato: req.query.formato
     };
-    
+
     const { whereClause, params } = buildWhereClause(filters);
     const query = `SELECT area_conocimiento, COUNT(area_conocimiento) AS cant_area FROM revistas_data ${whereClause} GROUP BY area_conocimiento ORDER BY COUNT(area_conocimiento) DESC`;
-    
+
     const result = await client.query(query, params);
     client.release();
     res.json(result.rows);
@@ -548,10 +548,10 @@ app.get('/gr_indices_filtrado', async (req, res) => {
       periodicidad: req.query.periodicidad,
       formato: req.query.formato
     };
-    
+
     const { whereClause, params } = buildWhereClause(filters);
     const query = `SELECT indice, COUNT(indice) AS cant_inddice FROM revistas_data ${whereClause} GROUP BY indice ORDER BY COUNT(indice) DESC`;
-    
+
     const result = await client.query(query, params);
     client.release();
     res.json(result.rows);
@@ -573,10 +573,10 @@ app.get('/gr_idiomas_filtrado', async (req, res) => {
       periodicidad: req.query.periodicidad,
       formato: req.query.formato
     };
-    
+
     const { whereClause, params } = buildWhereClause(filters);
     const query = `SELECT idioma, COUNT(idioma) AS cant_idioma FROM revistas_data ${whereClause} GROUP BY idioma ORDER BY COUNT(idioma) DESC`;
-    
+
     const result = await client.query(query, params);
     client.release();
     res.json(result.rows);
@@ -598,10 +598,10 @@ app.get('/gr_editoriales_filtrado', async (req, res) => {
       periodicidad: req.query.periodicidad,
       formato: req.query.formato
     };
-    
+
     const { whereClause, params } = buildWhereClause(filters);
     const query = `SELECT editorial, COUNT(editorial) AS cant_editorial FROM revistas_data ${whereClause} GROUP BY editorial ORDER BY COUNT(editorial) DESC`;
-    
+
     const result = await client.query(query, params);
     client.release();
     res.json(result.rows);
@@ -623,10 +623,10 @@ app.get('/gr_periodicidades_filtrado', async (req, res) => {
       editorial: req.query.editorial,
       formato: req.query.formato
     };
-    
+
     const { whereClause, params } = buildWhereClause(filters);
     const query = `SELECT periodicidad, COUNT(periodicidad) AS cant_periodicidad FROM revistas_data ${whereClause} GROUP BY periodicidad ORDER BY COUNT(periodicidad) DESC`;
-    
+
     const result = await client.query(query, params);
     client.release();
     res.json(result.rows);
@@ -648,10 +648,10 @@ app.get('/gr_formatos_filtrado', async (req, res) => {
       editorial: req.query.editorial,
       periodicidad: req.query.periodicidad
     };
-    
+
     const { whereClause, params } = buildWhereClause(filters);
     const query = `SELECT formato, COUNT(formato) AS cant_formato FROM revistas_data ${whereClause} GROUP BY formato ORDER BY COUNT(formato) DESC`;
-    
+
     const result = await client.query(query, params);
     client.release();
     res.json(result.rows);
@@ -673,10 +673,10 @@ app.get('/gr_estados_filtrado', async (req, res) => {
       periodicidad: req.query.periodicidad,
       formato: req.query.formato
     };
-    
+
     const { whereClause, params } = buildWhereClause(filters);
     const query = `SELECT estado, COUNT(estado) AS cant_estado FROM revistas_data ${whereClause} GROUP BY estado ORDER BY COUNT(estado) DESC`;
-    
+
     const result = await client.query(query, params);
     client.release();
     res.json(result.rows);
@@ -701,7 +701,7 @@ app.get('/lista_estados', async (req, res) => {
 app.get('/lista_areas', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT DISTINCT area_conocimiento FROM revistas_data WHERE area_conocimiento IS NOT NULL AND area_conocimiento != \'\' ORDER BY area_conocimiento');
+    const result = await client.query('SELECT id AS id_area_conocimiento, area_conocimiento FROM areas_conocimiento ORDER BY area_conocimiento');
     client.release();
     res.json(result.rows);
   } catch (err) {
@@ -714,7 +714,7 @@ app.get('/lista_areas', async (req, res) => {
 app.get('/lista_indices', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT DISTINCT indice FROM revistas_data WHERE indice IS NOT NULL AND indice != \'\' ORDER BY indice');
+    const result = await client.query('SELECT id AS id_indice, indice FROM indices ORDER BY indice');
     client.release();
     res.json(result.rows);
   } catch (err) {
@@ -727,7 +727,7 @@ app.get('/lista_indices', async (req, res) => {
 app.get('/lista_editoriales', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT DISTINCT editorial FROM revistas_data WHERE editorial IS NOT NULL AND editorial != \'\' ORDER BY editorial');
+    const result = await client.query('SELECT id AS id_editorial, editorial FROM editoriales ORDER BY editorial');
     client.release();
     res.json(result.rows);
   } catch (err) {
@@ -740,7 +740,7 @@ app.get('/lista_editoriales', async (req, res) => {
 app.get('/lista_periodicidad', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT DISTINCT periodicidad FROM revistas_data WHERE periodicidad IS NOT NULL AND periodicidad != \'\' ORDER BY periodicidad');
+    const result = await client.query('SELECT id AS id_periodicidad, periodicidad FROM periodicidad ORDER BY periodicidad');
     client.release();
     res.json(result.rows);
   } catch (err) {
@@ -753,7 +753,7 @@ app.get('/lista_periodicidad', async (req, res) => {
 app.get('/lista_formatos', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT DISTINCT formato FROM revistas_data WHERE formato IS NOT NULL AND formato != \'\' ORDER BY formato');
+    const result = await client.query('SELECT id AS id_formato, formato FROM formatos ORDER BY formato');
     client.release();
     res.json(result.rows);
   } catch (err) {
@@ -766,7 +766,7 @@ app.get('/lista_formatos', async (req, res) => {
 app.get('/lista_idiomas', async (req, res) => {
   try {
     const client = await pool.connect();
-    const result = await client.query('SELECT DISTINCT idioma FROM revistas_data WHERE idioma IS NOT NULL AND idioma != \'\' ORDER BY idioma');
+    const result = await client.query('SELECT id AS id_idioma, idioma FROM idiomas ORDER BY idioma');
     client.release();
     res.json(result.rows);
   } catch (err) {
@@ -799,13 +799,13 @@ app.get('/endpoints', (req, res) => {
       path: layer.route.path,
       methods: Object.keys(layer.route.methods)
     }));
-  
+
   // Añadir rutas estáticas manualmente
   routes.push({
     path: '/portadas/*',
     methods: ['GET']
   });
-  
+
   res.json(routes);
 });
 /*
