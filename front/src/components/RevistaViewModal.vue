@@ -8,7 +8,7 @@
         </q-toolbar-title>
         <q-btn :icon="isMaximized ? 'fullscreen_exit' : 'fullscreen'" flat round dense @click="toggleMaximized"
           :title="isMaximized ? 'Salir de pantalla completa' : 'Pantalla completa'" />
-        <q-btn icon="close" flat round dense @click="$emit('close')" />
+        <q-btn icon="close" flat round dense @click="visible = false" />
       </q-toolbar>
       <!-- Contenido del diálogo con scroll -->
       <q-card-section class="scrollable-content">

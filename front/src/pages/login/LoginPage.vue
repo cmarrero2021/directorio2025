@@ -9,8 +9,13 @@
       <h5>Directorio de Revistas Científicas</h5>
       <h4>Iniciar Sesión</h4>
       <q-input filled outlined v-model="email" label="Correo Electrónico" type="email" />
-      <q-input filled outlined v-model="password" label="Contraseña" type="password" />
-      <q-btn label="Ingresar" color="primary" @click="handleLogin" />
+      <q-input filled outlined v-model="password" label="Contraseña" :type="isPasswordVisible ? 'text' : 'password'">
+        <template v-slot:append>
+          <q-btn :icon="isPasswordVisible ? 'visibility' : 'visibility_off'" flat round dense color="grey-7"
+            @click="isPasswordVisible = !isPasswordVisible" />
+        </template>
+      </q-input>
+      <q-btn label="Ingresar" class="q-mt-md" color="primary" @click="handleLogin" />
       <q-btn flat label="¿Olvidaste tu contraseña?" @click="recoverPassword" />
     </div>
   </div>
@@ -23,6 +28,7 @@ import { LocalStorage, Notify } from "quasar";
 import axios from "axios";
 const email = ref("");
 const password = ref("");
+const isPasswordVisible = ref(false);
 const router = useRouter();
 const loginUrl = import.meta.env.VITE_LOGIN_URL;
 const validateEmail = (email) => {
