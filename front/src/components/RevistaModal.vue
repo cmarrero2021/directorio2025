@@ -52,7 +52,7 @@
                   <q-input v-model="localForm.id" label="ID" readonly filled dense />
                 </div>
                 <div class="col-12 col-md-8">
-                  <q-input v-model="localForm.revista" label="📖 Nombre de la Revista" filled dense @keyup="forceInputCase($event, 'revista', 'upper')" class="uppercase-input" />
+                  <q-input v-model="localForm.revista" label="📚 Nombre de la Revista" filled dense @keyup="forceInputCase($event, 'revista', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
                   <q-input v-model="localForm.anio_inicial" label="📅 Año Inicial" type="number" filled dense />
@@ -61,7 +61,7 @@
                   <q-input v-model="localForm.url" label="🌐 URL" type="url" filled dense @keyup="forceInputCase($event, 'url', 'lower')" class="lowercase-input" />
                 </div>
                 <div class="col-12">
-                  <q-input v-model="localForm.direccion" label="📍 Dirección" filled dense @input="localForm.direccion = $event.toUpperCase()" class="uppercase-input" />
+                  <q-input v-model="localForm.direccion" label="📍 Dirección" filled dense @keyup="forceInputCase($event, 'direccion', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
                   <q-input v-model="localForm.correo_revista" label="📧 Correo Revista" type="email" filled dense @keyup="forceInputCase($event, 'correo_revista', 'lower')" class="lowercase-input" />
@@ -75,16 +75,16 @@
               </div>
               <div class="row q-col-gutter-md q-mb-lg">
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.issn_impreso" label="🏷️ ISSN Impreso" filled dense @input="forceInputCase($event, 'issn_impreso')" class="uppercase-input" />
+                  <q-input v-model="localForm.issn_impreso" label="🏷️ ISSN Impreso" filled dense @keyup="forceInputCase($event, 'issn_impreso', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.issn_digital" label="🏷️ ISSN Digital" filled dense @input="forceInputCase($event, 'issn_digital')" class="uppercase-input" />
+                  <q-input v-model="localForm.issn_digital" label="🏷️ ISSN Digital" filled dense @keyup="forceInputCase($event, 'issn_digital', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
                   <q-input v-model="localForm.deposito_legal_impreso" label="📋 Depósito Legal Impreso" filled dense @keyup="forceInputCase($event, 'deposito_legal_impreso', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.deposito_legal_digital" label="📋 Depósito Legal Digital" filled dense @input="forceInputCase($event, 'deposito_legal_digital')" class="uppercase-input" />
+                  <q-input v-model="localForm.deposito_legal_digital" label="📋 Depósito Legal Digital" filled dense @keyup="forceInputCase($event, 'deposito_legal_digital', 'upper')" class="uppercase-input" />
                 </div>
               </div>
 
@@ -143,16 +143,16 @@
               </div>
               <div class="row q-col-gutter-md">
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.nombres_editor" label="👤 Nombres Editor" filled dense @input="localForm.nombres_editor = $event.toUpperCase()" class="uppercase-input" />
+                  <q-input v-model="localForm.nombres_editor" label="👤 Nombres Editor" filled dense @keyup="forceInputCase($event, 'nombres_editor', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.apellidos_editor" label="👤 Apellidos Editor" filled dense @input="localForm.apellidos_editor = $event.toUpperCase()" class="uppercase-input" />
+                  <q-input v-model="localForm.apellidos_editor" label="👤 Apellidos Editor" filled dense @keyup="forceInputCase($event, 'apellidos_editor', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.correo_editor" label="📧 Correo Editor" type="email" filled dense @input="localForm.correo_editor = $event.toLowerCase()" class="lowercase-input" />
+                  <q-input v-model="localForm.correo_editor" label="📧 Correo Editor" type="email" filled dense @keyup="forceInputCase($event, 'correo_editor', 'lower')" class="lowercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.telefono" label="📞 Teléfono Editor" filled dense @input="localForm.telefono = $event.toUpperCase()" class="uppercase-input" />
+                  <q-input v-model="localForm.telefono" label="📞 Teléfono Editor" filled dense @keyup="forceInputCase($event, 'telefono', 'upper')" class="uppercase-input" />
                 </div>
               </div>
             </q-tab-panel>
@@ -177,8 +177,7 @@
                   counter
                   maxlength="500"
                   spellcheck="false"
-                  @input="localForm.resumen = $event.toUpperCase()" 
-                  class="uppercase-input resumen-field"
+                  class="normal-input"
                   hint="Máximo 500 caracteres"
                 />
               </div>
@@ -483,6 +482,13 @@ function forceInputCase(event, modelKey, type = 'upper') {
 .lowercase-input input,
 .lowercase-input textarea {
   text-transform: lowercase;
+}
+
+/* Resumen sin transformación - mantiene formato original */
+.normal-input input,
+.normal-input textarea {
+  text-transform: none;
+  font-weight: 400;
 }
 
 /* Footer con botones */
