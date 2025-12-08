@@ -235,43 +235,43 @@
       <div class="row q-col-gutter-md">
         <!-- Gráfico 1: Áreas de Conocimiento -->
         <div class="col-12 col-md-6">
-          <ChartComponent title="REVISTAS POR ÁREA DE CONOCIMIENTO" :endpoint="grAreasUrl" dataKey="area_conocimiento"
+          <ChartComponent title="Revistas por Área de Conocimiento" :endpoint="grAreasUrl" dataKey="area_conocimiento"
             valueKey="cant_area" :tableColumns="tableColumns1" />
         </div>
 
         <!-- Gráfico 2: Índices -->
         <div class="col-12 col-md-6">
-          <ChartComponent title="REVISTAS POR ÍNDICE" :endpoint="grIndicesUrl" dataKey="indice" valueKey="cant_inddice"
+          <ChartComponent title="Revistas por Índice" :endpoint="grIndicesUrl" dataKey="indice" valueKey="cant_inddice"
             :tableColumns="tableColumns2" />
         </div>
 
         <!-- Gráfico 3: Idiomas -->
         <div class="col-12 col-md-6">
-          <ChartComponent title="REVISTAS POR IDIOMA" :endpoint="grIdiomasUrl" dataKey="idioma" valueKey="cant_idioma"
+          <ChartComponent title="Revistas por Idioma" :endpoint="grIdiomasUrl" dataKey="idioma" valueKey="cant_idioma"
             :tableColumns="tableColumns3" />
         </div>
 
         <!-- Gráfico 4: Editoriales -->
         <div class="col-12 col-md-6">
-          <ChartComponent title="REVISTAS POR EDITORIAL" :endpoint="grEditorialesUrl" dataKey="editorial"
+          <ChartComponent title="Revistas por Editorial" :endpoint="grEditorialesUrl" dataKey="editorial"
             valueKey="cant_editorial" :tableColumns="tableColumns4" />
         </div>
 
         <!-- Gráfico 5: Periodicidades -->
         <div class="col-12 col-md-6">
-          <ChartComponent title="REVISTAS POR PERIODICIDAD" :endpoint="grPeriodicidadesUrl" dataKey="periodicidad"
+          <ChartComponent title="Revistas por Periodicidad" :endpoint="grPeriodicidadesUrl" dataKey="periodicidad"
             valueKey="cant_periodicidad" :tableColumns="tableColumns5" />
         </div>
 
         <!-- Gráfico 6: Formatos -->
         <div class="col-12 col-md-6">
-          <ChartComponent title="REVISTAS POR FORMATO" :endpoint="grFormatosUrl" dataKey="formato"
+          <ChartComponent title="Revistas por Formato" :endpoint="grFormatosUrl" dataKey="formato"
             valueKey="cant_formato" :tableColumns="tableColumns6" />
         </div>
 
         <!-- Gráfico 7: Estados -->
         <div class="col-12 col-md-6">
-          <ChartComponent title="REVISTAS POR ESTADO" :endpoint="grEstadosUrl" dataKey="estado" valueKey="cant_estado"
+          <ChartComponent title="Revistas por Estado" :endpoint="grEstadosUrl" dataKey="estado" valueKey="cant_estado"
             :tableColumns="tableColumns7" />
         </div>
       </div>

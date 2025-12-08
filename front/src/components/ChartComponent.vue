@@ -1,13 +1,8 @@
 <template>
   <div class="chart-component-wrapper">
     <div class="oncti-card chart-card">
-      <ChartToolbar
-        @change-chart-type="changeChartType"
-        @export-excel="exportToExcel"
-        @export-png="exportToPng"
-        @export-pdf="exportToPdf"
-        @toggle-table="toggleTable"
-      />
+      <ChartToolbar @change-chart-type="changeChartType" @export-excel="exportToExcel" @export-png="exportToPng"
+        @export-pdf="exportToPdf" @toggle-table="toggleTable" />
       <div v-if="!isTableVisible">
         <div ref="chartContainer" class="chart-container">
           <div class="chart-canvas-wrapper">
@@ -17,14 +12,8 @@
       </div>
       <div v-else>
         <q-card flat class="table-card">
-          <q-table
-            :title="title"
-            :rows="chartData"
-            :columns="tableColumns"
-            row-key="id"
-            :pagination="{ rowsPerPage: 10 }"
-            flat
-          />
+          <q-table :title="title" :rows="chartData" :columns="tableColumns" row-key="id"
+            :pagination="{ rowsPerPage: 10 }" flat />
         </q-card>
       </div>
     </div>
@@ -84,7 +73,7 @@ const chartData = ref([]);
 const chartCanvas = ref(null);
 const chartContainer = ref(null);
 let chartInstance = null;
-const currentChartType = ref("bar");
+const currentChartType = ref("doughnut");
 const isTableVisible = ref(false);
 
 // Función para generar el timestamp en formato YYYYMMDDHHmmss
@@ -126,10 +115,10 @@ const renderChart = (type) => {
   const dataValues = chartData.value.map(
     (item) => parseInt(item[props.valueKey], 10) || 0
   );
-  
+
   console.log(`[ChartComponent - ${props.title}] Labels:`, labels);
   console.log(`[ChartComponent - ${props.title}] Values:`, dataValues);
-  
+
   // const backgroundColors = chartData.value.map((_, index) => predefinedColors[index % predefinedColors.length]);
   const formattedDate = new Date().toLocaleDateString("es-ES", {
     day: "2-digit",
@@ -150,7 +139,7 @@ const renderChart = (type) => {
     dynamicTitle += ` EDO. ${selectedStateStore.selectedState.toUpperCase()}`;
   }
   dynamicTitle += `\n${formattedDate}`;
-  
+
   console.log(`[ChartComponent - ${props.title}] Título dinámico:`, dynamicTitle);
 
   // Ajustar altura del canvas y leyenda según el tipo de gráfico
@@ -180,6 +169,7 @@ const renderChart = (type) => {
         title: {
           display: true,
           text: dynamicTitle,
+          align: 'start',
           padding: 10,
         },
         legend: {
@@ -214,25 +204,25 @@ const fetchChartData = async () => {
   try {
     let url = props.endpoint;
     const timestamp = new Date().getTime();
-    
+
     // Verificar si hay filtros activos
     const hasFilters = filtersStore.hasActiveFilters();
-    
+
     if (hasFilters) {
       // Determinar si usar endpoint filtrado
       // Extraer el nombre base del endpoint (ej: gr_areas, gr_indices)
       const urlParts = url.split('/');
       const endpointName = urlParts[urlParts.length - 1].split('?')[0];
-      
+
       // Construir el endpoint filtrado
       const baseUrlParts = url.split('/');
       baseUrlParts[baseUrlParts.length - 1] = endpointName + '_filtrado';
       const filteredEndpoint = baseUrlParts.join('/');
-      
+
       // Construir query string con filtros
       const queryString = filtersStore.buildQueryString();
       url = `${filteredEndpoint}?${queryString}&_t=${timestamp}`;
-      
+
       console.log(`[ChartComponent - ${props.title}] Consultando con filtros:`, filtersStore.getActiveFilters(), 'URL:', url);
     } else if (selectedStateStore.selectedState) {
       // Solo filtro de estado (desde el mapa)
@@ -245,15 +235,15 @@ const fetchChartData = async () => {
       url += `${separator}_t=${timestamp}`;
       console.log(`[ChartComponent - ${props.title}] Consultando data nacional. URL:`, url);
     }
-    
+
     const response = await axios.get(url);
-    
+
     // Agregar datos duplicados (consolidar por dataKey)
     const aggregatedData = {};
     response.data.forEach(item => {
       const key = item[props.dataKey];
       const value = parseInt(item[props.valueKey], 10) || 0;
-      
+
       if (aggregatedData[key]) {
         // Si ya existe, sumar el valor
         aggregatedData[key] += value;
@@ -262,13 +252,13 @@ const fetchChartData = async () => {
         aggregatedData[key] = value;
       }
     });
-    
+
     // Convertir el objeto agregado de vuelta a array
     chartData.value = Object.keys(aggregatedData).map(key => ({
       [props.dataKey]: key,
       [props.valueKey]: aggregatedData[key]
     }));
-    
+
     console.log(`[ChartComponent - ${props.title}] Datos recibidos:`, response.data.length, 'registros. Después de agregar:', chartData.value.length, 'registros');
     await nextTick(); // Esperar a que Vue actualice el DOM
     renderChart(currentChartType.value);
@@ -456,7 +446,7 @@ onMounted(() => {
   // Configurar la fuente Roboto como predeterminada para Chart.js
   Chart.defaults.font.family = 'Roboto, sans-serif';
   Chart.defaults.font.size = 12;
-  
+
   fetchChartData(); // Obtener los datos iniciales
 
   // Escuchar eventos de actualización desde WebSocket
@@ -544,11 +534,11 @@ canvas {
   .chart-card {
     padding: 16px;
   }
-  
+
   .chart-container {
     padding: 16px;
   }
-  
+
   canvas {
     height: 300px !important;
   }
@@ -558,11 +548,11 @@ canvas {
   .chart-card {
     padding: 12px;
   }
-  
+
   .chart-container {
     padding: 12px;
   }
-  
+
   canvas {
     height: 250px !important;
   }
