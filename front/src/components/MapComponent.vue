@@ -32,7 +32,7 @@
             <div class="q-pa-md cards-grid">
               <q-card v-for="(value, key) in selectedStateData" :key="key" class="small-card q-mb-sm">
                 <q-card-section class="small-section">
-                  <div class="text-h6 small-title">{{ formatKey(key) }}</div>
+                  <div class="text-h6 small-title">{{ formatKey(key, value) }}</div>
                   <div class="text-subtitle1 small-text">{{ value }}</div>
                 </q-card-section>
               </q-card>
@@ -457,11 +457,42 @@ watch(
   },
   { immediate: false }
 );
-// Función para formatear las claves de la data
-const formatKey = (key) => {
+// Función para formatear las claves de la data con singular/plural y acentos
+const formatKey = (key, value) => {
+  const numValue = parseInt(value, 10) || 0;
+  const isSingular = numValue === 1;
+
+  // Mapeo de claves a títulos con singular/plural y acentos correctos
+  const keyMappings = {
+    'estado': { singular: 'ESTADO', plural: 'ESTADO' },
+    'cantidad_area_conocimiento': { singular: 'ÁREA DE CONOCIMIENTO', plural: 'ÁREAS DE CONOCIMIENTO' },
+    'cantidad_indice': { singular: 'ÍNDICE', plural: 'ÍNDICES' },
+    'cantidad_idioma': { singular: 'IDIOMA', plural: 'IDIOMAS' },
+    'cantidad_revista': { singular: 'REVISTA', plural: 'REVISTAS' },
+    'cantidad_editorial': { singular: 'EDITORIAL', plural: 'EDITORIALES' },
+    'cantidad_periodicidad': { singular: 'PERIODICIDAD', plural: 'PERIODICIDADES' },
+    'cantidad_formato': { singular: 'FORMATO', plural: 'FORMATOS' },
+    // Variantes sin prefijo "cantidad_"
+    'area_conocimiento': { singular: 'ÁREA DE CONOCIMIENTO', plural: 'ÁREAS DE CONOCIMIENTO' },
+    'indice': { singular: 'ÍNDICE', plural: 'ÍNDICES' },
+    'idioma': { singular: 'IDIOMA', plural: 'IDIOMAS' },
+    'revista': { singular: 'REVISTA', plural: 'REVISTAS' },
+    'editorial': { singular: 'EDITORIAL', plural: 'EDITORIALES' },
+    'periodicidad': { singular: 'PERIODICIDAD', plural: 'PERIODICIDADES' },
+    'formato': { singular: 'FORMATO', plural: 'FORMATOS' }
+  };
+
+  const normalizedKey = key.toLowerCase();
+
+  if (keyMappings[normalizedKey]) {
+    return isSingular ? keyMappings[normalizedKey].singular : keyMappings[normalizedKey].plural;
+  }
+
+  // Fallback: formatear la clave eliminando "cantidad_" y capitalizando
   const formattedKey = key
-    .replace(/_/g, " ") // Reemplazar guiones bajos por espacios
-    .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalizar cada palabra
+    .replace(/cantidad_/gi, '')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
   return formattedKey;
 };
 </script>
@@ -570,7 +601,7 @@ const formatKey = (key) => {
 .small-title {
   font-size: 0.75rem !important;
   margin-bottom: 4px !important;
-  color: var(--oncti-text-light);
+  color: var(--oncti-text-dark);
   font-weight: 600;
   text-transform: uppercase;
 }

@@ -171,6 +171,11 @@ const renderChart = (type) => {
           text: dynamicTitle,
           align: 'start',
           padding: 10,
+          color: '#333333',
+          font: {
+            size: 18,
+            weight: 'bold'
+          }
         },
         legend: {
           display: chartType === 'pie' || chartType === 'doughnut',
@@ -178,6 +183,7 @@ const renderChart = (type) => {
           labels: {
             padding: 10,
             boxWidth: 20,
+            color: '#333333',
           }
         },
       },
@@ -186,12 +192,14 @@ const renderChart = (type) => {
           grid: { display: false },
           ticks: {
             display: type !== 'bar', // Ocultar valores del eje X solo para barras horizontales
+            color: '#333333',
           }
         },
         y: {
           grid: { display: false },
           ticks: {
             display: type === 'bar', // Mostrar valores del eje Y solo para barras horizontales
+            color: '#333333',
           }
         },
       },
@@ -446,6 +454,7 @@ onMounted(() => {
   // Configurar la fuente Roboto como predeterminada para Chart.js
   Chart.defaults.font.family = 'Roboto, sans-serif';
   Chart.defaults.font.size = 12;
+  Chart.defaults.color = '#333333'; // Color negro para todos los textos
 
   fetchChartData(); // Obtener los datos iniciales
 
