@@ -90,15 +90,18 @@ const mostrarDataNacional = async () => {
 
 const generateColorScale = () => {
   const colorScale = [];
-  const step = 180 / 25; // Increment per step
+  // Color máximo #273984 = rgb(39, 57, 132)
+  // Color mínimo = blanco rgb(255, 255, 255)
+  const maxColor = { r: 39, g: 57, b: 132 };
+  const minColor = { r: 255, g: 255, b: 255 };
+
   for (let i = 0; i < 26; i++) {
-    if (i == 0) {
-      colorScale.push(`rgb(255,255,255)`);
-    } else {
-      const green = Math.round(180 - i * step);
-      const blue = 180; // Usar 180 en lugar de 255 para que coincida con el color de referencia
-      colorScale.push(`rgb(${green}, ${green}, ${blue})`);
-    }
+    // Interpolar entre blanco (i=0) y azul oscuro (i=25)
+    const ratio = i / 25;
+    const r = Math.round(minColor.r + (maxColor.r - minColor.r) * ratio);
+    const g = Math.round(minColor.g + (maxColor.g - minColor.g) * ratio);
+    const b = Math.round(minColor.b + (maxColor.b - minColor.b) * ratio);
+    colorScale.push(`rgb(${r}, ${g}, ${b})`);
   }
   return colorScale;
 };
@@ -221,24 +224,16 @@ const updateMap = async () => {
     uniqueValues.value = []; // Vaciar para que no se muestre la escala
     gradientStyle.value = `linear-gradient(to bottom, rgb(255, 255, 255), rgb(255, 255, 255))`;
   } else {
-    const realMin = Math.min(...valores);
     const realMax = Math.max(...valores);
 
-    // Lógica especial para 2 valores consecutivos
-    if (uniqueValues.value.length === 2 && (uniqueValues.value[1] - uniqueValues.value[0] === 1)) {
-      // Si son consecutivos (ej: 6,7 o 1,2)
-      minValue.value = Math.max(0, realMin - 1); // Restar 1 pero no bajar de 0
-      middleValue.value = realMin;
-      maxValue.value = realMax;
-    } else {
-      // Para todos los demás casos
-      minValue.value = realMin;
-      maxValue.value = realMax;
-      middleValue.value = Math.floor((minValue.value + maxValue.value) / 2);
-    }
+    // El mínimo siempre es 0 (hay estados sin datos que tienen valor 0)
+    // El máximo es el valor real más alto de los datos
+    minValue.value = 0;
+    maxValue.value = realMax;
+    middleValue.value = Math.floor(realMax / 2);
 
-    // Generar gradiente dinámico
-    gradientStyle.value = `linear-gradient(to bottom, rgb(0, 0, 180), rgb(180, 180, 255), rgb(255, 255, 255))`;
+    // Generar gradiente dinámico con color máximo #273984
+    gradientStyle.value = `linear-gradient(to bottom, rgb(39, 57, 132), rgb(147, 156, 194), rgb(255, 255, 255))`;
   }
 
   // Eliminar la capa GeoJSON existente si hay una
