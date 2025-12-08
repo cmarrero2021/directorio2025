@@ -3,8 +3,22 @@
     <div class="q-pa-md">
       <!-- Sección de Filtros -->
       <div class="filters-section">
-        <q-expansion-item icon="filter_list" label="Filtros de Búsqueda" header-class="text-primary text-weight-bold"
+        <q-expansion-item icon="filter_list" header-class="text-primary text-weight-bold"
           expand-icon-class="text-primary">
+          <template v-slot:header>
+            <q-item-section avatar>
+              <q-icon name="filter_list" color="primary" />
+            </q-item-section>
+            <q-item-section>
+              <span class="text-primary text-weight-bold">Filtros de Búsqueda</span>
+            </q-item-section>
+            <q-item-section side>
+              <q-btn color="primary" icon="filter_alt_off" round flat @click.stop="limpiarFiltros"
+                :disable="!filtersStore.hasActiveFilters()" size="sm" class="q-mr-sm">
+                <q-tooltip>Limpiar Filtros</q-tooltip>
+              </q-btn>
+            </q-item-section>
+          </template>
           <div class="q-pa-md">
             <div class="row q-col-gutter-md q-mb-md">
               <!-- Fila 1: Filtros principales -->
@@ -142,10 +156,6 @@
 
               <div class="col-12 col-sm-6 col-md-6">
                 <div class="row q-gutter-sm justify-end">
-                  <q-btn color="primary" icon="filter_alt_off" round @click="limpiarFiltros"
-                    :disable="!filtersStore.hasActiveFilters()" size="md">
-                    <q-tooltip>Limpiar Filtros</q-tooltip>
-                  </q-btn>
                   <q-btn color="accent" icon="download" flat round dense>
                     <q-tooltip>Descargar</q-tooltip>
                     <q-menu>
