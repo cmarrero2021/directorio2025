@@ -1,23 +1,19 @@
 <template>
   <q-layout view="hHh lpR fFf">
     <q-header elevated class="bg-primary text-white" height-hint="98">
-      <q-img
-        src="img/cintillo.jpg"
-        srcset="img/cintillo.jpg 100w,
+      <q-img src="img/cintillo.jpg" srcset="img/cintillo.jpg 100w,
       img/cintillo.jpg 1x,
       img/cintillo.jpg 1x,
-      img/cintillo.jpg 1x"
-        sizes="(max-width: 400px) 400w,
+      img/cintillo.jpg 1x" sizes="(max-width: 400px) 400w,
       (min-width: 400px) and (max-width: 800px) 800w,
       (min-width: 800px) and (max-width: 1200px) 1200w,
-      (min-width: 1200px) 1600w"
-      />
+      (min-width: 1200px) 1600w" />
       <q-tabs align="center">
         <q-route-tab to="/" label="Inicio" />
         <q-route-tab to="/revistas" label="Publicaciones" />
         <q-route-tab to="/estadisticas" label="Estadísticas" />
         <q-route-tab to="/editores" label="Para Editores" />
-        <q-route-tab to="/somos" label="Quienes Somos" />
+        <q-route-tab to="/somos" label="Quiénes Somos" />
       </q-tabs>
     </q-header>
     <q-page-container>

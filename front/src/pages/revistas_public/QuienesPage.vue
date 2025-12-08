@@ -10,31 +10,34 @@
     <div class="row items-stretch no-wrap">
       <div class="col-12 q-mb-xl q-px-sm ">
         <div class="text-left">
-          <p
-            class="q-mb-xs q-mt-none q-mb-md q-mt-md text-left text-bold q-mb-none q-mt-none"
-            :class="{'q-ml-xl': $q.screen.gt.sm, 'q-ml-none': !$q.screen.gt.sm, 'text-h4': $q.screen.gt.sm, 'text-h6': !$q.screen.gt.sm}"
-            :style="!$q.screen.gt.sm ? 'font-size:22px;' : 'font-size:36px; font-family: Gotham Bold;'"
-          >
-            QUIENES SOMOS
+          <p class="q-mb-xs q-mt-none q-mb-md q-mt-md text-left text-bold q-mb-none q-mt-none"
+            :class="{ 'q-ml-xl': $q.screen.gt.sm, 'q-ml-none': !$q.screen.gt.sm, 'text-h4': $q.screen.gt.sm, 'text-h6': !$q.screen.gt.sm }"
+            :style="!$q.screen.gt.sm ? 'font-size:22px;' : 'font-size:36px; font-family: Gotham Bold;'">
+            QUIÉNES SOMOS
           </p>
-          <p
-            :class="{'q-ml-xl': $q.screen.gt.sm, 'q-ml-none': !$q.screen.gt.sm}"
-            :style="!$q.screen.gt.sm ? 'font-size:15px;' : ''"
-          >
-            El «Directorio Nacional de Revistas Científicas» constituye un proyecto de divulgación científica de excepcional relevancia, liderado por el Observatorio Nacional de Ciencia, Tecnología e Innovación (Oncti), ente que se erige como instrumento sustantivo del órgano competente en materia de ciencia, tecnología, innovación y sus aplicaciones, el Ministerio del Poder Popular para Ciencia y Tecnología (Mincyt). El equipo responsable de la dirección y supervisión del proyecto está compuesto por los siguientes miembros:
+          <p :class="{ 'q-ml-xl': $q.screen.gt.sm, 'q-ml-none': !$q.screen.gt.sm }"
+            :style="!$q.screen.gt.sm ? 'font-size:15px;' : ''">
+            El «Directorio Nacional de Revistas Científicas» constituye un proyecto de divulgación científica de
+            excepcional relevancia, liderado por el Observatorio Nacional de Ciencia, Tecnología e Innovación (Oncti),
+            ente que se erige como instrumento sustantivo del órgano competente en materia de ciencia, tecnología,
+            innovación y sus aplicaciones, el Ministerio del Poder Popular para Ciencia y Tecnología (Mincyt). El equipo
+            responsable de la dirección y supervisión del proyecto está compuesto por los siguientes miembros:
           </p>
-          <div class="row q-col-gutter-md vcard-row-mobile-fix" :class="{'q-ml-xl': $q.screen.gt.sm}">
+          <div class="row q-col-gutter-md vcard-row-mobile-fix" :class="{ 'q-ml-xl': $q.screen.gt.sm }">
             <div class="col-12 col-md-6">
               <q-card>
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img :src="`${VITE_IMAGE_BASE_URL}betancourt.png`" alt="Foto Betancourt" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
+                      <q-img :src="`${VITE_IMAGE_BASE_URL}betancourt.png`" alt="Foto Betancourt"
+                        style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Dr. Roberto Betancourt A.</div>
-                      <div class="text-body2">Presidente del Observatorio Nacional de Ciencia, Tecnología e Innovación</div>
-                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:robertoabetancourt@gmail.com" style="color:blue;">robertoabetancourt@gmail.com</a></div>
+                      <div class="text-body2">Presidente del Observatorio Nacional de Ciencia, Tecnología e Innovación
+                      </div>
+                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:robertoabetancourt@gmail.com"
+                          style="color:blue;">robertoabetancourt@gmail.com</a></div>
                     </div>
                   </div>
                 </q-card-section>
@@ -45,12 +48,14 @@
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img :src="`${VITE_IMAGE_BASE_URL}ortuzar.png`" alt="Foto Ortúzar" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
+                      <q-img :src="`${VITE_IMAGE_BASE_URL}ortuzar.png`" alt="Foto Ortúzar"
+                        style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Lic. Fabiola Ortúzar</div>
                       <div class="text-body2">Gerente de Divulgación</div>
-                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:divulgación@oncti.gob.ve" style="color:blue;">divulgación@oncti.gob.ve</a></div>
+                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:divulgación@oncti.gob.ve"
+                          style="color:blue;">divulgación@oncti.gob.ve</a></div>
                     </div>
                   </div>
                 </q-card-section>
@@ -61,12 +66,14 @@
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img :src="`${VITE_IMAGE_BASE_URL}araujo.png`" alt="Foto Araujo" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
+                      <q-img :src="`${VITE_IMAGE_BASE_URL}araujo.png`" alt="Foto Araujo"
+                        style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Lic. Zenaida Araujo</div>
                       <div class="text-body2">Coordinadora de Publicaciones</div>
-                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:zaraujo@oncti.gob.ve" style="color:blue;">zaraujo@oncti.gob.ve</a></div>
+                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:zaraujo@oncti.gob.ve"
+                          style="color:blue;">zaraujo@oncti.gob.ve</a></div>
                     </div>
                   </div>
                 </q-card-section>
@@ -77,12 +84,15 @@
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img :src="`${VITE_IMAGE_BASE_URL}arvelo.png`" alt="Foto Arvelo" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
+                      <q-img :src="`${VITE_IMAGE_BASE_URL}arvelo.png`" alt="Foto Arvelo"
+                        style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Ing. Mónica Arvelo</div>
-                      <div class="text-body2">Directora de la Oficina de Tecnologías de la Información y la Comunicación</div>
-                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:marvelo@oncti.gob.ve" style="color:blue;">marvelo@oncti.gob.ve</a></div>
+                      <div class="text-body2">Directora de la Oficina de Tecnologías de la Información y la Comunicación
+                      </div>
+                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:marvelo@oncti.gob.ve"
+                          style="color:blue;">marvelo@oncti.gob.ve</a></div>
                     </div>
                   </div>
                 </q-card-section>
@@ -93,12 +103,14 @@
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img :src="`${VITE_IMAGE_BASE_URL}morales.png`" alt="Foto Morales" style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
+                      <q-img :src="`${VITE_IMAGE_BASE_URL}morales.png`" alt="Foto Morales"
+                        style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Dr. Gregorio Morales</div>
                       <div class="text-body2">Asesor</div>
-                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:gmorales@oncti.gob.ve" style="color:blue;">gmorales@oncti.gob.ve</a></div>
+                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:gmorales@oncti.gob.ve"
+                          style="color:blue;">gmorales@oncti.gob.ve</a></div>
                     </div>
                   </div>
                 </q-card-section>
@@ -126,7 +138,8 @@
         <div class="text-h6 q-mb-sm" style="font-family: Gotham Bold;">Enlaces</div>
         <div class="text-h7 text-white" title="Observatorio Nacional de Ciencia, Tecnología e Innovación">
           <a class="mostrar" href="https://www.oncti.gob.ve/">→ ONCTI</a>
-          <a class="ocultar" href="https://www.oncti.gob.ve/">→ Observatorio Nacional de Ciencia, tecnología e Innovación</a>
+          <a class="ocultar" href="https://www.oncti.gob.ve/">→ Observatorio Nacional de Ciencia, tecnología e
+            Innovación</a>
         </div>
         <div class="text-h7 text-white" title="Observatorio en Línea">
           <a class="mostrar" href="https://observatorio.oncti.gob.ve/#/">→ OEL</a>
@@ -149,7 +162,8 @@
         <div class="row items-start q-mb-sm">
           <q-img :src="ubicacionImg" style="width: 20px; height: 20px; margin-right: 8px;" />
           <div class="text-body2">
-            Avenida Universidad, esquina El Chorro, <br />Torre Ministerial, piso 16, La Hoyada, <br /> Caracas, Distrito Capital
+            Avenida Universidad, esquina El Chorro, <br />Torre Ministerial, piso 16, La Hoyada, <br /> Caracas,
+            Distrito Capital
           </div>
         </div>
         <div class="row items-center q-mb-sm">
@@ -666,85 +680,85 @@ a:visited {
 </style>
 /* Ajuste para que las vcards estén más a la izquierda en móvil */
 .vcard-row-mobile-fix {
-  padding-left: 0 !important;
+padding-left: 0 !important;
 }
 /* Layout para vcard: imagen y correo siempre alineados */
 .vcard-flex-wrap {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+display: flex;
+flex-direction: row;
+align-items: flex-start;
 }
 .vcard-img-col {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  min-width: 60px;
-  margin-right: 12px;
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+min-width: 60px;
+margin-right: 12px;
 }
 .vcard-info-col {
-  flex: 1 1 0%;
-  padding-right: 0;
+flex: 1 1 0%;
+padding-right: 0;
 }
 .vcard-email-align {
-  margin-top: 4px;
-  margin-bottom: 2px;
-  text-align: left;
-  font-size: 15px;
-  padding-left: 0;
-  margin-left: 0;
+margin-top: 4px;
+margin-bottom: 2px;
+text-align: left;
+font-size: 15px;
+padding-left: 0;
+margin-left: 0;
 }
 @media (max-width: 767px) {
-  .vcard-flex-wrap {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-  .vcard-img-col {
-    min-width: 60px;
-    margin-right: 8px;
-  }
-  .vcard-email-align {
-    max-width: 60px;
-    width: 60px;
-    padding-left: 0;
-    margin-left: 0;
-    text-align: left;
-    font-size: 15px;
-  }
+.vcard-flex-wrap {
+flex-direction: row;
+align-items: flex-start;
+}
+.vcard-img-col {
+min-width: 60px;
+margin-right: 8px;
+}
+.vcard-email-align {
+max-width: 60px;
+width: 60px;
+padding-left: 0;
+margin-left: 0;
+text-align: left;
+font-size: 15px;
+}
 }
 @media (min-width: 768px) {
-  .vcard-flex-wrap {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-  .vcard-img-col {
-    margin-right: 16px;
-  }
-  .vcard-email-align {
-    max-width: none;
-    width: auto;
-    font-size: 15px;
-    padding-left: 0;
-    margin-left: 0;
-  }
+.vcard-flex-wrap {
+flex-direction: row;
+align-items: flex-start;
+}
+.vcard-img-col {
+margin-right: 16px;
+}
+.vcard-email-align {
+max-width: none;
+width: auto;
+font-size: 15px;
+padding-left: 0;
+margin-left: 0;
+}
 }
 /* Ajuste para que las vcards estén más a la izquierda en móvil */
 .vcard-row-mobile-fix {
-  padding-left: 0 !important;
+padding-left: 0 !important;
 }
 @media (max-width: 767px) {
-  .vcard-row-mobile-fix {
-    margin-left: 0 !important;
-    padding-left: 0 !important;
-  }
-  .vcard-email-mobile-fix {
-    text-align: left !important;
-    padding-left: 0 !important;
-    margin-left: 0 !important;
-    font-size: 15px !important;
-  }
+.vcard-row-mobile-fix {
+margin-left: 0 !important;
+padding-left: 0 !important;
+}
+.vcard-email-mobile-fix {
+text-align: left !important;
+padding-left: 0 !important;
+margin-left: 0 !important;
+font-size: 15px !important;
+}
 }
 @media (min-width: 768px) {
-  .vcard-email-mobile-fix {
-    padding-left: 12px;
-  }
+.vcard-email-mobile-fix {
+padding-left: 12px;
+}
 }
