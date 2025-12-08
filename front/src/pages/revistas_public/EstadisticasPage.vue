@@ -3,344 +3,214 @@
     <div class="q-pa-md">
       <!-- Sección de Filtros -->
       <div class="filters-section">
-        <div class="row q-col-gutter-md q-mb-md">
-          <!-- Fila 1: Filtros principales -->
-          <div class="col-12 col-sm-6 col-md-3">
-            <label class="text-caption text-weight-medium q-mb-xs block">Área de Conocimiento</label>
-            <q-select
-              v-model="filtersStore.selectedArea"
-              filled
-              dense
-              :options="filteredAreasOptions"
-              option-value="area_conocimiento"
-              option-label="area_conocimiento"
-              emit-value
-              map-options
-              label="Seleccionar área"
-              clearable
-              use-input
-              input-debounce="300"
-              @filter="filterAreas"
-              @update:model-value="aplicarFiltros"
-            >
-              <template v-slot:prepend>
-                <q-icon name="category" color="primary" />
-              </template>
-              <template v-slot:no-option>
-                <q-item>
-                  <q-item-section class="text-grey">
-                    No hay resultados
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-
-          <div class="col-12 col-sm-6 col-md-3">
-            <label class="text-caption text-weight-medium q-mb-xs block">Índice</label>
-            <q-select
-              v-model="filtersStore.selectedIndice"
-              filled
-              dense
-              :options="filteredIndicesOptions"
-              option-value="indice"
-              option-label="indice"
-              emit-value
-              map-options
-              label="Seleccionar índice"
-              clearable
-              use-input
-              input-debounce="300"
-              @filter="filterIndices"
-              @update:model-value="aplicarFiltros"
-            >
-              <template v-slot:prepend>
-                <q-icon name="list_alt" color="primary" />
-              </template>
-              <template v-slot:no-option>
-                <q-item>
-                  <q-item-section class="text-grey">
-                    No hay resultados
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-
-          <div class="col-12 col-sm-6 col-md-3">
-            <label class="text-caption text-weight-medium q-mb-xs block">Idioma</label>
-            <q-select
-              v-model="filtersStore.selectedIdioma"
-              filled
-              dense
-              :options="filteredIdiomasOptions"
-              option-value="idioma"
-              option-label="idioma"
-              emit-value
-              map-options
-              label="Seleccionar idioma"
-              clearable
-              use-input
-              input-debounce="300"
-              @filter="filterIdiomas"
-              @update:model-value="aplicarFiltros"
-            >
-              <template v-slot:prepend>
-                <q-icon name="language" color="primary" />
-              </template>
-              <template v-slot:no-option>
-                <q-item>
-                  <q-item-section class="text-grey">
-                    No hay resultados
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-
-          <div class="col-12 col-sm-6 col-md-3">
-            <label class="text-caption text-weight-medium q-mb-xs block">Editorial</label>
-            <q-select
-              v-model="filtersStore.selectedEditorial"
-              filled
-              dense
-              :options="filteredEditorialesOptions"
-              option-value="editorial"
-              option-label="editorial"
-              emit-value
-              map-options
-              label="Seleccionar editorial"
-              clearable
-              use-input
-              input-debounce="300"
-              @filter="filterEditoriales"
-              @update:model-value="aplicarFiltros"
-            >
-              <template v-slot:prepend>
-                <q-icon name="business" color="primary" />
-              </template>
-              <template v-slot:no-option>
-                <q-item>
-                  <q-item-section class="text-grey">
-                    No hay resultados
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-        </div>
-
-        <!-- Fila 2: Filtros secundarios y acciones -->
-        <div class="row q-col-gutter-md items-end">
-          <div class="col-12 col-sm-6 col-md-2">
-            <label class="text-caption text-weight-medium q-mb-xs block">Periodicidad</label>
-            <q-select
-              v-model="filtersStore.selectedPeriodicidad"
-              filled
-              dense
-              :options="filteredPeriodicidadOptions"
-              option-value="periodicidad"
-              option-label="periodicidad"
-              emit-value
-              map-options
-              label="Periodicidad"
-              clearable
-              use-input
-              input-debounce="300"
-              @filter="filterPeriodicidad"
-              @update:model-value="aplicarFiltros"
-            >
-              <template v-slot:prepend>
-                <q-icon name="schedule" color="primary" />
-              </template>
-              <template v-slot:no-option>
-                <q-item>
-                  <q-item-section class="text-grey">
-                    No hay resultados
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-
-          <div class="col-12 col-sm-6 col-md-2">
-            <label class="text-caption text-weight-medium q-mb-xs block">Formato</label>
-            <q-select
-              v-model="filtersStore.selectedFormato"
-              filled
-              dense
-              :options="filteredFormatosOptions"
-              option-value="formato"
-              option-label="formato"
-              emit-value
-              map-options
-              label="Formato"
-              clearable
-              use-input
-              input-debounce="300"
-              @filter="filterFormatos"
-              @update:model-value="aplicarFiltros"
-            >
-              <template v-slot:prepend>
-                <q-icon name="description" color="primary" />
-              </template>
-              <template v-slot:no-option>
-                <q-item>
-                  <q-item-section class="text-grey">
-                    No hay resultados
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-
-          <div class="col-12 col-sm-6 col-md-2">
-            <label class="text-caption text-weight-medium q-mb-xs block">Estado</label>
-            <q-select
-              v-model="filtersStore.selectedEstado"
-              filled
-              dense
-              :options="filteredEstadosOptions"
-              option-value="value"
-              option-label="label"
-              emit-value
-              map-options
-              label="Estado"
-              clearable
-              use-input
-              input-debounce="300"
-              @filter="filterEstados"
-              @update:model-value="aplicarFiltros"
-            >
-              <template v-slot:prepend>
-                <q-icon name="location_on" color="primary" />
-              </template>
-              <template v-slot:no-option>
-                <q-item>
-                  <q-item-section class="text-grey">
-                    No hay resultados
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          </div>
-
-          <div class="col-12 col-sm-6 col-md-6">
-            <div class="row q-gutter-sm justify-end">
-              <q-btn
-                color="primary"
-                icon="filter_alt_off"
-                round
-                @click="limpiarFiltros"
-                :disable="!filtersStore.hasActiveFilters()"
-                size="md"
-              >
-                <q-tooltip>Limpiar Filtros</q-tooltip>
-              </q-btn>
-              <q-btn
-                color="accent"
-                icon="download"
-                flat
-                round
-                dense
-              >
-                <q-tooltip>Descargar</q-tooltip>
-                <q-menu>
-                  <q-list style="min-width: 150px">
-                    <q-item clickable v-close-popup @click="descargarPNG">
-                      <q-item-section avatar>
-                        <q-icon name="image" color="primary" />
+        <q-expansion-item icon="filter_list" label="Filtros de Búsqueda" header-class="text-primary text-weight-bold"
+          expand-icon-class="text-primary">
+          <div class="q-pa-md">
+            <div class="row q-col-gutter-md q-mb-md">
+              <!-- Fila 1: Filtros principales -->
+              <div class="col-12 col-sm-6 col-md-3">
+                <label class="text-caption text-weight-medium q-mb-xs block">Área de Conocimiento</label>
+                <q-select v-model="filtersStore.selectedArea" filled dense :options="filteredAreasOptions"
+                  option-value="area_conocimiento" option-label="area_conocimiento" emit-value map-options
+                  label="Seleccionar área" clearable use-input input-debounce="300" @filter="filterAreas"
+                  @update:model-value="aplicarFiltros">
+                  <template v-slot:prepend>
+                    <q-icon name="category" color="primary" />
+                  </template>
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">
+                        No hay resultados
                       </q-item-section>
-                      <q-item-section>PNG</q-item-section>
                     </q-item>
-                    <q-item clickable v-close-popup @click="descargarPDF">
-                      <q-item-section avatar>
-                        <q-icon name="picture_as_pdf" color="negative" />
+                  </template>
+                </q-select>
+              </div>
+
+              <div class="col-12 col-sm-6 col-md-3">
+                <label class="text-caption text-weight-medium q-mb-xs block">Índice</label>
+                <q-select v-model="filtersStore.selectedIndice" filled dense :options="filteredIndicesOptions"
+                  option-value="indice" option-label="indice" emit-value map-options label="Seleccionar índice"
+                  clearable use-input input-debounce="300" @filter="filterIndices" @update:model-value="aplicarFiltros">
+                  <template v-slot:prepend>
+                    <q-icon name="list_alt" color="primary" />
+                  </template>
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">
+                        No hay resultados
                       </q-item-section>
-                      <q-item-section>PDF</q-item-section>
                     </q-item>
-                  </q-list>
-                </q-menu>
-              </q-btn>
+                  </template>
+                </q-select>
+              </div>
+
+              <div class="col-12 col-sm-6 col-md-3">
+                <label class="text-caption text-weight-medium q-mb-xs block">Idioma</label>
+                <q-select v-model="filtersStore.selectedIdioma" filled dense :options="filteredIdiomasOptions"
+                  option-value="idioma" option-label="idioma" emit-value map-options label="Seleccionar idioma"
+                  clearable use-input input-debounce="300" @filter="filterIdiomas" @update:model-value="aplicarFiltros">
+                  <template v-slot:prepend>
+                    <q-icon name="language" color="primary" />
+                  </template>
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">
+                        No hay resultados
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
+              </div>
+
+              <div class="col-12 col-sm-6 col-md-3">
+                <label class="text-caption text-weight-medium q-mb-xs block">Editorial</label>
+                <q-select v-model="filtersStore.selectedEditorial" filled dense :options="filteredEditorialesOptions"
+                  option-value="editorial" option-label="editorial" emit-value map-options label="Seleccionar editorial"
+                  clearable use-input input-debounce="300" @filter="filterEditoriales"
+                  @update:model-value="aplicarFiltros">
+                  <template v-slot:prepend>
+                    <q-icon name="business" color="primary" />
+                  </template>
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">
+                        No hay resultados
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
+              </div>
+            </div>
+
+            <!-- Fila 2: Filtros secundarios y acciones -->
+            <div class="row q-col-gutter-md items-end">
+              <div class="col-12 col-sm-6 col-md-2">
+                <label class="text-caption text-weight-medium q-mb-xs block">Periodicidad</label>
+                <q-select v-model="filtersStore.selectedPeriodicidad" filled dense
+                  :options="filteredPeriodicidadOptions" option-value="periodicidad" option-label="periodicidad"
+                  emit-value map-options label="Periodicidad" clearable use-input input-debounce="300"
+                  @filter="filterPeriodicidad" @update:model-value="aplicarFiltros">
+                  <template v-slot:prepend>
+                    <q-icon name="schedule" color="primary" />
+                  </template>
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">
+                        No hay resultados
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
+              </div>
+
+              <div class="col-12 col-sm-6 col-md-2">
+                <label class="text-caption text-weight-medium q-mb-xs block">Formato</label>
+                <q-select v-model="filtersStore.selectedFormato" filled dense :options="filteredFormatosOptions"
+                  option-value="formato" option-label="formato" emit-value map-options label="Formato" clearable
+                  use-input input-debounce="300" @filter="filterFormatos" @update:model-value="aplicarFiltros">
+                  <template v-slot:prepend>
+                    <q-icon name="description" color="primary" />
+                  </template>
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">
+                        No hay resultados
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
+              </div>
+
+              <div class="col-12 col-sm-6 col-md-2">
+                <label class="text-caption text-weight-medium q-mb-xs block">Estado</label>
+                <q-select v-model="filtersStore.selectedEstado" filled dense :options="filteredEstadosOptions"
+                  option-value="value" option-label="label" emit-value map-options label="Estado" clearable use-input
+                  input-debounce="300" @filter="filterEstados" @update:model-value="aplicarFiltros">
+                  <template v-slot:prepend>
+                    <q-icon name="location_on" color="primary" />
+                  </template>
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">
+                        No hay resultados
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
+              </div>
+
+              <div class="col-12 col-sm-6 col-md-6">
+                <div class="row q-gutter-sm justify-end">
+                  <q-btn color="primary" icon="filter_alt_off" round @click="limpiarFiltros"
+                    :disable="!filtersStore.hasActiveFilters()" size="md">
+                    <q-tooltip>Limpiar Filtros</q-tooltip>
+                  </q-btn>
+                  <q-btn color="accent" icon="download" flat round dense>
+                    <q-tooltip>Descargar</q-tooltip>
+                    <q-menu>
+                      <q-list style="min-width: 150px">
+                        <q-item clickable v-close-popup @click="descargarPNG">
+                          <q-item-section avatar>
+                            <q-icon name="image" color="primary" />
+                          </q-item-section>
+                          <q-item-section>PNG</q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup @click="descargarPDF">
+                          <q-item-section avatar>
+                            <q-icon name="picture_as_pdf" color="negative" />
+                          </q-item-section>
+                          <q-item-section>PDF</q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
+                </div>
+              </div>
+            </div>
+
+            <!-- Indicador de filtros activos -->
+            <div v-if="filtersStore.hasActiveFilters()" class="q-mt-md">
+              <q-chip v-if="filtersStore.selectedArea" removable
+                @remove="filtersStore.selectedArea = null; aplicarFiltros()" color="primary" text-color="white"
+                icon="category">
+                Área: {{ filtersStore.selectedArea }}
+              </q-chip>
+              <q-chip v-if="filtersStore.selectedIndice" removable
+                @remove="filtersStore.selectedIndice = null; aplicarFiltros()" color="primary" text-color="white"
+                icon="list_alt">
+                Índice: {{ filtersStore.selectedIndice }}
+              </q-chip>
+              <q-chip v-if="filtersStore.selectedIdioma" removable
+                @remove="filtersStore.selectedIdioma = null; aplicarFiltros()" color="primary" text-color="white"
+                icon="language">
+                Idioma: {{ filtersStore.selectedIdioma }}
+              </q-chip>
+              <q-chip v-if="filtersStore.selectedEditorial" removable
+                @remove="filtersStore.selectedEditorial = null; aplicarFiltros()" color="primary" text-color="white"
+                icon="business">
+                Editorial: {{ filtersStore.selectedEditorial }}
+              </q-chip>
+              <q-chip v-if="filtersStore.selectedPeriodicidad" removable
+                @remove="filtersStore.selectedPeriodicidad = null; aplicarFiltros()" color="primary" text-color="white"
+                icon="schedule">
+                Periodicidad: {{ filtersStore.selectedPeriodicidad }}
+              </q-chip>
+              <q-chip v-if="filtersStore.selectedFormato" removable
+                @remove="filtersStore.selectedFormato = null; aplicarFiltros()" color="primary" text-color="white"
+                icon="description">
+                Formato: {{ filtersStore.selectedFormato }}
+              </q-chip>
+              <q-chip v-if="filtersStore.selectedEstado" removable
+                @remove="filtersStore.selectedEstado = null; aplicarFiltros()" color="primary" text-color="white"
+                icon="location_on">
+                Estado: {{ filtersStore.selectedEstado }}
+              </q-chip>
             </div>
           </div>
-        </div>
-
-        <!-- Indicador de filtros activos -->
-        <div v-if="filtersStore.hasActiveFilters()" class="q-mt-md">
-          <q-chip
-            v-if="filtersStore.selectedArea"
-            removable
-            @remove="filtersStore.selectedArea = null; aplicarFiltros()"
-            color="primary"
-            text-color="white"
-            icon="category"
-          >
-            Área: {{ filtersStore.selectedArea }}
-          </q-chip>
-          <q-chip
-            v-if="filtersStore.selectedIndice"
-            removable
-            @remove="filtersStore.selectedIndice = null; aplicarFiltros()"
-            color="primary"
-            text-color="white"
-            icon="list_alt"
-          >
-            Índice: {{ filtersStore.selectedIndice }}
-          </q-chip>
-          <q-chip
-            v-if="filtersStore.selectedIdioma"
-            removable
-            @remove="filtersStore.selectedIdioma = null; aplicarFiltros()"
-            color="primary"
-            text-color="white"
-            icon="language"
-          >
-            Idioma: {{ filtersStore.selectedIdioma }}
-          </q-chip>
-          <q-chip
-            v-if="filtersStore.selectedEditorial"
-            removable
-            @remove="filtersStore.selectedEditorial = null; aplicarFiltros()"
-            color="primary"
-            text-color="white"
-            icon="business"
-          >
-            Editorial: {{ filtersStore.selectedEditorial }}
-          </q-chip>
-          <q-chip
-            v-if="filtersStore.selectedPeriodicidad"
-            removable
-            @remove="filtersStore.selectedPeriodicidad = null; aplicarFiltros()"
-            color="primary"
-            text-color="white"
-            icon="schedule"
-          >
-            Periodicidad: {{ filtersStore.selectedPeriodicidad }}
-          </q-chip>
-          <q-chip
-            v-if="filtersStore.selectedFormato"
-            removable
-            @remove="filtersStore.selectedFormato = null; aplicarFiltros()"
-            color="primary"
-            text-color="white"
-            icon="description"
-          >
-            Formato: {{ filtersStore.selectedFormato }}
-          </q-chip>
-          <q-chip
-            v-if="filtersStore.selectedEstado"
-            removable
-            @remove="filtersStore.selectedEstado = null; aplicarFiltros()"
-            color="primary"
-            text-color="white"
-            icon="location_on"
-          >
-            Estado: {{ filtersStore.selectedEstado }}
-          </q-chip>
-        </div>
+        </q-expansion-item>
       </div>
-      
+
       <!-- Tarjetas de Estadísticas Principales -->
       <div class="row q-col-gutter-md q-mb-md">
         <div v-for="(stat, index) in mainStats" :key="index" class="col-12 col-sm-6 col-md-4 col-lg">
@@ -365,79 +235,44 @@
       <div class="row q-col-gutter-md">
         <!-- Gráfico 1: Áreas de Conocimiento -->
         <div class="col-12 col-md-6">
-          <ChartComponent 
-            title="REVISTAS POR ÁREA DE CONOCIMIENTO" 
-            :endpoint="grAreasUrl" 
-            dataKey="area_conocimiento"
-            valueKey="cant_area" 
-            :tableColumns="tableColumns1" 
-          />
+          <ChartComponent title="REVISTAS POR ÁREA DE CONOCIMIENTO" :endpoint="grAreasUrl" dataKey="area_conocimiento"
+            valueKey="cant_area" :tableColumns="tableColumns1" />
         </div>
 
         <!-- Gráfico 2: Índices -->
         <div class="col-12 col-md-6">
-          <ChartComponent 
-            title="REVISTAS POR ÍNDICE" 
-            :endpoint="grIndicesUrl" 
-            dataKey="indice" 
-            valueKey="cant_inddice"
-            :tableColumns="tableColumns2" 
-          />
+          <ChartComponent title="REVISTAS POR ÍNDICE" :endpoint="grIndicesUrl" dataKey="indice" valueKey="cant_inddice"
+            :tableColumns="tableColumns2" />
         </div>
 
         <!-- Gráfico 3: Idiomas -->
         <div class="col-12 col-md-6">
-          <ChartComponent 
-            title="REVISTAS POR IDIOMA" 
-            :endpoint="grIdiomasUrl" 
-            dataKey="idioma" 
-            valueKey="cant_idioma"
-            :tableColumns="tableColumns3" 
-          />
+          <ChartComponent title="REVISTAS POR IDIOMA" :endpoint="grIdiomasUrl" dataKey="idioma" valueKey="cant_idioma"
+            :tableColumns="tableColumns3" />
         </div>
 
         <!-- Gráfico 4: Editoriales -->
         <div class="col-12 col-md-6">
-          <ChartComponent 
-            title="REVISTAS POR EDITORIAL" 
-            :endpoint="grEditorialesUrl" 
-            dataKey="editorial"
-            valueKey="cant_editorial" 
-            :tableColumns="tableColumns4" 
-          />
+          <ChartComponent title="REVISTAS POR EDITORIAL" :endpoint="grEditorialesUrl" dataKey="editorial"
+            valueKey="cant_editorial" :tableColumns="tableColumns4" />
         </div>
 
         <!-- Gráfico 5: Periodicidades -->
         <div class="col-12 col-md-6">
-          <ChartComponent 
-            title="REVISTAS POR PERIODICIDAD" 
-            :endpoint="grPeriodicidadesUrl" 
-            dataKey="periodicidad"
-            valueKey="cant_periodicidad" 
-            :tableColumns="tableColumns5" 
-          />
+          <ChartComponent title="REVISTAS POR PERIODICIDAD" :endpoint="grPeriodicidadesUrl" dataKey="periodicidad"
+            valueKey="cant_periodicidad" :tableColumns="tableColumns5" />
         </div>
 
         <!-- Gráfico 6: Formatos -->
         <div class="col-12 col-md-6">
-          <ChartComponent 
-            title="REVISTAS POR FORMATO" 
-            :endpoint="grFormatosUrl" 
-            dataKey="formato" 
-            valueKey="cant_formato"
-            :tableColumns="tableColumns6" 
-          />
+          <ChartComponent title="REVISTAS POR FORMATO" :endpoint="grFormatosUrl" dataKey="formato"
+            valueKey="cant_formato" :tableColumns="tableColumns6" />
         </div>
 
         <!-- Gráfico 7: Estados -->
         <div class="col-12 col-md-6">
-          <ChartComponent 
-            title="REVISTAS POR ESTADO" 
-            :endpoint="grEstadosUrl" 
-            dataKey="estado" 
-            valueKey="cant_estado"
-            :tableColumns="tableColumns7" 
-          />
+          <ChartComponent title="REVISTAS POR ESTADO" :endpoint="grEstadosUrl" dataKey="estado" valueKey="cant_estado"
+            :tableColumns="tableColumns7" />
         </div>
       </div>
     </div>
@@ -595,7 +430,7 @@ const cargarOpcionesFiltros = async () => {
     editorialesOptions.value = editoriales.data;
     periodicidadOptions.value = periodicidad.data;
     formatosOptions.value = formatos.data;
-    
+
     // Mantener estados con formato original pero agregar valor en minúsculas
     estadosOptions.value = estados.data.map(e => ({
       ...e,
@@ -744,7 +579,7 @@ const descargarPNG = async () => {
     await new Promise(resolve => setTimeout(resolve, 300));
 
     const pageElement = document.querySelector('.stats-page');
-    
+
     if (!pageElement) {
       throw new Error('No se encontró el elemento de la página');
     }
@@ -770,7 +605,7 @@ const descargarPNG = async () => {
       const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
       link.download = `estadisticas-oncti-${timestamp}.png`;
       link.href = url;
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -808,7 +643,7 @@ const descargarPDF = async () => {
     await new Promise(resolve => setTimeout(resolve, 300));
 
     const pageElement = document.querySelector('.stats-page');
-    
+
     if (!pageElement) {
       throw new Error('No se encontró el elemento de la página');
     }
@@ -924,7 +759,7 @@ onUnmounted(() => {
   .filters-section {
     padding: 16px;
   }
-  
+
   .stat-card {
     margin-bottom: 12px;
   }

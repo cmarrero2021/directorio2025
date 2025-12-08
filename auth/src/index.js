@@ -13,8 +13,14 @@ const app = express();
 
 // Configuración de CORS
 app.use(cors({
-    // origin: '*', // Cambia esto al dominio de tu frontend (Quasar)
-    origin: 'http://localhost:9000', // Cambia esto al dominio de tu frontend (Quasar)
+    origin: [
+        'http://localhost:9000',
+        'http://localhost:8080',
+        'http://directorio.minaamp.gob.ve',
+        'https://directorio.minaamp.gob.ve',
+        'http://authdirectorio.minaamp.gob.ve',
+        'https://authdirectorio.minaamp.gob.ve'
+    ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Métodos permitidos
     allowedHeaders: ['Content-Type', 'Authorization'], // Cabeceras permitidas
     credentials: true // Permite el envío de credenciales (cookies, tokens, etc.)
@@ -35,7 +41,7 @@ app.get('/list-endpoints', (req, res) => {
     res.json(endpoints);
 });
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4001;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

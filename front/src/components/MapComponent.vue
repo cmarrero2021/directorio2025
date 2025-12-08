@@ -3,11 +3,11 @@
     <div class="map-wrapper">
       <!-- Título del mapa con indicador de zoom -->
       <div class="map-header">
-      
+
         <h6 class="map-title">Distribución nacional de registros</h6>
         <!-- <span class="zoom-indicator">Zoom: {{ currentZoom }}</span> -->
       </div>
-      
+
       <div class="row relative-position">
         <!-- Escala de colores (solo mostrar si hay datos) -->
         <div class="color-scale" v-if="uniqueValues.length > 0">
@@ -21,24 +21,16 @@
             <div class="scale-value">{{ maxValue }}</div>
           </div>
         </div>
-        
+
         <!-- Mapa -->
         <div ref="mapContainer" class="col-xs-12 col-md-6 map-container"></div>
-        
+
         <!-- Contenedor de cards (fuera del flujo normal) -->
-        <div
-          ref="cardsContainer"
-          class="cards-container"
-          :class="{ visible: showTable }"
-        >
+        <div ref="cardsContainer" class="cards-container" :class="{ visible: showTable }">
           <q-card class="q-ma-md" style="margin-right:160px;">
             <!-- Cards con la data del estado -->
             <div class="q-pa-md cards-grid">
-              <q-card
-                v-for="(value, key) in selectedStateData"
-                :key="key"
-                class="small-card q-mb-sm"
-              >
+              <q-card v-for="(value, key) in selectedStateData" :key="key" class="small-card q-mb-sm">
                 <q-card-section class="small-section">
                   <div class="text-h6 small-title">{{ formatKey(key) }}</div>
                   <div class="text-subtitle1 small-text">{{ value }}</div>
@@ -115,17 +107,17 @@ const colorScale = generateColorScale();
 const fetchEstadoData = async () => {
   try {
     const timestamp = new Date().getTime();
-    
+
     // Verificar si hay filtros activos (excluyendo el filtro de estado)
     const activeFilters = filtersStore.getActiveFilters();
     const hasNonStateFilters = Object.keys(activeFilters).some(key => key !== 'estado');
-    
+
     let url;
     if (hasNonStateFilters) {
       // Usar endpoint filtrado (sin incluir el filtro de estado en la query)
       const filtersWithoutState = { ...activeFilters };
       delete filtersWithoutState.estado;
-      
+
       const params = new URLSearchParams();
       Object.keys(filtersWithoutState).forEach(key => {
         if (filtersWithoutState[key]) {
@@ -133,7 +125,7 @@ const fetchEstadoData = async () => {
         }
       });
       params.append('_t', timestamp);
-      
+
       url = `${VITE_GR_ESTADOS_FILTRADO_URL}?${params.toString()}`;
       console.log('[MapComponent] Consultando mapa con filtros:', filtersWithoutState, 'URL:', url);
     } else {
@@ -142,7 +134,7 @@ const fetchEstadoData = async () => {
       url = `${VITE_GR_ESTADOS_URL}${separator}_t=${timestamp}`;
       console.log('[MapComponent] Consultando mapa sin filtros. URL:', url);
     }
-    
+
     const response = await axios.get(url);
     return response.data;
   } catch (error) {
@@ -162,20 +154,20 @@ const initializeMap = () => {
     map.remove();
     map = null;
   }
-  
+
   // Determinar el zoom inicial según el tamaño de pantalla
   const isDesktop = window.innerWidth >= 1024;
   const initialZoom = isDesktop ? 6 : 5;
   currentZoom.value = initialZoom;
-  
+
   // Crear un nuevo mapa
   map = L.map(mapContainer.value).setView([8.0, -66.0], initialZoom);
-  
+
   // Actualizar el zoom cuando cambie
   map.on('zoomend', () => {
     currentZoom.value = map.getZoom();
   });
-  
+
   // Agregar control de reinicio
   const resetControl = L.control({ position: "topright" });
   resetControl.onAdd = () => {
@@ -213,13 +205,13 @@ const updateMap = async () => {
     acc[item.estado.toLowerCase().replace(/ /g, "")] = item.cant_estado;
     return acc;
   }, {});
-  
+
   // Calcular valores mínimo y máximo
   const valores = estadoData.value.map((item) => item.cant_estado || 0);
-  
+
   // Obtener valores únicos y ordenarlos
   uniqueValues.value = [...new Set(valores)].sort((a, b) => a - b);
-  
+
   // Verificar si hay datos válidos
   if (valores.length === 0 || valores.every(v => v === 0)) {
     // No hay datos o todos son 0
@@ -231,7 +223,7 @@ const updateMap = async () => {
   } else {
     const realMin = Math.min(...valores);
     const realMax = Math.max(...valores);
-    
+
     // Lógica especial para 2 valores consecutivos
     if (uniqueValues.value.length === 2 && (uniqueValues.value[1] - uniqueValues.value[0] === 1)) {
       // Si son consecutivos (ej: 6,7 o 1,2)
@@ -244,16 +236,16 @@ const updateMap = async () => {
       maxValue.value = realMax;
       middleValue.value = Math.floor((minValue.value + maxValue.value) / 2);
     }
-    
+
     // Generar gradiente dinámico
     gradientStyle.value = `linear-gradient(to bottom, rgb(0, 0, 180), rgb(180, 180, 255), rgb(255, 255, 255))`;
   }
-  
+
   // Eliminar la capa GeoJSON existente si hay una
   if (geoJsonLayer) {
     map.removeLayer(geoJsonLayer);
   }
-  
+
   // Agregar una nueva capa GeoJSON con los datos actualizados
   geoJsonLayer = L.geoJSON(venezuelaGeoJsonData, {
     style(feature) {
@@ -278,11 +270,11 @@ const updateMap = async () => {
       const normalizedValue = Math.min(cant_estado / maxValue.value, 1);
       const colorIndex = Math.floor(normalizedValue * 25);
       const fillColor = colorScale[colorIndex] || colorScale[0];
-      
+
       // Agregar etiqueta con el número en el centro del estado
       const bounds = layer.getBounds();
       const center = bounds.getCenter();
-      
+
       // Crear un marcador de texto personalizado con outline blanco
       const label = L.marker(center, {
         icon: L.divIcon({
@@ -306,9 +298,9 @@ const updateMap = async () => {
           iconAnchor: [20, 10]
         })
       }).addTo(map);
-      
+
       layer.bindTooltip(`${feature.properties.name}: ${cant_estado}`);
-      
+
       layer.on("mouseover", () => {
         layer.setStyle({
           fillColor: "rgb(0, 0, 180)",
@@ -323,7 +315,7 @@ const updateMap = async () => {
         layer._path.style.transformOrigin = `${centerPixel.x}px ${centerPixel.y}px`;
         layer._path.style.transform = "scale(1)";
       });
-      
+
       layer.on("mouseout", () => {
         layer.setStyle({
           fillColor,
@@ -334,7 +326,7 @@ const updateMap = async () => {
         layer._path.style.transform = "";
         layer._path.style.transformOrigin = "";
       });
-      
+
       layer.on("click", async () => {
         const estadoName = feature.properties.name.toLowerCase();
         const estadoInfo = await fetchEstadoInfo(estadoName);
@@ -445,10 +437,10 @@ watch(
   () => filtersStore.selectedEstado,
   async (newEstado, oldEstado) => {
     console.log('[MapComponent] Filtro de estado cambiado:', oldEstado, '->', newEstado);
-    
+
     // Actualizar el selectedStateStore
     selectedStateStore.selectedState = newEstado;
-    
+
     // Actualizar la ficha con la información del estado
     if (newEstado) {
       const estadoInfo = await fetchEstadoInfo(newEstado);
@@ -482,7 +474,6 @@ const formatKey = (key) => {
 .map-container {
   height: 400px;
   background-color: var(--oncti-white);
-  border: 1px solid var(--oncti-blue);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(39, 57, 132, 0.08);
   margin-bottom: 24px;
@@ -620,11 +611,11 @@ const formatKey = (key) => {
   .cards-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .small-card {
     padding: 8px;
   }
-  
+
   .small-title {
     font-size: 0.6rem !important;
   }
@@ -734,22 +725,22 @@ const formatKey = (key) => {
     font-size: 1rem;
     margin-bottom: 12px;
   }
-  
+
   .color-scale {
     left: 5px;
     top: 50px;
     padding: 8px;
     min-width: 100px;
   }
-  
+
   .scale-gradient {
     height: 120px;
   }
-  
+
   .scale-title {
     font-size: 0.65rem;
   }
-  
+
   .scale-labels {
     font-size: 0.6rem;
   }

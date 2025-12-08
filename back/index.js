@@ -1,22 +1,26 @@
-
 const express = require('express');
 const { Pool, Client } = require('pg');
 const cors = require('cors');
 const path = require('path');
 const WebSocket = require('ws');
 
-
 const app = express();
-const PORT = 3000;
+const PORT = 4000;
 
 // Configuración CORS
 app.use(cors({
-  origin: '*',
+  origin: [
+    'http://localhost:9000',
+    // 'http://localhost:8080',
+    'http://localhost:4000',
+    'http://localhost:4001',
+    'http://directorio.minaamp.gob.ve',
+    'https://directorio.minaamp.gob.ve'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false
+  credentials: true
 }));
-
 
 // Configurar conexión a PostgreSQL para consultas regulares
 const pool = new Pool({
@@ -840,16 +844,9 @@ app.use('/portadas', express.static(portadasPath, {
 
 // Middleware para manejar errores cuando no se encuentra un archivo
 app.use('/portadas', (req, res, next) => {
-  res.status(404).json({ 
+  res.status(404).json({
     error: 'Archivo no encontrado',
     message: `La imagen ${req.path} no existe en el servidor`
   });
 });
 */
-// Manejar solicitudes OPTIONS (necesario para CORS preflight)
-app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.send();
-});
