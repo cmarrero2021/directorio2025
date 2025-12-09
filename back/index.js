@@ -15,7 +15,9 @@ app.use(cors({
     'http://localhost:4000',
     'http://localhost:4001',
     'http://directorio.minaamp.gob.ve',
-    'https://directorio.minaamp.gob.ve'
+    'https://directorio.minaamp.gob.ve',
+    'https://backdirectorio.minaamp.gob.ve',
+    'https://authdirectorio.minaamp.gob.ve'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

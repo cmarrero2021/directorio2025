@@ -6,3 +6,6 @@ auth/node_modules
 back/node_modules
 front/node_modules
 bd/20250605_directorio.sql
+revistas.sql
+TODO.md
+TODO_FILTROS.md
