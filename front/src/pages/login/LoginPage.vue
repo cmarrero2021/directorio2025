@@ -4,7 +4,7 @@
     <img alt="Observatorio Nacional de Ciencia, Tecnología e Innovación" src="img/oncti-nobg.png" class="logo-right" />
   </div>
   <div class="content-container">
-    <img alt="Directorio" src="public/img/directorio1.png" class="directorio-image" />
+    <img alt="Directorio" src="img/directorio1.png" class="directorio-image" />
     <div class="login-box">
       <h5>Directorio de Revistas Científicas</h5>
       <h4>Iniciar Sesión</h4>

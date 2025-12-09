@@ -771,4 +771,90 @@ const formatKey = (key, value) => {
     font-size: 0.6rem;
   }
 }
+
+/* Large screens (1440px+) */
+@media (min-width: 1440px) {
+  .map-container {
+    height: 600px;
+    width: 50%;
+    padding: 12px;
+  }
+
+  .cards-container {
+    max-height: 600px;
+    width: 48%;
+  }
+
+  .map-title {
+    font-size: 1.4rem;
+  }
+
+  .small-title {
+    font-size: 0.85rem !important;
+  }
+
+  .small-text {
+    font-size: 1.2rem !important;
+  }
+
+  .small-card {
+    padding: 16px;
+  }
+
+  .cards-grid {
+    gap: 16px;
+  }
+
+  .scale-gradient {
+    width: 35px;
+    height: 220px;
+  }
+
+  .scale-value {
+    font-size: 0.9rem;
+  }
+}
+
+/* Extra large screens (1920px+) */
+@media (min-width: 1920px) {
+  .map-container {
+    height: 700px;
+    width: 52%;
+    padding: 16px;
+  }
+
+  .cards-container {
+    max-height: 700px;
+    width: 46%;
+  }
+
+  .map-title {
+    font-size: 1.6rem;
+  }
+
+  .small-title {
+    font-size: 0.95rem !important;
+  }
+
+  .small-text {
+    font-size: 1.4rem !important;
+  }
+
+  .small-card {
+    padding: 20px;
+  }
+
+  .cards-grid {
+    gap: 20px;
+  }
+
+  .scale-gradient {
+    width: 40px;
+    height: 250px;
+  }
+
+  .scale-value {
+    font-size: 1rem;
+  }
+}
 </style>

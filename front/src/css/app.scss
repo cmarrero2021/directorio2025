@@ -28,7 +28,7 @@
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(39, 57, 132, 0.08);
   transition: all 0.3s ease;
-  
+
   &:hover {
     box-shadow: 0 4px 16px rgba(39, 57, 132, 0.12);
     transform: translateY(-2px);
@@ -45,12 +45,12 @@
   align-items: center;
   gap: 16px;
   transition: all 0.3s ease;
-  
+
   &:hover {
     box-shadow: 0 4px 16px rgba(39, 57, 132, 0.12);
     transform: translateY(-2px);
   }
-  
+
   .stat-icon {
     width: 48px;
     height: 48px;
@@ -62,10 +62,10 @@
     color: var(--oncti-white);
     font-size: 24px;
   }
-  
+
   .stat-content {
     flex: 1;
-    
+
     .stat-label {
       font-size: 12px;
       color: var(--oncti-text-dark);
@@ -73,7 +73,7 @@
       font-weight: 500;
       margin-bottom: 4px;
     }
-    
+
     .stat-value {
       font-size: 28px;
       font-weight: 700;
@@ -104,20 +104,20 @@
 @media (max-width: 768px) {
   .stat-card {
     padding: 16px;
-    
+
     .stat-icon {
       width: 40px;
       height: 40px;
       font-size: 20px;
     }
-    
+
     .stat-content {
       .stat-value {
         font-size: 24px;
       }
     }
   }
-  
+
   .charts-grid {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -128,21 +128,104 @@
   .stat-card {
     padding: 12px;
     gap: 12px;
-    
+
     .stat-icon {
       width: 36px;
       height: 36px;
       font-size: 18px;
     }
-    
+
     .stat-content {
       .stat-label {
         font-size: 10px;
       }
-      
+
       .stat-value {
         font-size: 20px;
       }
     }
+  }
+}
+
+// Large screens (1440px - 1919px)
+@media (min-width: 1440px) {
+  .stats-page {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 24px 48px;
+  }
+
+  .stat-card {
+    padding: 24px;
+    gap: 20px;
+
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      font-size: 28px;
+    }
+
+    .stat-content {
+      .stat-label {
+        font-size: 14px;
+      }
+
+      .stat-value {
+        font-size: 32px;
+      }
+    }
+  }
+
+  .filters-section {
+    padding: 24px;
+  }
+
+  .oncti-card {
+    padding: 24px;
+  }
+
+  .charts-grid {
+    gap: 32px;
+  }
+}
+
+// Extra large screens (1920px+)
+@media (min-width: 1920px) {
+  .stats-page {
+    max-width: 1800px;
+    padding: 32px 64px;
+  }
+
+  .stat-card {
+    padding: 28px;
+    gap: 24px;
+
+    .stat-icon {
+      width: 64px;
+      height: 64px;
+      font-size: 32px;
+    }
+
+    .stat-content {
+      .stat-label {
+        font-size: 15px;
+      }
+
+      .stat-value {
+        font-size: 36px;
+      }
+    }
+  }
+
+  .filters-section {
+    padding: 28px;
+  }
+
+  .oncti-card {
+    padding: 28px;
+  }
+
+  .charts-grid {
+    gap: 40px;
   }
 }

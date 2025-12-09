@@ -392,7 +392,7 @@ const customTitles1 = {
 const fetchData = async () => {
   try {
     const timestamp = new Date().getTime();
-    const url = `http://poi-r.vps.co.ve:3000/cantidades?_t=${timestamp}`;
+    const url = `${import.meta.env.VITE_CANTIDADESR_BASE_URL}?_t=${timestamp}`;
     const response = await axios.get(url);
     const newData = response.data[0];
     Object.keys(newData).forEach((key) => {

@@ -812,4 +812,89 @@ const exportToPdf = async () => {
     padding: 16px;
   }
 }
+
+/* Large screens (1440px+) */
+@media (min-width: 1440px) {
+  .q-page {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 24px 48px;
+  }
+
+  .my-card {
+    max-width: 240px;
+  }
+
+  .my-card .q-img {
+    height: 300px;
+  }
+
+  .custom-dialog {
+    max-width: 1400px;
+  }
+
+  .etq {
+    font-size: 12px;
+  }
+
+  .contenido {
+    font-size: 12px;
+  }
+
+  .portada-img {
+    height: 280px;
+  }
+
+  .resumen-content {
+    font-size: 12px;
+  }
+
+  .filters-section {
+    padding: 24px;
+  }
+}
+
+/* Extra large screens (1920px+) */
+@media (min-width: 1920px) {
+  .q-page {
+    max-width: 1800px;
+    padding: 32px 64px;
+  }
+
+  .my-card {
+    max-width: 280px;
+  }
+
+  .my-card .q-img {
+    height: 350px;
+  }
+
+  .custom-dialog {
+    max-width: 1600px;
+  }
+
+  .etq {
+    font-size: 14px;
+  }
+
+  .contenido {
+    font-size: 14px;
+  }
+
+  .portada-img {
+    height: 320px;
+  }
+
+  .resumen-content {
+    font-size: 14px;
+  }
+
+  .filters-section {
+    padding: 28px;
+  }
+
+  .text-responsive {
+    font-size: 1.4rem;
+  }
+}
 </style>

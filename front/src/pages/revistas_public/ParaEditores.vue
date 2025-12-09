@@ -12,9 +12,19 @@
         <div class="text-left">
           <p class="q-ml-xl" style="font-family: Gotham Bold;font-size:36px;">PARA EDITORES</p>
           <p class="q-ml-xl">
-            El Observatorio Nacional de Ciencia Tecnología e Innovación (Oncti) como ente responsable de la medición de la productividad de investigación y desarrollo del país, presenta a los editores de las revistas científicas venezolanas el «Directorio Venezolano de Revistas Científicas» como la guía oficial de información sobre las revistas científicas arbitradas y no arbitradas existentes en el territorio venezolano. Presenta un criterio de inclusión de las producciones de los sectores del Sistema Nacional de ciencia, Tecnología e Innovación (Sncti), tales como: Educación Universitaria, Industria, Administración Pública Nacional y Poder Popular. Este espacio es para dar orientaciones a los editores para futuras incorporaciones de revistas y adecuaciones en los datos de las ya existentes en la plataforma.</p>
+            El Observatorio Nacional de Ciencia Tecnología e Innovación (Oncti) como ente responsable de la medición de
+            la productividad de investigación y desarrollo del país, presenta a los editores de las revistas científicas
+            venezolanas el «Directorio Venezolano de Revistas Científicas» como la guía oficial de información sobre las
+            revistas científicas arbitradas y no arbitradas existentes en el territorio venezolano. Presenta un criterio
+            de inclusión de las producciones de los sectores del Sistema Nacional de ciencia, Tecnología e Innovación
+            (Sncti), tales como: Educación Universitaria, Industria, Administración Pública Nacional y Poder Popular.
+            Este espacio es para dar orientaciones a los editores para futuras incorporaciones de revistas y
+            adecuaciones en los datos de las ya existentes en la plataforma.</p>
           <p class="q-ml-xl">
-            Para iniciar el procedimiento de solicitud de incorporación o cambio de datos, es necesario contactar al equipo responsable a través de los siguientes correos electrónicos: <a href="mailto:divulgación@oncti.gob.ve" style="color:blue;">divulgación@oncti.gob.ve</a> o <a href="mailto:directoriovenezolano@gmail.com" style="color:blue;">directoriovenezolano@gmail.com</a>
+            Para iniciar el procedimiento de solicitud de incorporación o cambio de datos, es necesario contactar al
+            equipo responsable a través de los siguientes correos electrónicos: <a
+              href="mailto:divulgación@oncti.gob.ve" style="color:blue;">divulgación@oncti.gob.ve</a> o <a
+              href="mailto:directoriovenezolano@gmail.com" style="color:blue;">directoriovenezolano@gmail.com</a>
           </p>
         </div>
       </div>
@@ -580,5 +590,56 @@ a:visited {
 
 .hidden {
   display: none;
+}
+
+/* Large screens (1440px+) */
+@media (min-width: 1440px) {
+  .sections-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .responsive-logo {
+    max-width: 600px;
+  }
+
+  .footer-container {
+    max-width: 1400px;
+    gap: 40px;
+  }
+
+  .footer-column {
+    min-width: 220px;
+  }
+
+  p {
+    font-size: 18px;
+    line-height: 1.6;
+  }
+}
+
+/* Extra large screens (1920px+) */
+@media (min-width: 1920px) {
+  .sections-wrapper {
+    max-width: 1700px;
+  }
+
+  .responsive-logo {
+    max-width: 700px;
+  }
+
+  .footer-container {
+    max-width: 1600px;
+    gap: 60px;
+  }
+
+  .footer-column {
+    min-width: 250px;
+  }
+
+  p {
+    font-size: 20px;
+    line-height: 1.7;
+  }
 }
 </style>

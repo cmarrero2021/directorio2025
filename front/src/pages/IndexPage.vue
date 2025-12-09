@@ -11,41 +11,46 @@
       <q-spinner-hourglass color="primary" size="3em" />
       <p>Cargando contenido...</p>
     </div>
-<div v-else>
-    <!-- Fondo ABSOLUTO, fuera del row -->
-    <div class="desktop-background" :style="backgroundStyle"></div>
+    <div v-else>
+      <!-- Fondo ABSOLUTO, fuera del row -->
+      <div class="desktop-background" :style="backgroundStyle"></div>
 
-    <!-- Row SIN no-wrap, SIN elementos extra -->
-    <div class="row items-stretch q-col-gutter-md">
-      <div class="col-12 col-md-4 section-container" :ref="(el) => { if (el) sectionRefs[0] = el }">
-        <div class="content-wrapper text-left q-pa-md">
-          <p style="font-family: Gotham Bold; font-size: 36px;">{{ secciones[0]?.titulo }}</p>
-          <p :id="`seccion${secciones[0]?.orden}`" class="animated">
-            {{ secciones[0]?.contenido }}
-          </p>
+      <!-- Row SIN no-wrap, SIN elementos extra -->
+      <div class="row items-stretch q-col-gutter-md">
+        <div class="col-12 col-md-4 section-container" :ref="(el) => { if (el) sectionRefs[0] = el }">
+          <div class="content-wrapper text-left q-pa-md">
+            <p style="font-family: Gotham Bold; font-size: 36px;">{{ secciones[0]?.titulo }}</p>
+            <p :id="`seccion${secciones[0]?.orden}`" class="animated">
+              {{ secciones[0]?.contenido }}
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div class="col-12 col-md-4 section-container" :ref="(el) => { if (el) sectionRefs[1] = el }">
-        <div class="content-wrapper text-center q-pa-md">
-          <p style="font-family: Gotham Bold; font-size: 36px;">{{ secciones[1]?.titulo }}</p>
-          <p :id="`seccion${secciones[1]?.orden}`" class="animated">
-            {{ secciones[1]?.contenido }}
-          </p>
+        <div class="col-12 col-md-4 section-container" :ref="(el) => { if (el) sectionRefs[1] = el }">
+          <div class="content-wrapper text-center q-pa-md">
+            <p style="font-family: Gotham Bold; font-size: 36px;">{{ secciones[1]?.titulo }}</p>
+            <p :id="`seccion${secciones[1]?.orden}`" class="animated">
+              {{ secciones[1]?.contenido }}
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div class="col-12 col-md-4 section-container">
-        <div class="content-wrapper text-right q-pa-md">
-          <p style="font-family: Gotham Bold; font-size: 36px;">Base Legal</p>
-          <p class="animated" style="opacity:1; ">
-            La Ley Orgánica de Ciencia, Tecnología e Innovación (2022), en su artículo 22, establece que el Oncti «recaba la información relacionada con las actividades de ciencia y tecnología», y que «divulga la información sobre las actividades del Sistema Nacional de Ciencia, Tecnología e Innovación» para «publicarla y desarrollar las fuerzas productivas». Este directorio será el primer proceso de acreditación nacional de las publicaciones venezolanas, basado en criterios de inclusión y democratización de la información.
-          </p>
+        <div class="col-12 col-md-4 section-container">
+          <div class="content-wrapper text-right q-pa-md">
+            <p style="font-family: Gotham Bold; font-size: 36px;">Base Legal</p>
+            <p class="animated" style="opacity:1; ">
+              La Ley Orgánica de Ciencia, Tecnología e Innovación (2022), en su artículo 22, establece que el Oncti
+              «recaba la información relacionada con las actividades de ciencia y tecnología», y que «divulga la
+              información sobre las actividades del Sistema Nacional de Ciencia, Tecnología e Innovación» para
+              «publicarla y desarrollar las fuerzas productivas». Este directorio será el primer proceso de acreditación
+              nacional de las publicaciones venezolanas, basado en criterios de inclusión y democratización de la
+              información.
+            </p>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
   <div class="flex justify-center items-center" style="margin-top: 20px; gap: 60px;">
     <div class="image-container" @click="$router.push('/revistas')" style="cursor: pointer;">
       <img alt="Publicaciones" :src="publicaciones" style="width: 150px; height: 150px;margin-left:20px;" />
@@ -160,7 +165,7 @@ const VITE_RECIENTES_URL = import.meta.env.VITE_RECIENTES_URL;
 const VITE_IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 const VITE_SC_INSERT_URL = import.meta.env.VITE_SC_INSERT_URL;
 const secciones = ref([]);
-const sectionRefs = ref([null,null,null]);
+const sectionRefs = ref([null, null, null]);
 const recientes = ref([]);
 const portada1 = ref();
 const portada2 = ref();
@@ -641,5 +646,94 @@ a:visited {
 
 .hidden {
   display: none;
+}
+
+/* Large screens (1440px+) */
+@media (min-width: 1440px) {
+  .sections-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .section-container {
+    min-height: 350px;
+  }
+
+  .content-wrapper {
+    padding: 40px;
+  }
+
+  .content-wrapper p {
+    font-size: 18px;
+    line-height: 1.6;
+  }
+
+  .responsive-logo {
+    max-width: 600px;
+  }
+
+  .footer-container {
+    max-width: 1400px;
+    gap: 40px;
+  }
+
+  .footer-column {
+    min-width: 220px;
+  }
+
+  .image-container img {
+    width: 180px !important;
+    height: 180px !important;
+  }
+
+  .image-container p {
+    font-size: 28px !important;
+  }
+}
+
+/* Extra large screens (1920px+) */
+@media (min-width: 1920px) {
+  .sections-wrapper {
+    max-width: 1700px;
+  }
+
+  .section-container {
+    min-height: 400px;
+  }
+
+  .content-wrapper {
+    padding: 50px;
+  }
+
+  .content-wrapper p {
+    font-size: 20px;
+    line-height: 1.7;
+  }
+
+  .responsive-logo {
+    max-width: 700px;
+  }
+
+  .footer-container {
+    max-width: 1600px;
+    gap: 60px;
+  }
+
+  .footer-column {
+    min-width: 250px;
+  }
+
+  .image-container img {
+    width: 200px !important;
+    height: 200px !important;
+  }
+
+  .image-container p {
+    font-size: 32px !important;
+  }
+
+  .suscribir {
+    width: 600px !important;
+  }
 }
 </style>

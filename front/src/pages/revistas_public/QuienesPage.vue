@@ -37,7 +37,7 @@
                       <div class="text-body2">Presidente del Observatorio Nacional de Ciencia, Tecnología e Innovación
                       </div>
                       <div class="vcard-email-align text-body2 text-bold"><a href="mailto:robertoabetancourt@gmail.com"
-                          style="color:blue;">robertoabetancourt@gmail.com</a></div>
+                          style="color:blue;">roberto.betancourt@oncti.gob.ve</a></div>
                     </div>
                   </div>
                 </q-card-section>
@@ -677,88 +677,155 @@ a:visited {
 .hidden {
   display: none;
 }
-</style>
+
 /* Ajuste para que las vcards estén más a la izquierda en móvil */
 .vcard-row-mobile-fix {
-padding-left: 0 !important;
+  padding-left: 0 !important;
 }
+
 /* Layout para vcard: imagen y correo siempre alineados */
 .vcard-flex-wrap {
-display: flex;
-flex-direction: row;
-align-items: flex-start;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
 }
+
 .vcard-img-col {
-display: flex;
-flex-direction: column;
-align-items: flex-start;
-min-width: 60px;
-margin-right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 60px;
+  margin-right: 12px;
 }
+
 .vcard-info-col {
-flex: 1 1 0%;
-padding-right: 0;
+  flex: 1 1 0%;
+  padding-right: 0;
 }
+
 .vcard-email-align {
-margin-top: 4px;
-margin-bottom: 2px;
-text-align: left;
-font-size: 15px;
-padding-left: 0;
-margin-left: 0;
+  margin-top: 4px;
+  margin-bottom: 2px;
+  text-align: left;
+  font-size: 15px;
+  padding-left: 0;
+  margin-left: 0;
 }
+
 @media (max-width: 767px) {
-.vcard-flex-wrap {
-flex-direction: row;
-align-items: flex-start;
+  .vcard-flex-wrap {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .vcard-img-col {
+    min-width: 60px;
+    margin-right: 8px;
+  }
+
+  .vcard-email-align {
+    max-width: 60px;
+    width: 60px;
+    padding-left: 0;
+    margin-left: 0;
+    text-align: left;
+    font-size: 15px;
+  }
+
+  .vcard-row-mobile-fix {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  .vcard-email-mobile-fix {
+    text-align: left !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    font-size: 15px !important;
+  }
 }
-.vcard-img-col {
-min-width: 60px;
-margin-right: 8px;
-}
-.vcard-email-align {
-max-width: 60px;
-width: 60px;
-padding-left: 0;
-margin-left: 0;
-text-align: left;
-font-size: 15px;
-}
-}
+
 @media (min-width: 768px) {
-.vcard-flex-wrap {
-flex-direction: row;
-align-items: flex-start;
+  .vcard-flex-wrap {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .vcard-img-col {
+    margin-right: 16px;
+  }
+
+  .vcard-email-align {
+    max-width: none;
+    width: auto;
+    font-size: 15px;
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  .vcard-email-mobile-fix {
+    padding-left: 12px;
+  }
 }
-.vcard-img-col {
-margin-right: 16px;
+
+/* Large screens (1440px+) */
+@media (min-width: 1440px) {
+  .sections-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .responsive-logo {
+    max-width: 600px;
+  }
+
+  .footer-container {
+    max-width: 1400px;
+    gap: 40px;
+  }
+
+  .footer-column {
+    min-width: 220px;
+  }
+
+  p {
+    font-size: 18px;
+    line-height: 1.6;
+  }
+
+  .vcard-img-col {
+    min-width: 80px;
+    margin-right: 20px;
+  }
 }
-.vcard-email-align {
-max-width: none;
-width: auto;
-font-size: 15px;
-padding-left: 0;
-margin-left: 0;
+
+/* Extra large screens (1920px+) */
+@media (min-width: 1920px) {
+  .sections-wrapper {
+    max-width: 1700px;
+  }
+
+  .responsive-logo {
+    max-width: 700px;
+  }
+
+  .footer-container {
+    max-width: 1600px;
+    gap: 60px;
+  }
+
+  .footer-column {
+    min-width: 250px;
+  }
+
+  p {
+    font-size: 20px;
+    line-height: 1.7;
+  }
+
+  .vcard-img-col {
+    min-width: 90px;
+    margin-right: 24px;
+  }
 }
-}
-/* Ajuste para que las vcards estén más a la izquierda en móvil */
-.vcard-row-mobile-fix {
-padding-left: 0 !important;
-}
-@media (max-width: 767px) {
-.vcard-row-mobile-fix {
-margin-left: 0 !important;
-padding-left: 0 !important;
-}
-.vcard-email-mobile-fix {
-text-align: left !important;
-padding-left: 0 !important;
-margin-left: 0 !important;
-font-size: 15px !important;
-}
-}
-@media (min-width: 768px) {
-.vcard-email-mobile-fix {
-padding-left: 12px;
-}
-}
+</style>

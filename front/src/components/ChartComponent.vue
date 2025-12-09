@@ -566,4 +566,44 @@ canvas {
     height: 250px !important;
   }
 }
+
+/* Large screens (1440px+) */
+@media (min-width: 1440px) {
+  .chart-card {
+    padding: 24px;
+    min-height: 450px;
+  }
+
+  .chart-container {
+    padding: 24px;
+  }
+
+  .chart-canvas-wrapper {
+    min-height: 350px;
+  }
+
+  canvas {
+    height: 450px !important;
+  }
+}
+
+/* Extra large screens (1920px+) */
+@media (min-width: 1920px) {
+  .chart-card {
+    padding: 28px;
+    min-height: 500px;
+  }
+
+  .chart-container {
+    padding: 28px;
+  }
+
+  .chart-canvas-wrapper {
+    min-height: 400px;
+  }
+
+  canvas {
+    height: 500px !important;
+  }
+}
 </style>

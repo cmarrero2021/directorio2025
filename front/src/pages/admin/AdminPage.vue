@@ -262,8 +262,9 @@ const fetchUsers = async () => {
     loadingUsers.value = true
     try {
         const res = await api.get('/users')
-        users.value = res.data
+        users.value = Array.isArray(res.data) ? res.data : []
     } catch (error) {
+        users.value = []
         $q.notify({ type: 'negative', message: 'Error al cargar usuarios' })
     } finally {
         loadingUsers.value = false
@@ -321,8 +322,9 @@ const fetchRoles = async () => {
     loadingRoles.value = true
     try {
         const res = await api.get('/roles')
-        roles.value = res.data
+        roles.value = Array.isArray(res.data) ? res.data : []
     } catch (error) {
+        roles.value = []
         $q.notify({ type: 'negative', message: 'Error al cargar roles' })
     } finally {
         loadingRoles.value = false
@@ -378,8 +380,9 @@ const fetchPermissions = async () => {
     loadingPermissions.value = true
     try {
         const res = await api.get('/permissions')
-        permissions.value = res.data
+        permissions.value = Array.isArray(res.data) ? res.data : []
     } catch (error) {
+        permissions.value = []
         $q.notify({ type: 'negative', message: 'Error al cargar permisos' })
     } finally {
         loadingPermissions.value = false
@@ -397,11 +400,13 @@ const openAssignRoleModal = async (user) => {
 const fetchUserRoles = async (userId) => {
     try {
         const res = await api.get('/users_roles')
+        const data = Array.isArray(res.data) ? res.data : []
         // Filtrar los que corresponden a este usuario
-        const userRoles = res.data.filter(ur => ur.user_id === userId)
+        const userRoles = data.filter(ur => ur.user_id === userId)
         userRolesSelection.value = userRoles.map(ur => ur.role_id)
     } catch (error) {
         console.error(error)
+        userRolesSelection.value = []
         $q.notify({ type: 'negative', message: 'Error al cargar roles del usuario' })
     }
 }
@@ -435,11 +440,13 @@ const openAssignPermissionModal = (role) => {
 const fetchRolePermissions = async (roleId) => {
     try {
         const res = await api.get('/roles_permissions')
+        const data = Array.isArray(res.data) ? res.data : []
         // Filtrar los que corresponden a este rol
-        const rolePerms = res.data.filter(rp => rp.role_id === roleId)
+        const rolePerms = data.filter(rp => rp.role_id === roleId)
         rolePermissionsSelection.value = rolePerms.map(rp => rp.permission_id)
     } catch (error) {
         console.error(error)
+        rolePermissionsSelection.value = []
     }
 }
 
