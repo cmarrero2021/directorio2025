@@ -194,8 +194,14 @@ const backgroundStyle = computed(() => ({
 
 // const cargarSecciones = async () => {
 const cargarSecciones = async (usarCache = true) => {
-  recientes.value = await axios.get(VITE_RECIENTES_URL);
-  portadas(recientes.value);
+  // Cargar revistas recientes (no debe bloquear el resto de la página)
+  try {
+    recientes.value = await axios.get(VITE_RECIENTES_URL);
+    portadas(recientes.value);
+  } catch (err) {
+    console.warn('No se pudieron cargar las revistas recientes:', err.message);
+    // No bloquear la carga de la página
+  }
   try {
     if (usarCache) {
       const cached = localStorage.getItem(CACHE_KEY);
@@ -276,11 +282,16 @@ const enviar = async () => {
     loading.value = false;
   }
 };
-const portadas = (portadas) => {
-  portada1.value = VITE_IMAGE_BASE_URL + portadas.data[0].portada;
-  portada2.value = VITE_IMAGE_BASE_URL + portadas.data[1].portada;
-  revista1.value = portadas.data[0].revista;
-  revista2.value = portadas.data[1].revista;
+const portadas = (portadasResponse) => {
+  const data = portadasResponse?.data || [];
+  if (data.length > 0) {
+    portada1.value = VITE_IMAGE_BASE_URL + data[0].portada;
+    revista1.value = data[0].revista;
+  }
+  if (data.length > 1) {
+    portada2.value = VITE_IMAGE_BASE_URL + data[1].portada;
+    revista2.value = data[1].revista;
+  }
 }
 onMounted(async () => {
   await cargarSecciones(true);

@@ -792,14 +792,11 @@ app.get('/lista_idiomas', async (req, res) => {
 });
 //Ruta GET para obtener las dos publicaciones más recientes
 app.get('/recientes', async (req, res) => {
-  const { id } = req.params;
   try {
     const client = await pool.connect();
     const result = await client.query('SELECT revista,portada,created_at::date as fecha FROM public.revistas ORDER BY created_at desc limit 2');
     client.release(); // Liberar el cliente
-    if (result.rows.length === 0) {
-      return res.status(404).send('Datos no encontrados');
-    }
+    // Retornar array vacío si no hay datos (no 404)
     res.json(result.rows);
   } catch (err) {
     console.error('Error al ejecutar la consulta:', err);
