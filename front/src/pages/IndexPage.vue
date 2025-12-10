@@ -19,7 +19,7 @@
       <div class="row items-stretch q-col-gutter-md sections-row">
         <div class="col-12 col-md-4 section-container" :ref="(el) => { if (el) sectionRefs[0] = el }">
           <div class="content-wrapper text-left q-pa-md">
-            <p style="font-family: Gotham Bold; font-size: 36px;">{{ secciones[0]?.titulo }}</p>
+            <p class="section-title" style="font-family: Gotham Bold; font-size: 36px;">{{ secciones[0]?.titulo }}</p>
             <p :id="`seccion${secciones[0]?.orden}`" class="animated">
               {{ secciones[0]?.contenido }}
             </p>
@@ -28,7 +28,7 @@
 
         <div class="col-12 col-md-4 section-container" :ref="(el) => { if (el) sectionRefs[1] = el }">
           <div class="content-wrapper text-center q-pa-md">
-            <p style="font-family: Gotham Bold; font-size: 36px;">{{ secciones[1]?.titulo }}</p>
+            <p class="section-title" style="font-family: Gotham Bold; font-size: 36px;">{{ secciones[1]?.titulo }}</p>
             <p :id="`seccion${secciones[1]?.orden}`" class="animated">
               {{ secciones[1]?.contenido }}
             </p>
@@ -37,15 +37,13 @@
 
         <div class="col-12 col-md-4 section-container">
           <div class="content-wrapper text-right q-pa-md">
-            <p style="font-family: Gotham Bold; font-size: 36px;">Base Legal</p>
-            <p class="animated" style="opacity:1; ">
-              La Ley Orgánica de Ciencia, Tecnología e Innovación (2022), en su artículo 22, establece que el Oncti
-              «recaba la información relacionada con las actividades de ciencia y tecnología», y que «divulga la
-              información sobre las actividades del Sistema Nacional de Ciencia, Tecnología e Innovación» para
-              «publicarla y desarrollar las fuerzas productivas». Este directorio será el primer proceso de acreditación
-              nacional de las publicaciones venezolanas, basado en criterios de inclusión y democratización de la
-              información.
-            </p>
+            <p class="section-title" style="font-family: Gotham Bold; font-size: 36px;">Base Legal</p>
+            <p id="seccionBaseLegal" class="animated" style="opacity: 1; transform: translateY(0);">La Ley Orgánica de
+              Ciencia, Tecnología e Innovación (2022), en su artículo 22, establece que el Oncti «recaba la información
+              relacionada con las actividades de ciencia y tecnología», y que «divulga la información sobre las
+              actividades del Sistema Nacional de Ciencia, Tecnología e Innovación» para «publicarla y desarrollar las
+              fuerzas productivas». Este directorio será el primer proceso de acreditación nacional de las publicaciones
+              venezolanas, basado en criterios de inclusión y democratización de la información.</p>
           </div>
         </div>
       </div>
@@ -361,6 +359,22 @@ onUnmounted(() => {
   color: white;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Forzar que todos los títulos tengan exactamente la misma altura */
+.section-title {
+  height: 60px;
+  margin-bottom: 0;
+  margin-top: 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Normalizar márgenes de párrafos para alineación consistente */
+.content-wrapper p {
+  margin-top: 0;
 }
 
 .animated {
@@ -432,17 +446,24 @@ a:visited {
   }
 
   .sections-row {
-    flex-wrap: nowrap !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
   }
 
   .section-container {
-    /* Usar flex: 1 para distribuir espacio equitativamente */
-    flex: 1 1 0 !important;
+    /* Resetear estilos de flex de Quasar */
+    flex: none !important;
     max-width: none !important;
-    min-width: 0;
-    /* Permite que el contenido se comprima */
-    margin: 0 5px;
+    width: auto !important;
+    margin: 0;
     padding: 0;
+  }
+
+  .section-container .content-wrapper {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100%;
   }
 
   .content-wrapper {
