@@ -15,8 +15,8 @@
       <!-- Fondo ABSOLUTO, fuera del row -->
       <div class="desktop-background" :style="backgroundStyle"></div>
 
-      <!-- Row SIN no-wrap, SIN elementos extra -->
-      <div class="row items-stretch q-col-gutter-md">
+      <!-- Row con no-wrap para mantener las 3 columnas en una fila en desktop -->
+      <div class="row items-stretch q-col-gutter-md sections-row">
         <div class="col-12 col-md-4 section-container" :ref="(el) => { if (el) sectionRefs[0] = el }">
           <div class="content-wrapper text-left q-pa-md">
             <p style="font-family: Gotham Bold; font-size: 36px;">{{ secciones[0]?.titulo }}</p>
@@ -431,12 +431,16 @@ a:visited {
     margin: 0 -5px;
   }
 
+  .sections-row {
+    flex-wrap: nowrap !important;
+  }
+
   .section-container {
-    /* width: calc(50% - 10px); */
-    /* flex: 0 0 33.3333%;
-    max-width: 33.3333%; */
-    flex: 0 0 32.5%;
-    max-width: 32.5%;
+    /* Usar flex: 1 para distribuir espacio equitativamente */
+    flex: 1 1 0 !important;
+    max-width: none !important;
+    min-width: 0;
+    /* Permite que el contenido se comprima */
     margin: 0 5px;
     padding: 0;
   }
