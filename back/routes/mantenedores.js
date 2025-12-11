@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middlewares/auth');
 
 // Configuración de tablas permitidas y sus campos
 const TABLAS_CONFIG = {
@@ -120,8 +121,8 @@ router.get('/:tabla/:id', validarTabla, async (req, res) => {
     }
 });
 
-// POST - Crear nuevo registro
-router.post('/:tabla', validarTabla, async (req, res) => {
+// POST - Crear nuevo registro (requiere autenticación)
+router.post('/:tabla', authenticate, validarTabla, async (req, res) => {
     const { tabla } = req.params;
     const config = req.tablaConfig;
 
@@ -159,8 +160,8 @@ router.post('/:tabla', validarTabla, async (req, res) => {
     }
 });
 
-// PUT - Actualizar registro
-router.put('/:tabla/:id', validarTabla, async (req, res) => {
+// PUT - Actualizar registro (requiere autenticación)
+router.put('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
     const { tabla, id } = req.params;
     const config = req.tablaConfig;
 
@@ -215,8 +216,8 @@ router.put('/:tabla/:id', validarTabla, async (req, res) => {
     }
 });
 
-// DELETE - Eliminar registro (soft delete si está configurado)
-router.delete('/:tabla/:id', validarTabla, async (req, res) => {
+// DELETE - Eliminar registro (soft delete si está configurado, requiere autenticación)
+router.delete('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
     const { tabla, id } = req.params;
     const config = req.tablaConfig;
 

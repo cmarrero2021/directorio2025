@@ -26,13 +26,38 @@ export { api }
 */
 import { boot } from "quasar/wrappers";
 import axios from "axios";
-import { LocalStorage } from "quasar";
+import { LocalStorage, Notify } from "quasar";
 
 const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || '/api' });
 const authApi = axios.create({ baseURL: import.meta.env.VITE_AUTH_API_URL || '/auth' });
 
-export default boot(({ app }) => {
-  // Interceptor para añadir token automáticamente
+// Función para manejar sesión expirada
+const handleSessionExpired = (router) => {
+  // Limpiar almacenamiento local
+  LocalStorage.remove('token');
+  LocalStorage.remove('permissions');
+  LocalStorage.remove('role');
+  LocalStorage.remove('user');
+
+  // Mostrar notificación
+  Notify.create({
+    type: 'warning',
+    message: 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.',
+    position: 'top',
+    timeout: 5000,
+    icon: 'logout'
+  });
+
+  // Redirigir al login
+  if (router) {
+    router.push('/login');
+  } else {
+    window.location.href = '/login';
+  }
+};
+
+export default boot(({ app, router }) => {
+  // Interceptor para añadir token automáticamente (request)
   api.interceptors.request.use((config) => {
     const token = LocalStorage.getItem("token");
     if (token) {
@@ -48,6 +73,39 @@ export default boot(({ app }) => {
     }
     return config;
   });
+
+  // Interceptor para manejar errores de respuesta (response)
+  const responseErrorHandler = (error) => {
+    if (error.response && error.response.status === 401) {
+      // Sesión expirada o no autorizado
+      handleSessionExpired(router);
+    }
+    return Promise.reject(error);
+  };
+
+  api.interceptors.response.use(
+    (response) => response,
+    responseErrorHandler
+  );
+
+  authApi.interceptors.response.use(
+    (response) => response,
+    responseErrorHandler
+  );
+
+  // También agregar interceptores al axios global (para componentes que lo importan directamente)
+  axios.interceptors.request.use((config) => {
+    const token = LocalStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
+
+  axios.interceptors.response.use(
+    (response) => response,
+    responseErrorHandler
+  );
 
   app.config.globalProperties.$axios = axios;
   app.config.globalProperties.$api = api;

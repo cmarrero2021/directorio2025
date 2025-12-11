@@ -52,7 +52,7 @@ router.post("/force-logout", forceLogout); // Cierre forzoso de sesión
 router.post("/fast", fastChangePassworwd); // Cambio rápido de contraseña
 
 // Rutas Protegidas
-router.delete("/revistas/:id", deleteRevista); // Eliminar revista
+router.delete("/revistas/:id", authenticate, deleteRevista); // Eliminar revista
 
 router.use(checkBlacklist); // Middleware para verificar tokens en la lista negra
 
@@ -132,11 +132,11 @@ router.post('/remove-rolepermission', authenticate, authorize('remove_permission
 router.post('/assign-userpermission', authenticate, authorize('assign_permission'), assignPermissionToUser); // Asignar permiso a usuario
 router.post('/remove-userpermission', authenticate, authorize('remove_permission'), removePermissionFromUser); // Remover permiso de usuario
 
-// Mantenedores Revistas
-router.post("/upload-portada/:id", uploadPortada);
-router.get("/revistas/:id", getRevista);
-router.patch("/revistas/:id", updateRevista);
-router.post("/revista", insertRevista);
-router.post("/revista-con-portada", insertRevistaWithUpload);
+// Mantenedores Revistas (requieren autenticación)
+router.post("/upload-portada/:id", authenticate, uploadPortada);
+router.get("/revistas/:id", authenticate, getRevista);
+router.patch("/revistas/:id", authenticate, updateRevista);
+router.post("/revista", authenticate, insertRevista);
+router.post("/revista-con-portada", authenticate, insertRevistaWithUpload);
 
 module.exports = router;

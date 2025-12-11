@@ -73,35 +73,39 @@ exports.sendEmail = async (to, subject, text) => {
 };
 
 // Obtener duración de sesión (en minutos)
+// Prioridad: users.session_timeout_min > roles.session_timeout_min > session_settings.global_timeout
 exports.getSessionTimeout = async (userId) => {
   const client = await pool.connect();
   try {
-    // Verificar si el usuario tiene configuración específica
+    // 1. Verificar si el usuario tiene configuración específica (no null y mayor a 0)
     const userRes = await client.query(
-      'SELECT session_timeout_min FROM users WHERE id = $1', 
+      'SELECT session_timeout_min FROM users WHERE id = $1',
       [userId]
     );
-        if (userRes.rows.length > 0 && userRes.rows[0].session_timeout_min !== null) {
-      return userRes.rows[0].session_timeout_min;
+    const userTimeout = userRes.rows[0]?.session_timeout_min;
+    if (userTimeout !== null && userTimeout !== undefined && userTimeout > 0) {
+      return userTimeout;
     }
 
-    // Verificar si el rol del usuario tiene configuración específica
+    // 2. Verificar si el rol del usuario tiene configuración específica (no null y mayor a 0)
     const roleRes = await client.query(`
       SELECT r.session_timeout_min 
       FROM user_roles ur
       JOIN roles r ON ur.role_id = r.id
       WHERE ur.user_id = $1
+      ORDER BY r.session_timeout_min DESC
+      LIMIT 1
     `, [userId]);
-        if (roleRes.rows.length > 0 && roleRes.rows[0].session_timeout_min !== null) {
-      return roleRes.rows[0].session_timeout_min;
+    const roleTimeout = roleRes.rows[0]?.session_timeout_min;
+    if (roleTimeout !== null && roleTimeout !== undefined && roleTimeout > 0) {
+      return roleTimeout;
     }
 
-    // Usar configuración global
+    // 3. Usar configuración global
     const globalRes = await client.query(
       'SELECT global_timeout FROM session_settings WHERE id = 1'
     );
-        return globalRes.rows[0]?.global_timeout;
-    // return globalRes.rows[0]?.global_timeout || 120;
+    return globalRes.rows[0]?.global_timeout || 120; // Fallback de 120 minutos si no hay configuración
   } finally {
     client.release();
   }
@@ -110,7 +114,7 @@ exports.getSessionTimeout = async (userId) => {
 // Generar token JWT con duración dinámica
 exports.generateToken = async (userId) => {
   const timeoutMin = await exports.getSessionTimeout(userId);
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { 
-    expiresIn: `${timeoutMin}m` 
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: `${timeoutMin}m`
   });
 };
