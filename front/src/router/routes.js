@@ -46,6 +46,35 @@ const routes = [
         path: "administracion",
         component: () => import("pages/admin/AdminPage.vue"),
       },
+      // Rutas de mantenedores
+      {
+        path: "mantenedores/areas-conocimiento",
+        component: () => import("pages/mantenedores/AreasConocimientoPage.vue"),
+      },
+      {
+        path: "mantenedores/editoriales",
+        component: () => import("pages/mantenedores/EditorialesPage.vue"),
+      },
+      {
+        path: "mantenedores/estados",
+        component: () => import("pages/mantenedores/EstadosPage.vue"),
+      },
+      {
+        path: "mantenedores/formatos",
+        component: () => import("pages/mantenedores/FormatosPage.vue"),
+      },
+      {
+        path: "mantenedores/idiomas",
+        component: () => import("pages/mantenedores/IdiomasPage.vue"),
+      },
+      {
+        path: "mantenedores/indices",
+        component: () => import("pages/mantenedores/IndicesPage.vue"),
+      },
+      {
+        path: "mantenedores/periodicidad",
+        component: () => import("pages/mantenedores/PeriodicidadPage.vue"),
+      },
     ],
   },
   {
