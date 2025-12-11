@@ -190,7 +190,7 @@
                   maxlength="500" spellcheck="false" class="normal-input" hint="Máximo 500 caracteres" />
               </div>
               <div class="col-12">
-                <q-file v-model="imageFile" label="📎 Subir portada (solo JPG, máx 2MB)" accept=".jpg,.jpeg"
+                <q-file v-model="imageFile" label="📎 Subir portada (JPG/PNG, máx 2MB)" accept=".jpg,.jpeg,.png"
                   max-files="1" outlined dense @update:model-value="handleImageUpload" class="portada-upload">
                   <template v-slot:prepend>
                     <q-icon name="image" color="primary" />
@@ -286,11 +286,11 @@ const filterEstados = (val, update) => filterFn(val, update, props.optionsu?.est
 
 const handleImageUpload = (file) => {
   if (file) {
-    // Validar tipo de archivo (solo JPG)
-    if (!['image/jpeg', 'image/jpg'].includes(file.type)) {
+    // Validar tipo de archivo (JPG o PNG)
+    if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
       Notify.create({
         type: 'negative',
-        message: 'Solo se permiten archivos JPG/JPEG',
+        message: 'Solo se permiten archivos JPG o PNG',
         position: 'top'
       });
       imageFile.value = null;

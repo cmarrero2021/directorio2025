@@ -516,11 +516,11 @@ const openNewModal = () => {
 ////////////Upload portada/////////////
 const handleImageUpload = (file) => {
   if (file) {
-    // Verificar que sea JPG
-    if (!["image/jpeg", "image/jpg"].includes(file.type)) {
+    // Verificar que sea JPG o PNG
+    if (!["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
       Notify.create({
         type: "negative",
-        message: "Solo se permiten archivos JPG",
+        message: "Solo se permiten archivos JPG o PNG",
       });
       imageFile.value = null;
       imagePreview.value = null;
