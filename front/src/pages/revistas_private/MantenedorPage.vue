@@ -25,7 +25,7 @@
           </div>
         </div>
 
-        <!-- Segunda fila: Filtros para las columnas -->
+        <!-- Segunda fila: Filtros para las columnas + Botones de acción -->
         <div class="full-width row wrap justify-between items-center content-center q-mb-md">
           <div class="col-xs-12 col-sm-6 col-md-3 q-pa-sm" v-for="col in columns" :key="col.name">
             <div v-if="col.filterable">
@@ -49,24 +49,26 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="col-xs-12 col-sm-3 export-btns-group row items-center no-wrap">
-          <q-btn v-if="isAdmin() || hasPermission('create_revista')" icon="add" title="Agregar nueva revista"
-            @click="openNewModal" color="positive" size="md" class="q-mb-xs add-btn-responsive"
-            style="min-width: 180px; width: 100%;" />
-          <div class="row export-btns-responsive q-mt-xs q-ml-none q-ml-sm-md">
-            <q-btn color="blue-8" size="sm" class="export-btn-desktop q-mr-xs" @click="exportExcel"
-              title="Exportar a Excel">
-              <q-icon name="mdi-file-excel" />
-            </q-btn>
-            <q-btn color="amber-7" size="sm" class="export-btn-desktop q-mr-xs" @click="exportCSV"
-              title="Exportar a CSV">
-              <q-icon name="mdi-file-delimited" />
-            </q-btn>
-            <q-btn color="deep-orange-5" size="sm" class="export-btn-desktop" @click="exportJSON"
-              title="Exportar a JSON">
-              <q-icon name="mdi-code-json" />
-            </q-btn>
+          <!-- Botones de acción alineados a la derecha -->
+          <div class="col-xs-12 col-sm-6 col-md-3 q-pa-sm row justify-end no-wrap items-center">
+            <q-btn v-if="isAdmin() || hasPermission('create_revista')" icon="add" color="primary" label="Nuevo"
+              @click="openNewModal" class="action-btn q-mr-sm" />
+            <q-btn-dropdown color="secondary" label="Exportar" icon="file_download" class="action-btn">
+              <q-list>
+                <q-item clickable v-close-popup @click="exportExcel">
+                  <q-item-section avatar><q-icon name="mdi-file-excel" color="green" /></q-item-section>
+                  <q-item-section>Excel</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="exportCSV">
+                  <q-item-section avatar><q-icon name="mdi-file-delimited" color="blue" /></q-item-section>
+                  <q-item-section>CSV</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="exportJSON">
+                  <q-item-section avatar><q-icon name="mdi-code-json" color="orange" /></q-item-section>
+                  <q-item-section>JSON</q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
           </div>
         </div>
       </template>
@@ -74,18 +76,24 @@
       <!-- Botones de acción en cada fila -->
       <template v-slot:body-cell-actions="props">
         <q-td>
-          <div class="row items-center">
+          <div class="row items-center no-wrap">
             <!-- Botón Editar -->
-            <q-btn v-if="isAdmin() || hasPermission('update_revista')" icon="edit" color="primary"
-              title="Editar revista" size="xs" @click.stop="openEditModal(props.row)" class="q-mr-xs" />
+            <q-btn v-if="isAdmin() || hasPermission('update_revista')" icon="edit" color="primary" size="sm" flat round
+              @click.stop="openEditModal(props.row)">
+              <q-tooltip>Editar revista</q-tooltip>
+            </q-btn>
 
             <!-- Botón Ver -->
-            <q-btn icon="visibility" color="positive" title="Ver revista" size="xs" class="q-mr-xs"
-              @click.stop="() => openViewModalFn(props.row)" />
+            <q-btn icon="visibility" color="positive" size="sm" flat round
+              @click.stop="() => openViewModalFn(props.row)">
+              <q-tooltip>Ver revista</q-tooltip>
+            </q-btn>
 
             <!-- Botón Borrar -->
-            <q-btn v-if="isAdmin() || hasPermission('delete_revista')" icon="delete" color="negative"
-              title="Eliminar Revista" size="xs" class="q-mr-xs" @click.stop="() => deleteRevista(props.row)" />
+            <q-btn v-if="isAdmin() || hasPermission('delete_revista')" icon="delete" color="negative" size="sm" flat
+              round @click.stop="() => deleteRevista(props.row)">
+              <q-tooltip>Eliminar revista</q-tooltip>
+            </q-btn>
           </div>
         </q-td>
       </template>
@@ -821,5 +829,10 @@ onMounted(async () => {
   .responsive-table {
     overflow-x: scroll;
   }
+}
+
+/* Botones de acción con ancho igual */
+.action-btn {
+  min-width: 140px;
 }
 </style>

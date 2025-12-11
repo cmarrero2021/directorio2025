@@ -17,9 +17,11 @@
                     </div>
 
                     <!-- Botones de acción -->
-                    <div class="col-xs-12 col-sm-6 row justify-end q-gutter-sm q-mt-sm-none q-mt-xs-sm">
-                        <q-btn v-if="puedeCrear" icon="add" color="primary" label="Nuevo" @click="abrirModalCrear" />
-                        <q-btn-dropdown v-if="puedeExportar" color="secondary" label="Exportar" icon="file_download">
+                    <div class="col-xs-12 col-sm-6 row justify-end no-wrap q-mt-sm-none q-mt-xs-sm">
+                        <q-btn v-if="puedeCrear" icon="add" color="primary" label="Nuevo" @click="abrirModalCrear"
+                            class="action-btn q-mr-sm" />
+                        <q-btn-dropdown v-if="puedeExportar" color="secondary" label="Exportar" icon="file_download"
+                            class="action-btn">
                             <q-list>
                                 <q-item clickable v-close-popup @click="exportExcel">
                                     <q-item-section avatar><q-icon name="mdi-file-excel"
@@ -349,5 +351,10 @@ onMounted(() => {
 
 .responsive-table {
     max-width: 100%;
+}
+
+/* Botones de acción con ancho igual */
+.action-btn {
+    min-width: 140px;
 }
 </style>
