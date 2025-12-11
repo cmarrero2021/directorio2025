@@ -55,6 +55,7 @@ const {
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const crypto = require("crypto");
 const moment = require("moment-timezone");
 
 // Ensure destination directory exists
@@ -67,12 +68,18 @@ function ensureDir(dir) {
 // Multer configuration (10 MB max)
 const uploadStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const dir = path.join(__dirname, "../../back/public/portadas");
+    // Usar variable de entorno PORTADAS_PATH si está definida (producción)
+    // Si no, usar la ruta relativa (desarrollo local)
+    const dir = process.env.PORTADAS_PATH || path.join(__dirname, "../../back/public/portadas");
     ensureDir(dir);
     cb(null, dir);
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname);
+    // Generar UUID lowercase para evitar problemas de case-sensitivity en Linux
+    const uuid = crypto.randomUUID();
+    const ext = path.extname(file.originalname).toLowerCase();
+    const newFilename = `${uuid}${ext}`;
+    cb(null, newFilename);
   },
 });
 const uploadAny = multer({
@@ -116,13 +123,14 @@ exports.uploadPortada = [
       return res.status(400).json({ error: "No se proporcionó archivo" });
     }
 
-    const originalFilename = file.originalname;
+    // Usar file.filename (el nombre UUID generado por multer) en lugar de originalname
+    const savedFilename = file.filename;
     const client = await pool.connect();
 
     try {
       const result = await client.query(
         "UPDATE revistas SET portada = $1 WHERE id = $2 RETURNING *",
-        [originalFilename, id]
+        [savedFilename, id]
       );
 
       if (!result.rows.length) {
@@ -131,7 +139,7 @@ exports.uploadPortada = [
 
       res.status(200).json({
         message: "Portada subida y actualizada exitosamente",
-        filename: originalFilename,
+        filename: savedFilename,
         revista: result.rows[0],
       });
     } catch (err) {
@@ -1275,9 +1283,14 @@ exports.insertRevistaWithUpload = [
       });
     }
 
-    // Si se subió un archivo, usar su nombre como el valor para 'portada'
+    // Si se subió un archivo, usar el nombre UUID generado por multer (file.filename)
     if (file) {
-      insertFields.portada = file.originalname;
+      console.log('📁 Archivo recibido:');
+      console.log('   - originalname:', file.originalname);
+      console.log('   - filename (UUID):', file.filename);
+      console.log('   - path:', file.path);
+      insertFields.portada = file.filename;
+      console.log('   - portada asignada:', insertFields.portada);
     }
 
     // Limpiar y validar datos antes de insertar

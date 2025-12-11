@@ -1,5 +1,5 @@
 <template>
-  <q-page>
+  <div class="map-component">
     <div class="map-wrapper">
       <!-- Título del mapa con indicador de zoom -->
       <div class="map-header">
@@ -8,7 +8,7 @@
         <!-- <span class="zoom-indicator">Zoom: {{ currentZoom }}</span> -->
       </div>
 
-      <div class="row relative-position">
+      <div class="row relative-position map-row">
         <!-- Escala de colores (solo mostrar si hay datos) -->
         <div class="color-scale" v-if="uniqueValues.length > 0">
           <div class="scale-gradient" :style="{ background: gradientStyle }"></div>
@@ -41,7 +41,7 @@
         </div>
       </div>
     </div>
-  </q-page>
+  </div>
 </template>
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from "vue";
@@ -673,6 +673,20 @@ const formatKey = (key, value) => {
 /* Estilos para el título del mapa */
 .map-wrapper {
   position: relative;
+  overflow: hidden;
+  /* Contener los elementos flotantes */
+}
+
+/* Clearfix para el contenedor con floats */
+.map-row {
+  overflow: hidden;
+  /* Alternativa moderna al clearfix */
+}
+
+.map-row::after {
+  content: "";
+  display: table;
+  clear: both;
 }
 
 .map-header {
@@ -855,6 +869,21 @@ const formatKey = (key, value) => {
 
   .scale-value {
     font-size: 1rem;
+  }
+}
+
+/* Pantallas en orientación vertical (portrait) - reducir altura para evitar espacio en blanco excesivo */
+@media (min-width: 768px) and (max-width: 1200px) and (orientation: portrait) {
+  .map-container {
+    height: 350px;
+    float: left;
+    width: 48%;
+    margin-right: 2%;
+  }
+
+  .cards-container {
+    max-height: 350px;
+    width: 50%;
   }
 }
 </style>
