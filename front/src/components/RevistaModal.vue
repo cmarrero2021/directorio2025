@@ -46,7 +46,7 @@
                 </div>
                 <div class="col-12 col-md-8">
                   <q-input v-model="localForm.revista" label="📚 Nombre de la Revista" filled dense
-                    @keyup="forceInputCase($event, 'revista', 'upper')" class="uppercase-input" />
+                    @keyup="forceInputCase($event, 'revista', 'upper')" class="uppercase-input required-field" />
                 </div>
                 <div class="col-12 col-md-6">
                   <q-input v-model="localForm.anio_inicial" label="📅 Año Inicial" type="number" filled dense />
@@ -57,7 +57,7 @@
                 </div>
                 <div class="col-12">
                   <q-input v-model="localForm.direccion" label="📍 Dirección" filled dense
-                    @keyup="forceInputCase($event, 'direccion', 'upper')" class="uppercase-input" />
+                    @keyup="forceInputCase($event, 'direccion', 'upper')" class="uppercase-input required-field" />
                 </div>
                 <div class="col-12 col-md-6">
                   <q-input v-model="localForm.correo_revista" label="📧 Correo Revista" type="email" filled dense
@@ -98,17 +98,17 @@
                 <div class="col-12 col-md-6">
                   <q-select v-model="localForm.area_conocimiento" :options="filteredAreas"
                     label="🎓 Área de Conocimiento" filled dense option-label="label" option-value="value" emit-value
-                    map-options use-input input-debounce="300" @filter="filterAreas" />
+                    map-options use-input input-debounce="300" @filter="filterAreas" class="required-field" />
                 </div>
                 <div class="col-12 col-md-6">
                   <q-select v-model="localForm.indice" :options="filteredIndices" label="📚 Índice" filled dense
                     option-label="label" option-value="value" emit-value map-options use-input input-debounce="300"
-                    @filter="filterIndices" />
+                    @filter="filterIndices" class="required-field" />
                 </div>
                 <div class="col-12 col-md-6">
                   <q-select v-model="localForm.idioma" :options="filteredIdiomas" label="🌍 Idioma" filled dense
                     option-label="label" option-value="value" emit-value map-options use-input input-debounce="300"
-                    @filter="filterIdiomas" />
+                    @filter="filterIdiomas" class="required-field" />
                 </div>
               </div>
 
@@ -121,12 +121,12 @@
                 <div class="col-12 col-md-6">
                   <q-select v-model="localForm.periodicidad" :options="filteredPeriodicidad" label="📅 Periodicidad"
                     filled dense option-label="label" option-value="value" emit-value map-options use-input
-                    input-debounce="300" @filter="filterPeriodicidad" />
+                    input-debounce="300" @filter="filterPeriodicidad" class="required-field" />
                 </div>
                 <div class="col-12 col-md-6">
                   <q-select v-model="localForm.formato" :options="filteredFormatos" label="📄 Formato" filled dense
                     option-label="label" option-value="value" emit-value map-options use-input input-debounce="300"
-                    @filter="filterFormatos" />
+                    @filter="filterFormatos" class="required-field" />
                 </div>
               </div>
             </q-tab-panel>
@@ -142,12 +142,12 @@
                 <div class="col-12 col-md-6">
                   <q-select v-model="localForm.editorial" :options="filteredEditoriales" label="🏢 Editorial" filled
                     dense option-label="label" option-value="value" emit-value map-options use-input
-                    input-debounce="300" @filter="filterEditoriales" />
+                    input-debounce="300" @filter="filterEditoriales" class="required-field" />
                 </div>
                 <div class="col-12 col-md-6">
                   <q-select v-model="localForm.estado" :options="filteredEstados" label="📍 Estado" filled dense
                     option-label="label" option-value="value" emit-value map-options use-input input-debounce="300"
-                    @filter="filterEstados" />
+                    @filter="filterEstados" class="required-field" />
                 </div>
               </div>
 
@@ -159,7 +159,7 @@
               <div class="row q-col-gutter-md">
                 <div class="col-12 col-md-6">
                   <q-input v-model="localForm.nombres_editor" label="👤 Nombres Editor" filled dense
-                    @keyup="forceInputCase($event, 'nombres_editor', 'upper')" class="uppercase-input" />
+                    @keyup="forceInputCase($event, 'nombres_editor', 'upper')" class="uppercase-input required-field" />
                 </div>
                 <div class="col-12 col-md-6">
                   <q-input v-model="localForm.apellidos_editor" label="👤 Apellidos Editor" filled dense
@@ -187,11 +187,12 @@
             <div class="row q-col-gutter-md q-mt-sm">
               <div class="col-12">
                 <q-input v-model="localForm.resumen" label="📝 Resumen" type="textarea" filled dense rows="4" counter
-                  maxlength="500" spellcheck="false" class="normal-input" hint="Máximo 500 caracteres" />
+                  maxlength="500" spellcheck="false" class="normal-input required-field" hint="Máximo 500 caracteres" />
               </div>
               <div class="col-12">
                 <q-file v-model="imageFile" label="📎 Subir portada (JPG/PNG, máx 2MB)" accept=".jpg,.jpeg,.png"
-                  max-files="1" outlined dense @update:model-value="handleImageUpload" class="portada-upload">
+                  max-files="1" outlined dense @update:model-value="handleImageUpload"
+                  class="portada-upload required-field">
                   <template v-slot:prepend>
                     <q-icon name="image" color="primary" />
                   </template>
@@ -357,12 +358,174 @@ const onFileRejected = (rejectedEntries) => {
     }
   });
 };
+
+// Funciones de validación
+const isValidEmail = (email) => {
+  if (!email) return true; // Si está vacío, no validar formato (solo requerido valida si está vacío)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// Valida URL y retorna array de errores específicos
+const validateUrl = (url) => {
+  const urlErrors = [];
+  if (!url) return urlErrors; // Si está vacío, no hay errores de formato
+
+  // Verificar espacios en blanco
+  if (url.includes(' ')) {
+    urlErrors.push('La URL no debe tener espacios en blanco');
+  }
+
+  // Verificar que comience con http o https
+  const startsWithHttp = url.toLowerCase().startsWith('http');
+  const startsWithHttps = url.toLowerCase().startsWith('https');
+  if (!startsWithHttp && !startsWithHttps) {
+    urlErrors.push('La URL debe comenzar con http o https');
+  }
+
+  // Verificar : después de http/https
+  const hasColon = url.includes(':');
+  if (!hasColon) {
+    urlErrors.push('La URL debe tener : después de http o https');
+  } else {
+    // Verificar // después de :
+    const colonIndex = url.indexOf(':');
+    const afterColon = url.substring(colonIndex + 1);
+    if (!afterColon.startsWith('//')) {
+      urlErrors.push('La URL debe tener // después de los dos puntos');
+    }
+  }
+
+  // Verificar dominio válido (solo si tiene el formato básico correcto)
+  if (url.includes('://')) {
+    const afterProtocol = url.split('://')[1];
+    if (!afterProtocol || afterProtocol.trim() === '') {
+      urlErrors.push('Se debe indicar el dominio en la URL');
+    } else {
+      // Verificar que el dominio tenga extensión (al menos un punto)
+      const domain = afterProtocol.split('/')[0]; // Tomar solo el dominio, no la ruta
+      if (!domain.includes('.')) {
+        urlErrors.push('El dominio de la URL debe tener una extensión válida (ej: .com, .org, .ve)');
+      }
+    }
+  }
+
+  return urlErrors;
+};
+
 const onSave = (e) => {
   e.preventDefault();
-  console.log('🔍 [RevistaModal] Datos en localForm antes de emitir:');
-  console.log('  - localForm.area_conocimiento:', localForm.value.area_conocimiento);
-  console.log('  - localForm.idioma:', localForm.value.idioma);
-  console.log('  - localForm completo:', localForm.value);
+
+  // Validar campos obligatorios y formatos
+  const errors = [];
+
+  // Campos obligatorios
+  if (!localForm.value.revista?.trim()) errors.push('Nombre de la Revista es obligatorio');
+  if (!localForm.value.direccion?.trim()) errors.push('Dirección es obligatoria');
+  if (!localForm.value.area_conocimiento) errors.push('Área de Conocimiento es obligatoria');
+  if (!localForm.value.indice) errors.push('Índice es obligatorio');
+  if (!localForm.value.idioma) errors.push('Idioma es obligatorio');
+  if (!localForm.value.periodicidad) errors.push('Periodicidad es obligatoria');
+  if (!localForm.value.formato) errors.push('Formato es obligatorio');
+  if (!localForm.value.resumen?.trim()) errors.push('Resumen es obligatorio');
+  if (!imageFile.value && !props.imagePreview) errors.push('Portada es obligatoria');
+  if (!localForm.value.editorial) errors.push('Editorial es obligatoria');
+  if (!localForm.value.estado) errors.push('Estado es obligatorio');
+  if (!localForm.value.nombres_editor?.trim()) errors.push('Nombres del Editor es obligatorio');
+
+  // Validación de formato de URL (agrega todos los errores específicos)
+  const urlErrors = validateUrl(localForm.value.url);
+  errors.push(...urlErrors);
+
+  // Validación de formato de correo
+  if (localForm.value.correo_revista && !isValidEmail(localForm.value.correo_revista)) {
+    errors.push('El correo de la revista no tiene un formato válido');
+  }
+  if (localForm.value.correo_editor && !isValidEmail(localForm.value.correo_editor)) {
+    errors.push('El correo del editor no tiene un formato válido');
+  }
+
+  // Validación de ISSN y Depósito Legal
+  const hasIssnImpreso = !!localForm.value.issn_impreso?.trim();
+  const hasDepositoImpreso = !!localForm.value.deposito_legal_impreso?.trim();
+  const hasIssnDigital = !!localForm.value.issn_digital?.trim();
+  const hasDepositoDigital = !!localForm.value.deposito_legal_digital?.trim();
+
+  // Obtener el nombre del formato seleccionado (buscar en las opciones)
+  const formatoSeleccionado = props.optionsu?.formato?.find(f => f.value === localForm.value.formato);
+  const formatoNombre = formatoSeleccionado?.label?.toUpperCase() || '';
+
+  // Validar que al menos un par (impreso o digital) esté completo
+  const tieneImpreso = hasIssnImpreso && hasDepositoImpreso;
+  const tieneDigital = hasIssnDigital && hasDepositoDigital;
+
+  if (!tieneImpreso && !tieneDigital) {
+    // Si no hay ningún par completo, verificar qué falta
+    if (!hasIssnImpreso && !hasIssnDigital && !hasDepositoImpreso && !hasDepositoDigital) {
+      errors.push('Debe completar al menos el ISSN y Depósito Legal impreso o digital');
+    } else {
+      // Hay campos parcialmente llenos
+      if (hasIssnImpreso && !hasDepositoImpreso) {
+        errors.push('Si ingresa ISSN Impreso, también debe ingresar el Depósito Legal Impreso');
+      }
+      if (!hasIssnImpreso && hasDepositoImpreso) {
+        errors.push('Si ingresa Depósito Legal Impreso, también debe ingresar el ISSN Impreso');
+      }
+      if (hasIssnDigital && !hasDepositoDigital) {
+        errors.push('Si ingresa ISSN Digital, también debe ingresar el Depósito Legal Digital');
+      }
+      if (!hasIssnDigital && hasDepositoDigital) {
+        errors.push('Si ingresa Depósito Legal Digital, también debe ingresar el ISSN Digital');
+      }
+    }
+  } else {
+    // Hay al menos un par completo, validar consistencia
+    if (hasIssnImpreso && !hasDepositoImpreso) {
+      errors.push('Si ingresa ISSN Impreso, también debe ingresar el Depósito Legal Impreso');
+    }
+    if (!hasIssnImpreso && hasDepositoImpreso) {
+      errors.push('Si ingresa Depósito Legal Impreso, también debe ingresar el ISSN Impreso');
+    }
+    if (hasIssnDigital && !hasDepositoDigital) {
+      errors.push('Si ingresa ISSN Digital, también debe ingresar el Depósito Legal Digital');
+    }
+    if (!hasIssnDigital && hasDepositoDigital) {
+      errors.push('Si ingresa Depósito Legal Digital, también debe ingresar el ISSN Digital');
+    }
+  }
+
+  // Validar que el formato coincida con los datos ingresados
+  if (tieneImpreso && !tieneDigital) {
+    // Solo tiene impreso, el formato debe ser IMPRESO
+    if (!formatoNombre.includes('IMPRESO')) {
+      errors.push('Si solo ingresa ISSN y Depósito Legal impreso, el formato debe ser Impreso');
+    }
+  } else if (!tieneImpreso && tieneDigital) {
+    // Solo tiene digital, el formato debe ser DIGITAL
+    if (!formatoNombre.includes('DIGITAL')) {
+      errors.push('Si solo ingresa ISSN y Depósito Legal digital, el formato debe ser Digital');
+    }
+  } else if (tieneImpreso && tieneDigital) {
+    // Tiene ambos, el formato debe ser MIXTO
+    if (!formatoNombre.includes('MIXTO')) {
+      errors.push('Si ingresa tanto impreso como digital, el formato debe ser Mixto');
+    }
+  }
+
+  // Si hay errores, mostrar notificación y no guardar
+  if (errors.length > 0) {
+    Notify.create({
+      type: 'negative',
+      message: `Errores de validación:\n• ${errors.join('\n• ')}`,
+      position: 'top',
+      timeout: 8000,
+      icon: 'error',
+      html: true,
+      multiLine: true
+    });
+    return;
+  }
+
   emit('save', localForm.value, imageFile.value);
 };
 const onClose = () => {
@@ -556,5 +719,12 @@ function forceInputCase(event, modelKey, type = 'upper') {
   .scroll-area {
     padding: 12px 16px;
   }
+}
+
+/* Indicador de campo requerido (asterisco rojo) */
+.required-field :deep(.q-field__label)::after {
+  content: ' *';
+  color: #d32f2f;
+  font-weight: bold;
 }
 </style>
