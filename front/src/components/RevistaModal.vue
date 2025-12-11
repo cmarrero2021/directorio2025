@@ -11,15 +11,8 @@
 
       <!-- Tabs Navigation -->
       <q-card-section class="q-pt-md q-pb-none">
-        <q-tabs
-          v-model="activeTab"
-          dense
-          align="left"
-          class="custom-tabs"
-          indicator-color="primary"
-          active-color="primary"
-          active-bg-color="blue-1"
-        >
+        <q-tabs v-model="activeTab" dense align="left" class="custom-tabs" indicator-color="primary"
+          active-color="primary" active-bg-color="blue-1">
           <q-tab name="revista" class="custom-tab">
             <div class="row items-center no-wrap">
               <q-icon name="menu_book" size="20px" class="q-mr-xs" />
@@ -39,7 +32,7 @@
       <q-card-section class="scroll-area q-pt-sm" style="max-height: calc(90vh - 280px); overflow-y: auto;">
         <q-form @submit="onSave">
           <q-tab-panels v-model="activeTab" animated class="bg-transparent">
-            
+
             <!-- TAB REVISTA -->
             <q-tab-panel name="revista" class="q-pa-none">
               <!-- Información Básica -->
@@ -52,19 +45,23 @@
                   <q-input v-model="localForm.id" label="ID" readonly filled dense />
                 </div>
                 <div class="col-12 col-md-8">
-                  <q-input v-model="localForm.revista" label="📚 Nombre de la Revista" filled dense @keyup="forceInputCase($event, 'revista', 'upper')" class="uppercase-input" />
+                  <q-input v-model="localForm.revista" label="📚 Nombre de la Revista" filled dense
+                    @keyup="forceInputCase($event, 'revista', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
                   <q-input v-model="localForm.anio_inicial" label="📅 Año Inicial" type="number" filled dense />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.url" label="🌐 URL" type="url" filled dense @keyup="forceInputCase($event, 'url', 'lower')" class="lowercase-input" />
+                  <q-input v-model="localForm.url" label="🌐 URL" type="url" filled dense
+                    @keyup="forceInputCase($event, 'url', 'lower')" class="lowercase-input" />
                 </div>
                 <div class="col-12">
-                  <q-input v-model="localForm.direccion" label="📍 Dirección" filled dense @keyup="forceInputCase($event, 'direccion', 'upper')" class="uppercase-input" />
+                  <q-input v-model="localForm.direccion" label="📍 Dirección" filled dense
+                    @keyup="forceInputCase($event, 'direccion', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.correo_revista" label="📧 Correo Revista" type="email" filled dense @keyup="forceInputCase($event, 'correo_revista', 'lower')" class="lowercase-input" />
+                  <q-input v-model="localForm.correo_revista" label="📧 Correo Revista" type="email" filled dense
+                    @keyup="forceInputCase($event, 'correo_revista', 'lower')" class="lowercase-input" />
                 </div>
               </div>
 
@@ -75,16 +72,20 @@
               </div>
               <div class="row q-col-gutter-md q-mb-lg">
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.issn_impreso" label="🏷️ ISSN Impreso" filled dense @keyup="forceInputCase($event, 'issn_impreso', 'upper')" class="uppercase-input" />
+                  <q-input v-model="localForm.issn_impreso" label="🏷️ ISSN Impreso" filled dense
+                    @keyup="forceInputCase($event, 'issn_impreso', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.issn_digital" label="🏷️ ISSN Digital" filled dense @keyup="forceInputCase($event, 'issn_digital', 'upper')" class="uppercase-input" />
+                  <q-input v-model="localForm.issn_digital" label="🏷️ ISSN Digital" filled dense
+                    @keyup="forceInputCase($event, 'issn_digital', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.deposito_legal_impreso" label="📋 Depósito Legal Impreso" filled dense @keyup="forceInputCase($event, 'deposito_legal_impreso', 'upper')" class="uppercase-input" />
+                  <q-input v-model="localForm.deposito_legal_impreso" label="📋 Depósito Legal Impreso" filled dense
+                    @keyup="forceInputCase($event, 'deposito_legal_impreso', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.deposito_legal_digital" label="📋 Depósito Legal Digital" filled dense @keyup="forceInputCase($event, 'deposito_legal_digital', 'upper')" class="uppercase-input" />
+                  <q-input v-model="localForm.deposito_legal_digital" label="📋 Depósito Legal Digital" filled dense
+                    @keyup="forceInputCase($event, 'deposito_legal_digital', 'upper')" class="uppercase-input" />
                 </div>
               </div>
 
@@ -95,13 +96,19 @@
               </div>
               <div class="row q-col-gutter-md q-mb-lg">
                 <div class="col-12 col-md-6">
-                  <q-select v-model="localForm.area_conocimiento" :options="filteredAreas" label="🎓 Área de Conocimiento" filled dense option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterAreas" />
+                  <q-select v-model="localForm.area_conocimiento" :options="filteredAreas"
+                    label="🎓 Área de Conocimiento" filled dense option-label="label" option-value="value" emit-value
+                    map-options use-input input-debounce="300" @filter="filterAreas" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-select v-model="localForm.indice" :options="filteredIndices" label="📚 Índice" filled dense option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterIndices" />
+                  <q-select v-model="localForm.indice" :options="filteredIndices" label="📚 Índice" filled dense
+                    option-label="label" option-value="value" emit-value map-options use-input input-debounce="300"
+                    @filter="filterIndices" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-select v-model="localForm.idioma" :options="filteredIdiomas" label="🌍 Idioma" filled dense option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterIdiomas" />
+                  <q-select v-model="localForm.idioma" :options="filteredIdiomas" label="🌍 Idioma" filled dense
+                    option-label="label" option-value="value" emit-value map-options use-input input-debounce="300"
+                    @filter="filterIdiomas" />
                 </div>
               </div>
 
@@ -112,10 +119,14 @@
               </div>
               <div class="row q-col-gutter-md">
                 <div class="col-12 col-md-6">
-                  <q-select v-model="localForm.periodicidad" :options="filteredPeriodicidad" label="📅 Periodicidad" filled dense option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterPeriodicidad" />
+                  <q-select v-model="localForm.periodicidad" :options="filteredPeriodicidad" label="📅 Periodicidad"
+                    filled dense option-label="label" option-value="value" emit-value map-options use-input
+                    input-debounce="300" @filter="filterPeriodicidad" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-select v-model="localForm.formato" :options="filteredFormatos" label="📄 Formato" filled dense option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterFormatos" />
+                  <q-select v-model="localForm.formato" :options="filteredFormatos" label="📄 Formato" filled dense
+                    option-label="label" option-value="value" emit-value map-options use-input input-debounce="300"
+                    @filter="filterFormatos" />
                 </div>
               </div>
             </q-tab-panel>
@@ -129,10 +140,14 @@
               </div>
               <div class="row q-col-gutter-md q-mb-lg">
                 <div class="col-12 col-md-6">
-                  <q-select v-model="localForm.editorial" :options="filteredEditoriales" label="🏢 Editorial" filled dense option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterEditoriales" />
+                  <q-select v-model="localForm.editorial" :options="filteredEditoriales" label="🏢 Editorial" filled
+                    dense option-label="label" option-value="value" emit-value map-options use-input
+                    input-debounce="300" @filter="filterEditoriales" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-select v-model="localForm.estado" :options="filteredEstados" label="📍 Estado" filled dense option-label="label" option-value="value" emit-value map-options use-input input-debounce="300" @filter="filterEstados" />
+                  <q-select v-model="localForm.estado" :options="filteredEstados" label="📍 Estado" filled dense
+                    option-label="label" option-value="value" emit-value map-options use-input input-debounce="300"
+                    @filter="filterEstados" />
                 </div>
               </div>
 
@@ -143,16 +158,20 @@
               </div>
               <div class="row q-col-gutter-md">
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.nombres_editor" label="👤 Nombres Editor" filled dense @keyup="forceInputCase($event, 'nombres_editor', 'upper')" class="uppercase-input" />
+                  <q-input v-model="localForm.nombres_editor" label="👤 Nombres Editor" filled dense
+                    @keyup="forceInputCase($event, 'nombres_editor', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.apellidos_editor" label="👤 Apellidos Editor" filled dense @keyup="forceInputCase($event, 'apellidos_editor', 'upper')" class="uppercase-input" />
+                  <q-input v-model="localForm.apellidos_editor" label="👤 Apellidos Editor" filled dense
+                    @keyup="forceInputCase($event, 'apellidos_editor', 'upper')" class="uppercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.correo_editor" label="📧 Correo Editor" type="email" filled dense @keyup="forceInputCase($event, 'correo_editor', 'lower')" class="lowercase-input" />
+                  <q-input v-model="localForm.correo_editor" label="📧 Correo Editor" type="email" filled dense
+                    @keyup="forceInputCase($event, 'correo_editor', 'lower')" class="lowercase-input" />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input v-model="localForm.telefono" label="📞 Teléfono Editor" filled dense @keyup="forceInputCase($event, 'telefono', 'upper')" class="uppercase-input" />
+                  <q-input v-model="localForm.telefono" label="📞 Teléfono Editor" filled dense
+                    @keyup="forceInputCase($event, 'telefono', 'upper')" class="uppercase-input" />
                 </div>
               </div>
             </q-tab-panel>
@@ -164,44 +183,23 @@
               <q-icon name="description" size="18px" class="q-mr-xs" />
               <span class="section-title">Resumen y Portada</span>
             </div>
-            
+
             <div class="row q-col-gutter-md q-mt-sm">
               <div class="col-12">
-                <q-input 
-                  v-model="localForm.resumen" 
-                  label="📝 Resumen" 
-                  type="textarea" 
-                  filled 
-                  dense
-                  rows="4"
-                  counter
-                  maxlength="500"
-                  spellcheck="false"
-                  class="normal-input"
-                  hint="Máximo 500 caracteres"
-                />
+                <q-input v-model="localForm.resumen" label="📝 Resumen" type="textarea" filled dense rows="4" counter
+                  maxlength="500" spellcheck="false" class="normal-input" hint="Máximo 500 caracteres" />
               </div>
               <div class="col-12">
-                <q-file 
-                  v-model="imageFile" 
-                  label="📎 Subir portada (solo JPG)" 
-                  accept=".jpg,.jpeg" 
-                  max-files="1" 
-                  outlined 
-                  dense 
-                  @update:model-value="handleImageUpload"
-                  class="portada-upload"
-                >
+                <q-file v-model="imageFile" label="📎 Subir portada (solo JPG, máx 2MB)" accept=".jpg,.jpeg"
+                  max-files="1" outlined dense @update:model-value="handleImageUpload" class="portada-upload">
                   <template v-slot:prepend>
                     <q-icon name="image" color="primary" />
                   </template>
                 </q-file>
                 <div v-if="imagePreview" class="q-mt-md text-center">
-                  <q-img 
-                    :src="imagePreview" 
-                    style="max-width: 250px; max-height: 250px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" 
-                    class="portada-preview"
-                  />
+                  <q-img :src="imagePreview"
+                    style="max-width: 250px; max-height: 250px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                    class="portada-preview" />
                 </div>
               </div>
             </div>
@@ -212,22 +210,8 @@
       <!-- Footer con botones siempre visibles -->
       <q-separator />
       <q-card-actions align="right" class="q-pa-md bg-grey-1">
-        <q-btn 
-          label="Cancelar" 
-          icon="cancel" 
-          color="negative" 
-          outline
-          @click="onClose" 
-          class="q-px-lg"
-        />
-        <q-btn 
-          label="Guardar" 
-          icon="save" 
-          color="primary" 
-          unelevated
-          @click="onSave" 
-          class="q-px-lg q-ml-sm"
-        />
+        <q-btn label="Cancelar" icon="cancel" color="negative" outline @click="onClose" class="q-px-lg" />
+        <q-btn label="Guardar" icon="save" color="primary" unelevated @click="onSave" class="q-px-lg q-ml-sm" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -235,6 +219,7 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue';
+import { Notify } from 'quasar';
 const activeTab = ref('revista');
 const props = defineProps({
   modelValue: Boolean,
@@ -301,12 +286,39 @@ const filterEstados = (val, update) => filterFn(val, update, props.optionsu?.est
 
 const handleImageUpload = (file) => {
   if (file) {
+    // Validar tipo de archivo (solo JPG)
     if (!['image/jpeg', 'image/jpg'].includes(file.type)) {
+      Notify.create({
+        type: 'negative',
+        message: 'Solo se permiten archivos JPG/JPEG',
+        position: 'top'
+      });
       imageFile.value = null;
       emit('update:imageFile', null);
       emit('update:imagePreview', null);
       return;
     }
+
+    // Validar tamaño de archivo (max 2MB)
+    const maxSizeMB = 2;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+    if (file.size > maxSizeBytes) {
+      Notify.create({
+        type: 'negative',
+        message: `El archivo es demasiado grande. Máximo permitido: ${maxSizeMB}MB (tu archivo: ${(file.size / 1024 / 1024).toFixed(2)}MB)`,
+        position: 'top',
+        timeout: 5000,
+        icon: 'warning'
+      });
+      // Limpiar todo
+      imageFile.value = null;
+      imagePreview.value = null;
+      emit('update:imageFile', null);
+      emit('update:imagePreview', null);
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       imagePreview.value = e.target.result;
@@ -321,6 +333,29 @@ const handleImageUpload = (file) => {
     emit('update:imageFile', null);
     emit('update:imagePreview', null);
   }
+};
+
+// Manejar archivos rechazados por Quasar (tamaño o tipo inválido)
+const onFileRejected = (rejectedEntries) => {
+  rejectedEntries.forEach(entry => {
+    if (entry.failedPropValidation === 'max-file-size') {
+      Notify.create({
+        type: 'negative',
+        message: `El archivo "${entry.file.name}" excede el tamaño máximo de 2MB (${(entry.file.size / 1024 / 1024).toFixed(2)}MB)`,
+        position: 'top',
+        icon: 'warning',
+        timeout: 5000
+      });
+    } else if (entry.failedPropValidation === 'accept') {
+      Notify.create({
+        type: 'negative',
+        message: 'Solo se permiten archivos JPG/JPEG',
+        position: 'top',
+        icon: 'warning',
+        timeout: 3000
+      });
+    }
+  });
 };
 const onSave = (e) => {
   e.preventDefault();
@@ -513,14 +548,13 @@ function forceInputCase(event, modelKey, type = 'upper') {
   .section-divider {
     font-size: 12px;
   }
-  
+
   .section-title {
     font-size: 12px;
   }
-  
+
   .scroll-area {
     padding: 12px 16px;
   }
 }
 </style>
-

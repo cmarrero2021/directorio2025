@@ -523,6 +523,24 @@ const handleImageUpload = (file) => {
         message: "Solo se permiten archivos JPG",
       });
       imageFile.value = null;
+      imagePreview.value = null;
+      return;
+    }
+
+    // Validar tamaño de archivo (max 2MB)
+    const maxSizeMB = 2;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+    if (file.size > maxSizeBytes) {
+      Notify.create({
+        type: "negative",
+        message: `El archivo es demasiado grande. Máximo permitido: ${maxSizeMB}MB (tu archivo: ${(file.size / 1024 / 1024).toFixed(2)}MB)`,
+        position: "top",
+        timeout: 5000,
+        icon: "warning"
+      });
+      imageFile.value = null;
+      imagePreview.value = null;
       return;
     }
 

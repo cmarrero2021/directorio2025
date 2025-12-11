@@ -84,7 +84,7 @@ const uploadStorage = multer.diskStorage({
 });
 const uploadAny = multer({
   storage: uploadStorage,
-  limits: { fileSize: 1024 * 1024 * 10 },
+  limits: { fileSize: 1024 * 1024 * 2 }, // Límite de 2MB
 }).any();
 
 // Simple health/prueba endpoint
