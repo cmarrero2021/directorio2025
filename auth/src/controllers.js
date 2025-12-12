@@ -1511,3 +1511,34 @@ exports.insertRevistaWithUpload = [
     }
   },
 ];
+
+// ================================
+// AUDITORÍA - LOGIN LOGS
+// ================================
+
+// Listar Login Logs
+exports.listLoginLogs = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      `SELECT 
+        id, 
+        user_id, 
+        username, 
+        ip_address::text as ip_address, 
+        login_status, 
+        login_timestamp, 
+        logout_type, 
+        logout_timestamp, 
+        session_token 
+      FROM login_logs 
+      ORDER BY id DESC`
+    );
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error("Error al listar login logs:", err);
+    res.status(500).json({ error: "Error al listar los registros de ingreso." });
+  } finally {
+    client.release();
+  }
+};

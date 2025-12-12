@@ -75,6 +75,15 @@ const routes = [
         path: "mantenedores/periodicidad",
         component: () => import("pages/mantenedores/PeriodicidadPage.vue"),
       },
+      // Rutas de auditoría
+      {
+        path: "auditoria/ingresos",
+        component: () => import("pages/auditoria/LoginLogsPage.vue"),
+      },
+      {
+        path: "auditoria/acciones",
+        component: () => import("pages/auditoria/AccionesPage.vue"),
+      },
     ],
   },
   {

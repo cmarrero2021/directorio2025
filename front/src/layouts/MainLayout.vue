@@ -81,6 +81,21 @@
           </q-item-section>
           <q-item-section>Administración</q-item-section>
         </q-item>
+
+        <!-- Menú expandible de Auditoría -->
+        <q-expansion-item v-if="isAdmin() || hasPermission('view_audit_menu')" icon="policy" label="Auditoría"
+          expand-separator>
+          <q-item clickable v-ripple to="/admin/auditoria/ingresos" v-if="isAdmin() || hasPermission('view_login_logs')"
+            class="q-pl-lg">
+            <q-item-section avatar><q-icon name="login" /></q-item-section>
+            <q-item-section>Ingresos</q-item-section>
+          </q-item>
+          <q-item clickable v-ripple to="/admin/auditoria/acciones"
+            v-if="isAdmin() || hasPermission('view_action_logs')" class="q-pl-lg">
+            <q-item-section avatar><q-icon name="history" /></q-item-section>
+            <q-item-section>Acciones</q-item-section>
+          </q-item>
+        </q-expansion-item>
       </q-list>
     </q-drawer>
 

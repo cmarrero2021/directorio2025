@@ -40,7 +40,8 @@ const {
   deleteRole,
   testUpload,
   insertRevistaWithUpload,
-  getRevista
+  getRevista,
+  listLoginLogs
 } = require("./controllers");
 const { authenticate, authorize, checkBlacklist } = require("./middlewares");
 
@@ -144,5 +145,8 @@ router.get("/revistas/:id", authenticate, getRevista);
 router.patch("/revistas/:id", authenticate, updateRevista);
 router.post("/revista", authenticate, insertRevista);
 router.post("/revista-con-portada", authenticate, insertRevistaWithUpload);
+
+// Auditoría
+router.get("/login-logs", authenticate, authorize('view_login_logs'), listLoginLogs); // Listar registros de ingreso
 
 module.exports = router;
