@@ -245,6 +245,10 @@ router.delete('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
         res.json({ message: 'Registro eliminado correctamente', id: result.rows[0].id });
     } catch (error) {
         console.error(`Error al eliminar ${tabla}/${id}:`, error);
+        console.error('Error code:', error.code);
+        console.error('Error detail:', error.detail);
+        console.error('Error hint:', error.hint);
+        console.error('Error where:', error.where);
 
         if (error.code === '23503') {
             return res.status(409).json({
@@ -253,7 +257,7 @@ router.delete('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
             });
         }
 
-        res.status(500).json({ error: 'Error al eliminar registro', details: error.message });
+        res.status(500).json({ error: 'Error al eliminar registro', details: error.message, code: error.code, hint: error.hint });
     } finally {
         client.release();
     }

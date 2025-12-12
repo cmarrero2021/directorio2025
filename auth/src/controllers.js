@@ -1542,3 +1542,33 @@ exports.listLoginLogs = async (req, res) => {
     client.release();
   }
 };
+
+// Listar Audit Logs (Acciones)
+exports.listAuditLogs = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      `SELECT 
+        id,
+        fecha,
+        id_usuario,
+        usuario,
+        ip::text as ip,
+        tabla,
+        accion,
+        id_registro,
+        datos_anteriores,
+        datos_nuevos,
+        campos_modificados,
+        comando_sql
+      FROM vaudit_logs 
+      ORDER BY id DESC`
+    );
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error("Error al listar audit logs:", err);
+    res.status(500).json({ error: "Error al listar los registros de acciones." });
+  } finally {
+    client.release();
+  }
+};
