@@ -83,14 +83,27 @@ BEGIN
         v_new_data := to_jsonb(NEW);
         v_old_data := NULL;
         v_changed_fields := v_new_data;
-        v_record_id := NEW.id;
+        
+        -- Safe extraction of ID
+        IF (v_new_data ? 'id') THEN
+            v_record_id := (v_new_data ->> 'id')::INTEGER;
+        ELSE
+            v_record_id := NULL;
+        END IF;
+
         v_sql_command := 'INSERT INTO ' || TG_TABLE_NAME;
         v_action := 'INSERT';
         
     ELSIF (TG_OP = 'UPDATE') THEN
         v_old_data := to_jsonb(OLD);
         v_new_data := to_jsonb(NEW);
-        v_record_id := NEW.id;
+        
+        -- Safe extraction of ID
+        IF (v_new_data ? 'id') THEN
+            v_record_id := (v_new_data ->> 'id')::INTEGER;
+        ELSE
+            v_record_id := NULL;
+        END IF;
         
         -- Calcular solo los campos que cambiaron
         SELECT jsonb_object_agg(key, value) INTO v_changed_fields
@@ -99,35 +112,42 @@ BEGIN
             FROM jsonb_each(v_new_data) n
             LEFT JOIN jsonb_each(v_old_data) o ON n.key = o.key
             WHERE n.value IS DISTINCT FROM o.value
-        ) changed;
-        
-        -- Detectar si es un borrado lógico (soft delete)
-        -- Un soft delete se detecta cuando:
-        -- 1. La tabla tiene columna deleted_at
-        -- 2. deleted_at era NULL y ahora tiene valor
-        -- Nota: En JSONB, null se representa como 'null' string, no SQL NULL
+        ) changes;
+
+        v_sql_command := 'UPDATE ' || TG_TABLE_NAME;
+        v_action := 'UPDATE';
+
+        -- Detección de Borrado Lógico (Soft Delete)
         IF (v_new_data ? 'deleted_at') THEN
-            -- La tabla tiene columna deleted_at
-            IF ((v_old_data ->> 'deleted_at') IS NULL OR (v_old_data ->> 'deleted_at') = 'null' OR v_old_data -> 'deleted_at' = 'null'::jsonb) 
-               AND ((v_new_data ->> 'deleted_at') IS NOT NULL AND (v_new_data ->> 'deleted_at') <> 'null' AND v_new_data -> 'deleted_at' <> 'null'::jsonb) THEN
+            IF ((v_old_data ->> 'deleted_at') IS NULL OR (v_old_data ->> 'deleted_at') = 'null') 
+               AND ((v_new_data ->> 'deleted_at') IS NOT NULL AND (v_new_data ->> 'deleted_at') <> 'null') THEN
                 v_is_soft_delete := TRUE;
                 v_action := 'SOFT_DELETE';
-                v_sql_command := 'SOFT DELETE FROM ' || TG_TABLE_NAME || ' WHERE id = ' || NEW.id;
-            ELSE
-                v_action := 'UPDATE';
-                v_sql_command := 'UPDATE ' || TG_TABLE_NAME || ' WHERE id = ' || NEW.id;
             END IF;
-        ELSE
-            v_action := 'UPDATE';
-            v_sql_command := 'UPDATE ' || TG_TABLE_NAME || ' WHERE id = ' || NEW.id;
+        END IF;
+        
+        -- Apéndice de ID al comando SQL solo si tenemos ID
+        IF v_record_id IS NOT NULL THEN
+             v_sql_command := v_sql_command || ' WHERE id = ' || v_record_id;
         END IF;
         
     ELSIF (TG_OP = 'DELETE') THEN
         v_old_data := to_jsonb(OLD);
         v_new_data := NULL;
         v_changed_fields := NULL;
-        v_record_id := OLD.id;
-        v_sql_command := 'DELETE FROM ' || TG_TABLE_NAME || ' WHERE id = ' || OLD.id;
+        
+        -- Safe extraction of ID
+        IF (v_old_data ? 'id') THEN
+            v_record_id := (v_old_data ->> 'id')::INTEGER;
+        ELSE
+            v_record_id := NULL;
+        END IF;
+
+        v_sql_command := 'DELETE FROM ' || TG_TABLE_NAME;
+        IF v_record_id IS NOT NULL THEN
+             v_sql_command := v_sql_command || ' WHERE id = ' || v_record_id;
+        END IF;
+        
         v_action := 'DELETE';
     END IF;
 

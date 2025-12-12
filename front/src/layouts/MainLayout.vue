@@ -96,6 +96,16 @@
             <q-item-section>Acciones</q-item-section>
           </q-item>
         </q-expansion-item>
+
+        <!-- Menú expandible de Mantenimiento -->
+        <q-expansion-item v-if="isAdmin() || hasPermission('view_maintenance_menu')" icon="build" label="Mantenimiento"
+          expand-separator>
+          <q-item clickable v-ripple to="/admin/mantenimiento/sesion"
+            v-if="isAdmin() || hasPermission('view_session_settings')" class="q-pl-lg">
+            <q-item-section avatar><q-icon name="timer" /></q-item-section>
+            <q-item-section>Sesión</q-item-section>
+          </q-item>
+        </q-expansion-item>
       </q-list>
     </q-drawer>
 

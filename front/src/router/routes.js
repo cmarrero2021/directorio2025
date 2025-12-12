@@ -84,6 +84,11 @@ const routes = [
         path: "auditoria/acciones",
         component: () => import("pages/auditoria/AccionesPage.vue"),
       },
+      // Rutas de Mantenimiento
+      {
+        path: "mantenimiento/sesion",
+        component: () => import("pages/admin/maintenance/SessionMaintenancePage.vue"),
+      },
     ],
   },
   {

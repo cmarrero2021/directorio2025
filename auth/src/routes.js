@@ -42,7 +42,9 @@ const {
   insertRevistaWithUpload,
   getRevista,
   listLoginLogs,
-  listAuditLogs
+  listAuditLogs,
+  getSessionSettings,
+  updateSessionSettings
 } = require("./controllers");
 const { authenticate, authorize, checkBlacklist } = require("./middlewares");
 
@@ -61,30 +63,18 @@ router.delete("/revistas/:id", authenticate, deleteRevista); // Eliminar revista
 
 router.use(checkBlacklist); // Middleware para verificar tokens en la lista negra
 
-// Sesiones
+// Mantenimiento - Sesión
 router.get(
-  "/session-settings/global",
+  "/maintenance/session",
   authenticate,
-  authorize("get_global_session_settings"),
-  getGlobalSessionTimeout
+  authorize("view_session_settings"),
+  getSessionSettings
 );
-router.patch(
-  "/session-settings/global",
+router.put(
+  "/maintenance/session",
   authenticate,
-  authorize("update_global_session_settings"),
-  updateGlobalSessionTimeout
-);
-router.patch(
-  "/users/:userId/session-timeout",
-  authenticate,
-  authorize("update_user_session_timeout"),
-  updateUserSessionTimeout
-);
-router.patch(
-  "/roles/:roleId/session-timeout",
-  authenticate,
-  authorize("update_role_session_timeout"),
-  updateRoleSessionTimeout
+  authorize("edit_session_settings"),
+  updateSessionSettings
 );
 
 // Usuarios
