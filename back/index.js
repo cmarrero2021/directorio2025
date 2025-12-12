@@ -1,11 +1,12 @@
 const express = require('express');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env') });
 const { Pool, Client } = require('pg');
 const cors = require('cors');
-const path = require('path');
 const WebSocket = require('ws');
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 // Configuración CORS
 app.use(cors({
@@ -26,20 +27,20 @@ app.use(cors({
 
 // Configurar conexión a PostgreSQL para consultas regulares
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: '_api_revistas',
-  password: 'postgres',
-  port: 5432,
+  user: process.env.DB_USER || 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_NAME || '_api_revistas',
+  password: process.env.DB_PASSWORD || 'postgres',
+  port: process.env.DB_PORT || 5432,
 });
 
 // Configurar cliente separado para escuchar notificaciones
 const notificationClient = new Client({
-  user: 'postgres',
-  host: 'localhost',
-  database: '_api_revistas',
-  password: 'postgres',
-  port: 5432,
+  user: process.env.DB_USER || 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_NAME || '_api_revistas',
+  password: process.env.DB_PASSWORD || 'postgres',
+  port: process.env.DB_PORT || 5432,
 });
 
 // Iniciar servidor WebSocket
