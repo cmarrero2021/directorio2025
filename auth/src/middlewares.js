@@ -76,7 +76,10 @@ exports.authenticate = async (req, res, next) => {
 
     // Verificar si la sesión está activa y no revocada
     const sessionResult = await client.query(
-      "SELECT expires_at FROM sessions WHERE token = $1 AND is_revoked = FALSE",
+      `SELECT s.expires_at, u.email, u.first_name, u.last_name 
+       FROM sessions s
+       JOIN users u ON s.user_id = u.id
+       WHERE s.token = $1 AND s.is_revoked = FALSE`,
       [token]
     );
 
@@ -86,7 +89,8 @@ exports.authenticate = async (req, res, next) => {
         .json({ error: "Sesión no encontrada o revocada." });
     }
 
-    const expiresAt = new Date(sessionResult.rows[0].expires_at);
+    const sessionData = sessionResult.rows[0];
+    const expiresAt = new Date(sessionData.expires_at);
     const currentTime = new Date();
     // Restar 10 segundos a expiresAt
 
@@ -110,6 +114,14 @@ exports.authenticate = async (req, res, next) => {
           error: "La sesión ha expirado. Se ha realizado un logout automático.",
         });
     }
+
+    // Adjuntar usuario al request para uso en auditoría
+    req.user = {
+      id: req.userId,
+      email: sessionData.email,
+      name: `${sessionData.first_name} ${sessionData.last_name}`
+    };
+    req.username = sessionData.email; // Compatibilidad con extractAuditContext
 
     next(); // Continuar con la petición si la sesión no ha expirado
   } catch (err) {

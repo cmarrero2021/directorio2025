@@ -3,6 +3,7 @@ exports.deleteRevista = async (req, res) => {
   const { id } = req.params;
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     const result = await client.query('DELETE FROM revistas WHERE id = $1 RETURNING *', [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Revista no encontrada.' });
@@ -57,6 +58,7 @@ const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 const moment = require("moment-timezone");
+const { withAuditContext } = require("./audit");
 
 // Ensure destination directory exists
 function ensureDir(dir) {
@@ -128,6 +130,7 @@ exports.uploadPortada = [
     const client = await pool.connect();
 
     try {
+      await withAuditContext(client, req);
       const result = await client.query(
         "UPDATE revistas SET portada = $1 WHERE id = $2 RETURNING *",
         [savedFilename, id]
@@ -173,6 +176,7 @@ exports.fastChangePassworwd = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     await client.query(
       "UPDATE users SET password_hash = $2 where email = $1",
       [email, hashedPassword]
@@ -311,6 +315,7 @@ exports.deleteUser = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     await client.query("UPDATE users SET deleted_at = NOW() WHERE id = $1", [
       userId,
     ]);
@@ -328,6 +333,7 @@ exports.deleteUserPermanently = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     await client.query("DELETE FROM users WHERE id = $1", [userId]);
     res.status(200).json({ message: "Usuario eliminado permanentemente." });
   } catch (err) {
@@ -348,6 +354,7 @@ exports.createRole = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     const result = await client.query(
       "INSERT INTO roles (name, description, session_timeout_min) VALUES ($1, $2, $3) RETURNING id",
       [name, description, timeout]
@@ -406,6 +413,7 @@ exports.createPermission = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     // Verificar si ya existe un permiso con ese nombre
     const exists = await client.query(
       "SELECT id FROM permissions WHERE name = $1",
@@ -446,6 +454,7 @@ exports.updatePermission = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     // Verificar si otro permiso ya tiene ese nombre
     const exists = await client.query(
       "SELECT id FROM permissions WHERE name = $1 AND id != $2",
@@ -482,6 +491,7 @@ exports.deletePermission = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     // Primero eliminar las asignaciones de este permiso a roles y usuarios
     await client.query("DELETE FROM role_permissions WHERE permission_id = $1", [permissionId]);
     await client.query("DELETE FROM user_permissions WHERE permission_id = $1", [permissionId]);
@@ -886,6 +896,7 @@ exports.insertRevista = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     // Construir la consulta dinámicamente
     const keys = Object.keys(insertFields);
     if (keys.length === 0) {
@@ -983,6 +994,7 @@ exports.updateRevista = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     const keys = Object.keys(updateFields);
     if (keys.length === 0) {
       return res
@@ -1201,6 +1213,7 @@ exports.updateRole = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     await client.query(
       "UPDATE roles SET name = $1, description = $2, session_timeout_min = $3, updated_at = NOW() WHERE id = $4",
       [name, description, timeout, roleId]
@@ -1222,6 +1235,7 @@ exports.deleteRole = async (req, res) => {
   const { roleId } = req.params;
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     await client.query("DELETE FROM roles WHERE id = $1", [roleId]);
     res.status(200).json({ message: "Rol eliminado exitosamente." });
   } catch (err) {
@@ -1243,6 +1257,7 @@ exports.assignRoleToUser = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     // Verificar si ya existe la asignación
     const check = await client.query(
       "SELECT * FROM user_roles WHERE user_id = $1 AND role_id = $2",
@@ -1272,6 +1287,7 @@ exports.removeRoleFromUser = async (req, res) => {
   const { userId, roleId } = req.body;
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     await client.query(
       "DELETE FROM user_roles WHERE user_id = $1 AND role_id = $2",
       [userId, roleId]
@@ -1296,6 +1312,7 @@ exports.assignPermissionToRole = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     const check = await client.query(
       "SELECT * FROM role_permissions WHERE role_id = $1 AND permission_id = $2",
       [roleId, permissionId]
@@ -1329,6 +1346,7 @@ exports.removePermissionFromRole = async (req, res) => {
 
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     const result = await client.query(
       "DELETE FROM role_permissions WHERE role_id = $1 AND permission_id = $2",
       [roleId, permissionId]
@@ -1353,6 +1371,7 @@ exports.assignPermissionToUser = async (req, res) => {
   const { userId, permissionId } = req.body;
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     await client.query(
       "INSERT INTO user_permissions (user_id, permission_id) VALUES ($1, $2) ON CONFLICT (user_id, permission_id) DO NOTHING",
       [userId, permissionId]
@@ -1371,6 +1390,7 @@ exports.removePermissionFromUser = async (req, res) => {
   const { userId, permissionId } = req.body;
   const client = await pool.connect();
   try {
+    await withAuditContext(client, req);
     await client.query(
       "DELETE FROM user_permissions WHERE user_id = $1 AND permission_id = $2",
       [userId, permissionId]
@@ -1464,6 +1484,7 @@ exports.insertRevistaWithUpload = [
 
     const client = await pool.connect();
     try {
+      await withAuditContext(client, req);
       // Filtrar campos null antes de construir la query
       const validFields = {};
       for (const key in insertFields) {

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('./db');
 const { authenticate } = require('./middlewares');
+const { withAuditContext } = require('./audit');
 
 // Configuración de tablas permitidas y sus campos
 const TABLAS_CONFIG = {
@@ -131,6 +132,7 @@ router.post('/:tabla', authenticate, validarTabla, async (req, res) => {
 
     const client = await pool.connect();
     try {
+        await withAuditContext(client, req);
         const valores = [];
         const campos = [];
         const placeholders = [];
@@ -171,6 +173,7 @@ router.put('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
 
     const client = await pool.connect();
     try {
+        await withAuditContext(client, req);
         const updates = [];
         const valores = [];
         let paramIndex = 1;
@@ -228,6 +231,7 @@ router.delete('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
 
     const client = await pool.connect();
     try {
+        await withAuditContext(client, req);
         let query;
 
         if (config.softDelete) {
@@ -244,12 +248,6 @@ router.delete('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
 
         res.json({ message: 'Registro eliminado correctamente', id: result.rows[0].id });
     } catch (error) {
-        console.error(`Error al eliminar ${tabla}/${id}:`, error);
-        console.error('Error code:', error.code);
-        console.error('Error detail:', error.detail);
-        console.error('Error hint:', error.hint);
-        console.error('Error where:', error.where);
-
         if (error.code === '23503') {
             return res.status(409).json({
                 error: 'No se puede eliminar el registro porque está siendo utilizado en otras tablas',
@@ -257,7 +255,7 @@ router.delete('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
             });
         }
 
-        res.status(500).json({ error: 'Error al eliminar registro', details: error.message, code: error.code, hint: error.hint });
+        res.status(500).json({ error: 'Error al eliminar registro', details: error.message });
     } finally {
         client.release();
     }

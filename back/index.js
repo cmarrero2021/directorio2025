@@ -3,22 +3,46 @@ const { Pool, Client } = require('pg');
 const cors = require('cors');
 const path = require('path');
 const WebSocket = require('ws');
+// Cargar variables de entorno desde el directorio auth
+const fs = require('fs');
+const envPath = process.env.NODE_ENV === 'production'
+  ? path.resolve(__dirname, '../auth/.env.production')
+  : path.resolve(__dirname, '../auth/.env.development');
+
+if (!fs.existsSync(envPath)) {
+  console.error(`❌ ERROR CRÍTICO: No se encontró el archivo de configuración en: ${envPath}`);
+  process.exit(1);
+}
+
+const envConfig = require('dotenv').config({ path: envPath });
+if (envConfig.error) {
+  console.error(`❌ ERROR CRÍTICO: Error al leer archivo .env: ${envConfig.error.message}`);
+  process.exit(1);
+}
+
+// Validar variables requeridas
+const requiredEnvVars = ['DB_USER', 'DB_HOST', 'DB_NAME', 'DB_PASSWORD', 'DB_PORT', 'ALLOWED_ORIGINS', 'PORT_BACK'];
+const missingVars = requiredEnvVars.filter(key => !process.env[key]);
+
+if (missingVars.length > 0) {
+  console.error(`❌ ERROR CRÍTICO: Faltan las siguientes variables de entorno requeridas: ${missingVars.join(', ')}`);
+  process.exit(1);
+}
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT_BACK; // Sin fallback, debe estar en .env
 
 // Configuración CORS
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim());
+
+// Validar que haya al menos un origen permitido
+if (allowedOrigins.length === 0 || (allowedOrigins.length === 1 && allowedOrigins[0] === '')) {
+  console.error('❌ ERROR CRÍTICO: ALLOWED_ORIGINS está vacío o mal configurado.');
+  process.exit(1);
+}
+
 app.use(cors({
-  origin: [
-    'http://localhost:9000',
-    // 'http://localhost:8080',
-    'http://localhost:4000',
-    'http://localhost:4001',
-    'http://directorio.minaamp.gob.ve',
-    'https://directorio.minaamp.gob.ve',
-    'https://backdirectorio.minaamp.gob.ve',
-    'https://authdirectorio.minaamp.gob.ve'
-  ],
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -26,20 +50,20 @@ app.use(cors({
 
 // Configurar conexión a PostgreSQL para consultas regulares
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: '_api_revistas',
-  password: 'postgres',
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
 
 // Configurar cliente separado para escuchar notificaciones
 const notificationClient = new Client({
-  user: 'postgres',
-  host: 'localhost',
-  database: '_api_revistas',
-  password: 'postgres',
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
 
 // Iniciar servidor WebSocket

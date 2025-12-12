@@ -167,7 +167,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 3. Verificación
+
+
+-- 3. Actualizar función helper para establecer contexto (Corrección de persistencia)
+-- is_local = false asegura que las variables persistan durante la sesión (útil para pool de conexiones y transacciones implícitas)
+CREATE OR REPLACE FUNCTION public.set_audit_context(
+    p_user_id INTEGER DEFAULT NULL,
+    p_username VARCHAR(255) DEFAULT NULL,
+    p_ip_address VARCHAR(45) DEFAULT NULL,
+    p_session_token VARCHAR(255) DEFAULT NULL
+)
+RETURNS VOID AS $$
+BEGIN
+    -- Usamos false en el tercer parámetro para que la configuración dure toda la sesión actual
+    -- y no se pierda al terminar la "transacción" implícita de esta llamada.
+    -- Manejamos NULLs convirtiéndolos a strings vacíos o cadenas nulas que el trigger sepa manejar.
+    
+    PERFORM set_config('audit.user_id', COALESCE(p_user_id::TEXT, ''), false);
+    PERFORM set_config('audit.username', COALESCE(p_username, ''), false);
+    PERFORM set_config('audit.ip_address', COALESCE(p_ip_address, ''), false);
+    PERFORM set_config('audit.session_token', COALESCE(p_session_token, ''), false);
+END;
+$$ LANGUAGE plpgsql;
+
+-- 4. Verificación
 DO $$
 BEGIN
     RAISE NOTICE '============================================';
