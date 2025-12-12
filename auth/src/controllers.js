@@ -271,10 +271,13 @@ exports.listUsers = async (req, res) => {
 // Actualizar Usuario
 exports.updateUser = async (req, res) => {
   const { userId } = req.params;
-  const { first_name, last_name, cedula, email, password } = req.body;
+  const { first_name, last_name, cedula, email, password, session_timeout_min } = req.body;
 
   const client = await pool.connect();
   try {
+    // Convertir session_timeout_min a número o null
+    const timeout = session_timeout_min ? parseInt(session_timeout_min, 10) : null;
+
     if (password) {
       // Validar fortaleza de la contraseña si se proporciona
       const passwordErrors = validatePassword(password);
@@ -284,13 +287,13 @@ exports.updateUser = async (req, res) => {
       const hashedPassword = await hashPassword(password);
 
       await client.query(
-        "UPDATE users SET first_name = $1, last_name = $2, cedula = $3, email = $4, password_hash = $5, updated_at = NOW() WHERE id = $6",
-        [first_name, last_name, cedula, email, hashedPassword, userId]
+        "UPDATE users SET first_name = $1, last_name = $2, cedula = $3, email = $4, password_hash = $5, session_timeout_min = $6, updated_at = NOW() WHERE id = $7",
+        [first_name, last_name, cedula, email, hashedPassword, timeout, userId]
       );
     } else {
       await client.query(
-        "UPDATE users SET first_name = $1, last_name = $2, cedula = $3, email = $4, updated_at = NOW() WHERE id = $5",
-        [first_name, last_name, cedula, email, userId]
+        "UPDATE users SET first_name = $1, last_name = $2, cedula = $3, email = $4, session_timeout_min = $5, updated_at = NOW() WHERE id = $6",
+        [first_name, last_name, cedula, email, timeout, userId]
       );
     }
     res.status(200).json({ message: "Usuario actualizado exitosamente." });
@@ -338,12 +341,16 @@ exports.deleteUserPermanently = async (req, res) => {
 
 // Crear Rol
 exports.createRole = async (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, session_timeout_min } = req.body;
+
+  // Convertir session_timeout_min a número o null
+  const timeout = session_timeout_min ? parseInt(session_timeout_min, 10) : null;
+
   const client = await pool.connect();
   try {
     const result = await client.query(
-      "INSERT INTO roles (name, description) VALUES ($1, $2) RETURNING id",
-      [name, description]
+      "INSERT INTO roles (name, description, session_timeout_min) VALUES ($1, $2, $3) RETURNING id",
+      [name, description, timeout]
     );
     res
       .status(201)
@@ -360,7 +367,7 @@ exports.listRoles = async (req, res) => {
   const client = await pool.connect();
   try {
     const result = await client.query(
-      "SELECT id, name, description FROM roles"
+      "SELECT id, name, description, session_timeout_min FROM roles"
     );
     res.status(200).json(result.rows);
   } catch (err) {
@@ -375,11 +382,124 @@ exports.listPermissions = async (req, res) => {
   const client = await pool.connect();
   try {
     const result = await client.query(
-      "SELECT id, name, description FROM permissions"
+      "SELECT id, name, resource, action, description FROM permissions ORDER BY resource, action"
     );
     res.status(200).json(result.rows);
   } catch (err) {
     res.status(500).json({ error: "Error al listar los permisos." });
+  } finally {
+    client.release();
+  }
+};
+
+// Crear Permiso
+exports.createPermission = async (req, res) => {
+  const { name, description, resource, action } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ error: "El nombre del permiso es obligatorio." });
+  }
+
+  if (!resource || !action) {
+    return res.status(400).json({ error: "El recurso y la acción son obligatorios." });
+  }
+
+  const client = await pool.connect();
+  try {
+    // Verificar si ya existe un permiso con ese nombre
+    const exists = await client.query(
+      "SELECT id FROM permissions WHERE name = $1",
+      [name]
+    );
+    if (exists.rows.length > 0) {
+      return res.status(409).json({ error: "Ya existe un permiso con ese nombre." });
+    }
+
+    const result = await client.query(
+      "INSERT INTO permissions (name, resource, action, description) VALUES ($1, $2, $3, $4) RETURNING id, name, resource, action, description",
+      [name, resource, action, description || null]
+    );
+    res.status(201).json({
+      message: "Permiso creado exitosamente.",
+      permission: result.rows[0]
+    });
+  } catch (err) {
+    console.error("Error al crear permiso:", err);
+    res.status(500).json({ error: "Error al crear el permiso." });
+  } finally {
+    client.release();
+  }
+};
+
+// Actualizar Permiso
+exports.updatePermission = async (req, res) => {
+  const { permissionId } = req.params;
+  const { name, description, resource, action } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ error: "El nombre del permiso es obligatorio." });
+  }
+
+  if (!resource || !action) {
+    return res.status(400).json({ error: "El recurso y la acción son obligatorios." });
+  }
+
+  const client = await pool.connect();
+  try {
+    // Verificar si otro permiso ya tiene ese nombre
+    const exists = await client.query(
+      "SELECT id FROM permissions WHERE name = $1 AND id != $2",
+      [name, permissionId]
+    );
+    if (exists.rows.length > 0) {
+      return res.status(409).json({ error: "Ya existe otro permiso con ese nombre." });
+    }
+
+    const result = await client.query(
+      "UPDATE permissions SET name = $1, resource = $2, action = $3, description = $4 WHERE id = $5 RETURNING id, name, resource, action, description",
+      [name, resource, action, description || null, permissionId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Permiso no encontrado." });
+    }
+
+    res.status(200).json({
+      message: "Permiso actualizado exitosamente.",
+      permission: result.rows[0]
+    });
+  } catch (err) {
+    console.error("Error al actualizar permiso:", err);
+    res.status(500).json({ error: "Error al actualizar el permiso." });
+  } finally {
+    client.release();
+  }
+};
+
+// Eliminar Permiso
+exports.deletePermission = async (req, res) => {
+  const { permissionId } = req.params;
+
+  const client = await pool.connect();
+  try {
+    // Primero eliminar las asignaciones de este permiso a roles y usuarios
+    await client.query("DELETE FROM role_permissions WHERE permission_id = $1", [permissionId]);
+    await client.query("DELETE FROM user_permissions WHERE permission_id = $1", [permissionId]);
+
+    // Luego eliminar el permiso
+    const result = await client.query(
+      "DELETE FROM permissions WHERE id = $1 RETURNING id",
+      [permissionId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Permiso no encontrado." });
+    }
+
+    res.status(200).json({ message: "Permiso eliminado exitosamente." });
+  } catch (err) {
+    console.error("Error al eliminar permiso:", err);
+    res.status(500).json({ error: "Error al eliminar el permiso." });
   } finally {
     client.release();
   }
@@ -1023,7 +1143,7 @@ exports.updateRoleSessionTimeout = async (req, res) => {
 // ================================
 
 exports.createUser = async (req, res) => {
-  const { first_name, last_name, cedula, email, password } = req.body;
+  const { first_name, last_name, cedula, email, password, session_timeout_min } = req.body;
 
   // Validar campos requeridos
   if (!first_name || !last_name || !cedula || !email || !password) {
@@ -1050,10 +1170,13 @@ exports.createUser = async (req, res) => {
     // Hash password
     const hashedPassword = await hashPassword(password);
 
+    // Convertir session_timeout_min a número o null
+    const timeout = session_timeout_min ? parseInt(session_timeout_min, 10) : null;
+
     // Insertar usuario
     const newUser = await client.query(
-      "INSERT INTO users (first_name, last_name, cedula, email, password_hash, status) VALUES ($1, $2, $3, $4, $5, 'active') RETURNING id, first_name, last_name, email",
-      [first_name, last_name, cedula, email, hashedPassword]
+      "INSERT INTO users (first_name, last_name, cedula, email, password_hash, session_timeout_min, status) VALUES ($1, $2, $3, $4, $5, $6, 'active') RETURNING id, first_name, last_name, email",
+      [first_name, last_name, cedula, email, hashedPassword, timeout]
     );
 
     res.status(201).json({
@@ -1071,13 +1194,16 @@ exports.createUser = async (req, res) => {
 // Actualizar Rol
 exports.updateRole = async (req, res) => {
   const { roleId } = req.params;
-  const { name, description } = req.body;
+  const { name, description, session_timeout_min } = req.body;
+
+  // Convertir session_timeout_min a número o null
+  const timeout = session_timeout_min ? parseInt(session_timeout_min, 10) : null;
 
   const client = await pool.connect();
   try {
     await client.query(
-      "UPDATE roles SET name = $1, description = $2, updated_at = NOW() WHERE id = $3",
-      [name, description, roleId]
+      "UPDATE roles SET name = $1, description = $2, session_timeout_min = $3, updated_at = NOW() WHERE id = $4",
+      [name, description, timeout, roleId]
     );
     res.status(200).json({ message: "Rol actualizado exitosamente." });
   } catch (err) {

@@ -16,8 +16,17 @@
                 <!-- Panel de Usuarios -->
                 <q-tab-panel name="users">
                     <div class="text-h6">Gestión de Usuarios</div>
-                    <q-table :rows="users" :columns="userColumns" row-key="id" :loading="loadingUsers">
+                    <q-table :rows="filteredUsers" :columns="userColumns" row-key="id" :loading="loadingUsers">
                         <template v-slot:top-right>
+                            <q-input v-model="userSearch" dense outlined placeholder="Buscar usuario..." class="q-mr-md"
+                                style="min-width: 200px">
+                                <template v-slot:prepend>
+                                    <q-icon name="search" />
+                                </template>
+                                <template v-slot:append v-if="userSearch">
+                                    <q-icon name="close" class="cursor-pointer" @click="userSearch = ''" />
+                                </template>
+                            </q-input>
                             <q-btn color="primary" icon="add" label="Nuevo Usuario" @click="openUserModal()" />
                         </template>
                         <template v-slot:body-cell-actions="props">
@@ -37,8 +46,17 @@
                 <!-- Panel de Roles -->
                 <q-tab-panel name="roles">
                     <div class="text-h6">Gestión de Roles</div>
-                    <q-table :rows="roles" :columns="roleColumns" row-key="id" :loading="loadingRoles">
+                    <q-table :rows="filteredRoles" :columns="roleColumns" row-key="id" :loading="loadingRoles">
                         <template v-slot:top-right>
+                            <q-input v-model="roleSearch" dense outlined placeholder="Buscar rol..." class="q-mr-md"
+                                style="min-width: 200px">
+                                <template v-slot:prepend>
+                                    <q-icon name="search" />
+                                </template>
+                                <template v-slot:append v-if="roleSearch">
+                                    <q-icon name="close" class="cursor-pointer" @click="roleSearch = ''" />
+                                </template>
+                            </q-input>
                             <q-btn color="primary" icon="add" label="Nuevo Rol" @click="openRoleModal()" />
                         </template>
                         <template v-slot:body-cell-actions="props">
@@ -57,9 +75,30 @@
 
                 <!-- Panel de Permisos -->
                 <q-tab-panel name="permissions">
-                    <div class="text-h6">Listado de Permisos</div>
-                    <q-table :rows="permissions" :columns="permissionColumns" row-key="id"
-                        :loading="loadingPermissions" />
+                    <div class="text-h6">Gestión de Permisos</div>
+                    <q-table :rows="filteredPermissions" :columns="permissionColumns" row-key="id"
+                        :loading="loadingPermissions">
+                        <template v-slot:top-right>
+                            <q-input v-model="permissionSearch" dense outlined placeholder="Buscar permiso..."
+                                class="q-mr-md" style="min-width: 200px">
+                                <template v-slot:prepend>
+                                    <q-icon name="search" />
+                                </template>
+                                <template v-slot:append v-if="permissionSearch">
+                                    <q-icon name="close" class="cursor-pointer" @click="permissionSearch = ''" />
+                                </template>
+                            </q-input>
+                            <q-btn color="primary" icon="add" label="Nuevo Permiso" @click="openPermissionModal()" />
+                        </template>
+                        <template v-slot:body-cell-actions="props">
+                            <q-td :props="props">
+                                <q-btn flat round dense color="primary" icon="edit"
+                                    @click="openPermissionModal(props.row)" />
+                                <q-btn flat round dense color="negative" icon="delete"
+                                    @click="confirmDeletePermission(props.row)" />
+                            </q-td>
+                        </template>
+                    </q-table>
                 </q-tab-panel>
             </q-tab-panels>
         </q-card>
@@ -132,6 +171,16 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Duración de sesión -->
+                        <q-input v-model.number="userForm.session_timeout_min" label="Duración de sesión (minutos)"
+                            type="number" min="0"
+                            hint="Opcional: deje en 0 o vacío para usar la configuración del rol o global"
+                            class="q-mt-md">
+                            <template v-slot:prepend>
+                                <q-icon name="timer" />
+                            </template>
+                        </q-input>
                         <div class="row justify-end q-mt-md">
                             <q-btn label="Cancelar" color="negative" flat v-close-popup />
                             <q-btn label="Guardar" type="submit" color="primary" />
@@ -151,6 +200,16 @@
                     <q-form @submit="saveRole">
                         <q-input v-model="roleForm.name" label="Nombre" :rules="[val => !!val || 'Requerido']" />
                         <q-input v-model="roleForm.description" label="Descripción" />
+
+                        <!-- Duración de sesión para usuarios con este rol -->
+                        <q-input v-model.number="roleForm.session_timeout_min" label="Duración de sesión (minutos)"
+                            type="number" min="0" hint="Opcional: deje en 0 o vacío para usar la configuración global"
+                            class="q-mt-md">
+                            <template v-slot:prepend>
+                                <q-icon name="timer" />
+                            </template>
+                        </q-input>
+
                         <div class="row justify-end q-mt-md">
                             <q-btn label="Cancelar" color="negative" flat v-close-popup />
                             <q-btn label="Guardar" type="submit" color="primary" />
@@ -167,7 +226,15 @@
                     <div class="text-h6">Asignar Roles a {{ selectedUser?.first_name }}</div>
                 </q-card-section>
                 <q-card-section>
-                    <div v-for="role in roles" :key="role.id" class="q-mb-sm">
+                    <q-input v-model="assignRoleSearch" dense outlined placeholder="Buscar rol..." class="q-mb-md">
+                        <template v-slot:prepend>
+                            <q-icon name="search" />
+                        </template>
+                        <template v-slot:append v-if="assignRoleSearch">
+                            <q-icon name="close" class="cursor-pointer" @click="assignRoleSearch = ''" />
+                        </template>
+                    </q-input>
+                    <div v-for="role in filteredRolesForAssign" :key="role.id" class="q-mb-sm">
                         <q-checkbox v-model="userRolesSelection" :val="role.id" :label="role.name"
                             @update:model-value="toggleRole(role.id)" />
                     </div>
@@ -185,7 +252,16 @@
                     <div class="text-h6">Asignar Permisos a {{ selectedRole?.name }}</div>
                 </q-card-section>
                 <q-card-section style="max-height: 50vh" class="scroll">
-                    <div v-for="perm in permissions" :key="perm.id" class="q-mb-sm">
+                    <q-input v-model="assignPermissionSearch" dense outlined placeholder="Buscar permiso..."
+                        class="q-mb-md">
+                        <template v-slot:prepend>
+                            <q-icon name="search" />
+                        </template>
+                        <template v-slot:append v-if="assignPermissionSearch">
+                            <q-icon name="close" class="cursor-pointer" @click="assignPermissionSearch = ''" />
+                        </template>
+                    </q-input>
+                    <div v-for="perm in filteredPermissionsForAssign" :key="perm.id" class="q-mb-sm">
                         <q-checkbox v-model="rolePermissionsSelection" :val="perm.id"
                             :label="perm.name + ' - ' + perm.description"
                             @update:model-value="togglePermission(perm.id)" />
@@ -194,6 +270,39 @@
                 <q-card-actions align="right">
                     <q-btn flat label="Cerrar" color="primary" v-close-popup />
                 </q-card-actions>
+            </q-card>
+        </q-dialog>
+
+        <!-- Modal Permiso -->
+        <q-dialog v-model="permissionModalOpen">
+            <q-card style="min-width: 400px">
+                <q-card-section>
+                    <div class="text-h6">{{ editingPermission ? 'Editar Permiso' : 'Nuevo Permiso' }}</div>
+                </q-card-section>
+                <q-card-section>
+                    <q-form @submit="savePermission">
+                        <q-input v-model="permissionForm.name" label="Nombre" :rules="[val => !!val || 'Requerido']"
+                            hint="Ejemplo: create_user, delete_role, view_reports" />
+                        <div class="row q-col-gutter-md q-mt-sm">
+                            <div class="col-6">
+                                <q-input v-model="permissionForm.resource" label="Recurso"
+                                    :rules="[val => !!val || 'Requerido']" hint="Ej: users, roles, revistas" />
+                            </div>
+                            <div class="col-6">
+                                <q-select v-model="permissionForm.action" label="Acción"
+                                    :rules="[val => !!val || 'Requerido']"
+                                    :options="['create', 'read', 'update', 'delete', 'assign', 'remove', 'export', 'import']"
+                                    hint="Tipo de acción" />
+                            </div>
+                        </div>
+                        <q-input v-model="permissionForm.description" label="Descripción" class="q-mt-md"
+                            hint="Descripción breve de lo que permite este permiso" />
+                        <div class="row justify-end q-mt-md">
+                            <q-btn label="Cancelar" color="negative" flat v-close-popup />
+                            <q-btn label="Guardar" type="submit" color="primary" />
+                        </div>
+                    </q-form>
+                </q-card-section>
             </q-card>
         </q-dialog>
 
@@ -220,7 +329,7 @@ const userColumns = [
 ]
 const userModalOpen = ref(false)
 const editingUser = ref(false)
-const userForm = reactive({ id: null, first_name: '', last_name: '', cedula: '', email: '', password: '', confirmPassword: '' })
+const userForm = reactive({ id: null, first_name: '', last_name: '', cedula: '', email: '', password: '', confirmPassword: '', session_timeout_min: null })
 const isPasswordVisible = ref(false)
 const isConfirmPasswordVisible = ref(false)
 const selectedUser = ref(null)
@@ -237,7 +346,7 @@ const roleColumns = [
 ]
 const roleModalOpen = ref(false)
 const editingRole = ref(false)
-const roleForm = reactive({ id: null, name: '', description: '' })
+const roleForm = reactive({ id: null, name: '', description: '', session_timeout_min: null })
 const selectedRole = ref(null)
 const assignPermissionModalOpen = ref(false)
 const rolePermissionsSelection = ref([])
@@ -247,8 +356,73 @@ const permissions = ref([])
 const loadingPermissions = ref(false)
 const permissionColumns = [
     { name: 'name', label: 'Nombre', field: 'name', align: 'left' },
-    { name: 'description', label: 'Descripción', field: 'description', align: 'left' }
+    { name: 'resource', label: 'Recurso', field: 'resource', align: 'left' },
+    { name: 'action', label: 'Acción', field: 'action', align: 'left' },
+    { name: 'description', label: 'Descripción', field: 'description', align: 'left' },
+    { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' }
 ]
+const permissionModalOpen = ref(false)
+const editingPermission = ref(false)
+const permissionForm = reactive({ id: null, name: '', resource: '', action: '', description: '' })
+
+// --- Búsquedas ---
+const userSearch = ref('')
+const roleSearch = ref('')
+const permissionSearch = ref('')
+const assignRoleSearch = ref('')
+const assignPermissionSearch = ref('')
+
+// --- Computed para filtrar ---
+const filteredUsers = computed(() => {
+    if (!userSearch.value) return users.value
+    const search = userSearch.value.toLowerCase()
+    return users.value.filter(u =>
+        String(u.first_name || '').toLowerCase().includes(search) ||
+        String(u.last_name || '').toLowerCase().includes(search) ||
+        String(u.cedula || '').toLowerCase().includes(search) ||
+        String(u.email || '').toLowerCase().includes(search)
+    )
+})
+
+const filteredRoles = computed(() => {
+    if (!roleSearch.value) return roles.value
+    const search = roleSearch.value.toLowerCase()
+    return roles.value.filter(r =>
+        r.name?.toLowerCase().includes(search) ||
+        r.description?.toLowerCase().includes(search)
+    )
+})
+
+const filteredPermissions = computed(() => {
+    if (!permissionSearch.value) return permissions.value
+    const search = permissionSearch.value.toLowerCase()
+    return permissions.value.filter(p =>
+        p.name?.toLowerCase().includes(search) ||
+        p.resource?.toLowerCase().includes(search) ||
+        p.action?.toLowerCase().includes(search) ||
+        p.description?.toLowerCase().includes(search)
+    )
+})
+
+const filteredRolesForAssign = computed(() => {
+    if (!assignRoleSearch.value) return roles.value
+    const search = assignRoleSearch.value.toLowerCase()
+    return roles.value.filter(r =>
+        r.name?.toLowerCase().includes(search) ||
+        r.description?.toLowerCase().includes(search)
+    )
+})
+
+const filteredPermissionsForAssign = computed(() => {
+    if (!assignPermissionSearch.value) return permissions.value
+    const search = assignPermissionSearch.value.toLowerCase()
+    return permissions.value.filter(p =>
+        p.name?.toLowerCase().includes(search) ||
+        p.resource?.toLowerCase().includes(search) ||
+        p.action?.toLowerCase().includes(search) ||
+        p.description?.toLowerCase().includes(search)
+    )
+})
 
 // --- Carga Inicial ---
 onMounted(() => {
@@ -277,7 +451,7 @@ const openUserModal = (user = null) => {
         Object.assign(userForm, user)
     } else {
         editingUser.value = false
-        Object.assign(userForm, { id: null, first_name: '', last_name: '', cedula: '', email: '', password: '', confirmPassword: '' })
+        Object.assign(userForm, { id: null, first_name: '', last_name: '', cedula: '', email: '', password: '', confirmPassword: '', session_timeout_min: null })
         isPasswordVisible.value = false
         isConfirmPasswordVisible.value = false
     }
@@ -337,7 +511,7 @@ const openRoleModal = (role = null) => {
         Object.assign(roleForm, role)
     } else {
         editingRole.value = false
-        Object.assign(roleForm, { id: null, name: '', description: '' })
+        Object.assign(roleForm, { id: null, name: '', description: '', session_timeout_min: null })
     }
     roleModalOpen.value = true
 }
@@ -387,6 +561,52 @@ const fetchPermissions = async () => {
     } finally {
         loadingPermissions.value = false
     }
+}
+
+const openPermissionModal = (permission = null) => {
+    if (permission) {
+        editingPermission.value = true
+        Object.assign(permissionForm, permission)
+    } else {
+        editingPermission.value = false
+        Object.assign(permissionForm, { id: null, name: '', resource: '', action: '', description: '' })
+    }
+    permissionModalOpen.value = true
+}
+
+const savePermission = async () => {
+    try {
+        if (editingPermission.value) {
+            await api.put(`/permissions/${permissionForm.id}`, permissionForm)
+            $q.notify({ type: 'positive', message: 'Permiso actualizado' })
+        } else {
+            await api.post('/permissions', permissionForm)
+            $q.notify({ type: 'positive', message: 'Permiso creado' })
+        }
+        permissionModalOpen.value = false
+        fetchPermissions()
+    } catch (error) {
+        const msg = error.response?.data?.error || 'Error al guardar permiso'
+        $q.notify({ type: 'negative', message: msg })
+    }
+}
+
+const confirmDeletePermission = (permission) => {
+    $q.dialog({
+        title: 'Confirmar',
+        message: `¿Eliminar permiso "${permission.name}"? Se quitará de todos los roles y usuarios que lo tengan asignado.`,
+        cancel: true,
+        persistent: true
+    }).onOk(async () => {
+        try {
+            await api.delete(`/permissions/${permission.id}`)
+            $q.notify({ type: 'positive', message: 'Permiso eliminado' })
+            fetchPermissions()
+        } catch (error) {
+            const msg = error.response?.data?.error || 'Error al eliminar permiso'
+            $q.notify({ type: 'negative', message: msg })
+        }
+    })
 }
 
 // --- Asignaciones ---

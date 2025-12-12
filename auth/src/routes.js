@@ -13,6 +13,9 @@ const {
   createRole,
   listRoles,
   listPermissions,
+  createPermission,
+  updatePermission,
+  deletePermission,
   listRolesPermissions,
   listUserssPermissions,
   listUserRoles,
@@ -118,6 +121,9 @@ router.delete('/roles/:roleId', authenticate, authorize('delete_role'), deleteRo
 
 // Permisos
 router.get("/permissions", listPermissions); // Listar permisos
+router.post("/permissions", authenticate, authorize("create_permission"), createPermission); // Crear permiso
+router.put("/permissions/:permissionId", authenticate, authorize("update_permission"), updatePermission); // Actualizar permiso
+router.delete("/permissions/:permissionId", authenticate, authorize("delete_permission"), deletePermission); // Eliminar permiso
 router.get("/roles_permissions", listRolesPermissions); // Listar permisos roles
 router.get("/users_permissions", listUserssPermissions); // Listar permisos usuarios
 router.get("/users_roles", listUserRoles); // Listar roles usuarios

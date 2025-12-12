@@ -460,9 +460,6 @@ const onSave = (e) => {
   const formatoNombre = formatoSeleccionado?.label?.toUpperCase() ||
     (typeof localForm.value.formato === 'object' ? localForm.value.formato?.label?.toUpperCase() : '') || '';
 
-  // Debug: ver valores (quitar después de confirmar que funciona)
-  console.log('Formato value:', formatoValue, 'Nombre:', formatoNombre);
-
   // Validar que al menos un par (impreso o digital) esté completo
   const tieneImpreso = hasIssnImpreso && hasDepositoImpreso;
   const tieneDigital = hasIssnDigital && hasDepositoDigital;
