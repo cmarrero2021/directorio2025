@@ -451,9 +451,17 @@ const onSave = (e) => {
   const hasIssnDigital = !!localForm.value.issn_digital?.trim();
   const hasDepositoDigital = !!localForm.value.deposito_legal_digital?.trim();
 
-  // Obtener el nombre del formato seleccionado (buscar en las opciones)
-  const formatoSeleccionado = props.optionsu?.formato?.find(f => f.value === localForm.value.formato);
-  const formatoNombre = formatoSeleccionado?.label?.toUpperCase() || '';
+  // Obtener el nombre del formato seleccionado
+  // localForm.value.formato puede ser un objeto {label, value} o solo el valor
+  const formatoValue = typeof localForm.value.formato === 'object'
+    ? localForm.value.formato?.value
+    : localForm.value.formato;
+  const formatoSeleccionado = props.optionsu?.formato?.find(f => String(f.value) === String(formatoValue));
+  const formatoNombre = formatoSeleccionado?.label?.toUpperCase() ||
+    (typeof localForm.value.formato === 'object' ? localForm.value.formato?.label?.toUpperCase() : '') || '';
+
+  // Debug: ver valores (quitar después de confirmar que funciona)
+  console.log('Formato value:', formatoValue, 'Nombre:', formatoNombre);
 
   // Validar que al menos un par (impreso o digital) esté completo
   const tieneImpreso = hasIssnImpreso && hasDepositoImpreso;

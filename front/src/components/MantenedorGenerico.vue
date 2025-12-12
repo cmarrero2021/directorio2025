@@ -139,8 +139,8 @@ const props = defineProps({
     }
 });
 
-// Quitar barra final de la URL si existe
-const apiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || '';
+// Usar auth service para mantenedores (requieren autenticación)
+const authApiUrl = import.meta.env.VITE_AUTH_API_URL?.replace(/\/$/, '') || '';
 const registros = ref([]);
 const busqueda = ref('');
 const loading = ref(false);
@@ -182,7 +182,7 @@ const registrosFiltrados = computed(() => {
 const cargarRegistros = async () => {
     loading.value = true;
     try {
-        const response = await axios.get(`${apiUrl}/mantenedor/${props.tabla}`);
+        const response = await axios.get(`${authApiUrl}/mantenedor/${props.tabla}`);
         registros.value = response.data;
     } catch (error) {
         console.error('Error al cargar registros:', error);
@@ -242,14 +242,14 @@ const guardar = async () => {
     guardando.value = true;
     try {
         if (modoEdicion.value) {
-            await axios.put(`${apiUrl}/mantenedor/${props.tabla}/${formData.value.id}`, formData.value);
+            await axios.put(`${authApiUrl}/mantenedor/${props.tabla}/${formData.value.id}`, formData.value);
             Notify.create({
                 type: 'positive',
                 message: `${props.tituloSingular} actualizado correctamente`,
                 position: 'top'
             });
         } else {
-            await axios.post(`${apiUrl}/mantenedor/${props.tabla}`, formData.value);
+            await axios.post(`${authApiUrl}/mantenedor/${props.tabla}`, formData.value);
             Notify.create({
                 type: 'positive',
                 message: `${props.tituloSingular} creado correctamente`,
@@ -289,7 +289,7 @@ const confirmarEliminar = async (registro) => {
 
     if (result.isConfirmed) {
         try {
-            await axios.delete(`${apiUrl}/mantenedor/${props.tabla}/${registro.id}`);
+            await axios.delete(`${authApiUrl}/mantenedor/${props.tabla}/${registro.id}`);
             Notify.create({
                 type: 'positive',
                 message: 'Registro eliminado correctamente',

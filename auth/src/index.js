@@ -31,7 +31,12 @@ app.use(express.json());
 // Servir archivos estáticos desde la carpeta uploads
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/public/portadas', express.static(path.join(__dirname, 'uploads')));
-// Rutas
+
+// Rutas de mantenedores
+const mantenedoresRoutes = require('./mantenedores');
+app.use('/auth/mantenedor', mantenedoresRoutes);
+
+// Rutas principales
 // app.use('/api', routes);
 app.use('/auth', routes);
 

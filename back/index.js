@@ -111,10 +111,6 @@ app.use('/portadas', (req, res, next) => {
 // Hacer pool disponible para las rutas
 app.set('pool', pool);
 
-// Importar y usar rutas de mantenedores
-const mantenedoresRoutes = require('./routes/mantenedores');
-app.use('/mantenedor', mantenedoresRoutes);
-
 // Ruta GET para obtener todas las revistas
 app.get('/', async (req, res) => {
   try {

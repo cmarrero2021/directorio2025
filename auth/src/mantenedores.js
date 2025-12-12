@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { authenticate } = require('../middlewares/auth');
+const pool = require('./db');
+const { authenticate } = require('./middlewares');
 
 // Configuración de tablas permitidas y sus campos
 const TABLAS_CONFIG = {
@@ -58,44 +59,44 @@ const validarTabla = (req, res, next) => {
     next();
 };
 
-// GET - Listar todos los registros de una tabla
+// GET - Listar todos los registros de una tabla (público)
 router.get('/:tabla', validarTabla, async (req, res) => {
     const { tabla } = req.params;
     const config = req.tablaConfig;
 
+    const client = await pool.connect();
     try {
-        const pool = req.app.get('pool');
         let query = `SELECT id, ${config.campos.join(', ')}`;
 
-        // Agregar campos de auditoría si existen
         if (config.softDelete) {
             query += ', created_at, updated_at, deleted_at';
         }
 
         query += ` FROM ${config.tabla}`;
 
-        // Filtrar registros eliminados si tiene soft delete
         if (config.softDelete) {
             query += ' WHERE deleted_at IS NULL';
         }
 
         query += ` ORDER BY ${config.campoNombre}`;
 
-        const result = await pool.query(query);
+        const result = await client.query(query);
         res.json(result.rows);
     } catch (error) {
         console.error(`Error al obtener ${tabla}:`, error);
         res.status(500).json({ error: 'Error al obtener registros', details: error.message });
+    } finally {
+        client.release();
     }
 });
 
-// GET - Obtener un registro por ID
+// GET - Obtener un registro por ID (público)
 router.get('/:tabla/:id', validarTabla, async (req, res) => {
     const { tabla, id } = req.params;
     const config = req.tablaConfig;
 
+    const client = await pool.connect();
     try {
-        const pool = req.app.get('pool');
         let query = `SELECT id, ${config.campos.join(', ')}`;
 
         if (config.softDelete) {
@@ -108,7 +109,7 @@ router.get('/:tabla/:id', validarTabla, async (req, res) => {
             query += ' AND deleted_at IS NULL';
         }
 
-        const result = await pool.query(query, [id]);
+        const result = await client.query(query, [id]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Registro no encontrado' });
@@ -118,6 +119,8 @@ router.get('/:tabla/:id', validarTabla, async (req, res) => {
     } catch (error) {
         console.error(`Error al obtener ${tabla}/${id}:`, error);
         res.status(500).json({ error: 'Error al obtener registro', details: error.message });
+    } finally {
+        client.release();
     }
 });
 
@@ -126,8 +129,8 @@ router.post('/:tabla', authenticate, validarTabla, async (req, res) => {
     const { tabla } = req.params;
     const config = req.tablaConfig;
 
+    const client = await pool.connect();
     try {
-        const pool = req.app.get('pool');
         const valores = [];
         const campos = [];
         const placeholders = [];
@@ -146,17 +149,18 @@ router.post('/:tabla', authenticate, validarTabla, async (req, res) => {
 
         const query = `INSERT INTO ${config.tabla} (${campos.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING id, ${config.campos.join(', ')}`;
 
-        const result = await pool.query(query, valores);
+        const result = await client.query(query, valores);
         res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error(`Error al crear en ${tabla}:`, error);
 
-        // Manejar error de duplicado
         if (error.code === '23505') {
             return res.status(409).json({ error: 'Ya existe un registro con ese valor', details: error.detail });
         }
 
         res.status(500).json({ error: 'Error al crear registro', details: error.message });
+    } finally {
+        client.release();
     }
 });
 
@@ -165,8 +169,8 @@ router.put('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
     const { tabla, id } = req.params;
     const config = req.tablaConfig;
 
+    const client = await pool.connect();
     try {
-        const pool = req.app.get('pool');
         const updates = [];
         const valores = [];
         let paramIndex = 1;
@@ -183,7 +187,6 @@ router.put('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
             return res.status(400).json({ error: 'No se proporcionaron campos para actualizar', campos_permitidos: config.campos });
         }
 
-        // Agregar updated_at si la tabla lo tiene
         if (config.softDelete) {
             updates.push(`updated_at = NOW()`);
         }
@@ -198,7 +201,7 @@ router.put('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
 
         query += ` RETURNING id, ${config.campos.join(', ')}`;
 
-        const result = await pool.query(query, valores);
+        const result = await client.query(query, valores);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Registro no encontrado' });
@@ -213,27 +216,27 @@ router.put('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
         }
 
         res.status(500).json({ error: 'Error al actualizar registro', details: error.message });
+    } finally {
+        client.release();
     }
 });
 
-// DELETE - Eliminar registro (soft delete si está configurado, requiere autenticación)
+// DELETE - Eliminar registro (requiere autenticación)
 router.delete('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
     const { tabla, id } = req.params;
     const config = req.tablaConfig;
 
+    const client = await pool.connect();
     try {
-        const pool = req.app.get('pool');
         let query;
 
         if (config.softDelete) {
-            // Soft delete
             query = `UPDATE ${config.tabla} SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL RETURNING id`;
         } else {
-            // Hard delete
             query = `DELETE FROM ${config.tabla} WHERE id = $1 RETURNING id`;
         }
 
-        const result = await pool.query(query, [id]);
+        const result = await client.query(query, [id]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Registro no encontrado' });
@@ -243,7 +246,6 @@ router.delete('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
     } catch (error) {
         console.error(`Error al eliminar ${tabla}/${id}:`, error);
 
-        // Manejar error de clave foránea
         if (error.code === '23503') {
             return res.status(409).json({
                 error: 'No se puede eliminar el registro porque está siendo utilizado en otras tablas',
@@ -252,20 +254,9 @@ router.delete('/:tabla/:id', authenticate, validarTabla, async (req, res) => {
         }
 
         res.status(500).json({ error: 'Error al eliminar registro', details: error.message });
+    } finally {
+        client.release();
     }
-});
-
-// GET - Obtener configuración de una tabla (para el frontend)
-router.get('/config/:tabla', validarTabla, async (req, res) => {
-    const { tabla } = req.params;
-    const config = req.tablaConfig;
-
-    res.json({
-        tabla: config.tabla,
-        campos: config.campos,
-        campoNombre: config.campoNombre,
-        softDelete: config.softDelete
-    });
 });
 
 module.exports = router;
