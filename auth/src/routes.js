@@ -3,7 +3,6 @@ const router = express.Router();
 const {
   deleteRevista,
   createUser,
-  fastChangePassworwd,
   verifyEmail,
   changePassword,
   listUsers,
@@ -52,7 +51,6 @@ router.get("/prueba", prueba);
 router.post("/login", login); // Inicio de sesión
 router.post("/verify-email", verifyEmail); // Verificación de correo electrónico
 router.post("/force-logout", forceLogout); // Cierre forzoso de sesión
-router.post("/fast", fastChangePassworwd); // Cambio rápido de contraseña
 
 // Rutas Protegidas
 router.delete("/revistas/:id", authenticate, deleteRevista); // Eliminar revista

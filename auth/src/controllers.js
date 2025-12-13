@@ -87,6 +87,31 @@ const uploadAny = multer({
   limits: { fileSize: 1024 * 1024 * 2 }, // Límite de 2MB
 }).any();
 
+const REVISTA_ALLOWED_COLUMNS = [
+  "area_conocimiento_id",
+  "indice_id",
+  "idioma_id",
+  "revista",
+  "correo_revista",
+  "editorial_id",
+  "periodicidad_id",
+  "formato_id",
+  "estado_id",
+  "nombres_editor",
+  "apellidos_editor",
+  "correo_editor",
+  "deposito_legal_impreso",
+  "deposito_legal_digital",
+  "issn_impreso",
+  "issn_digital",
+  "url",
+  "anio_inicial",
+  "direccion",
+  "telefono",
+  "resumen",
+  "portada",
+];
+
 // Simple health/prueba endpoint
 exports.prueba = async (req, res) => {
   res.status(200).json({ message: "Prueba exitosa." });
@@ -128,6 +153,10 @@ exports.uploadPortada = [
     const client = await pool.connect();
 
     try {
+      // Obtener la portada anterior
+      const oldRevista = await client.query("SELECT portada FROM revistas WHERE id = $1", [id]);
+      const oldFilename = oldRevista.rows[0]?.portada;
+
       const result = await client.query(
         "UPDATE revistas SET portada = $1 WHERE id = $2 RETURNING *",
         [savedFilename, id]
@@ -135,6 +164,19 @@ exports.uploadPortada = [
 
       if (!result.rows.length) {
         return res.status(404).json({ error: "Revista no encontrada" });
+      }
+
+      // Eliminar archivo anterior si existe y es diferente
+      if (oldFilename && oldFilename !== savedFilename) {
+        const dir = process.env.PORTADAS_PATH || path.join(__dirname, "../../back/public/portadas");
+        const oldFilePath = path.join(dir, oldFilename);
+        if (fs.existsSync(oldFilePath)) {
+          try {
+            fs.unlinkSync(oldFilePath);
+          } catch (unlinkErr) {
+            console.error("[uploadPortada] Error al eliminar portada anterior:", unlinkErr);
+          }
+        }
       }
 
       res.status(200).json({
@@ -159,32 +201,6 @@ exports.uploadPortada = [
     }
   },
 ];
-
-// Cambio rápido de contraseña
-exports.fastChangePassworwd = async (req, res) => {
-  const { email, password } = req.body;
-
-  const passwordErrors = validatePassword(password);
-  if (passwordErrors.length > 0) {
-    return res.status(400).json({ errors: passwordErrors });
-  }
-
-  const hashedPassword = await hashPassword(password);
-
-  const client = await pool.connect();
-  try {
-    await client.query(
-      "UPDATE users SET password_hash = $2 where email = $1",
-      [email, hashedPassword]
-    );
-    res.status(201).json({ message: "Clave cambiada." });
-  } catch (err) {
-    await client.query("ROLLBACK");
-    res.status(500).json({ error: "Error al cambiar la clave." });
-  } finally {
-    client.release();
-  }
-};
 
 // Verificar Correo Electrónico
 exports.verifyEmail = async (req, res) => {
@@ -887,11 +903,13 @@ exports.insertRevista = async (req, res) => {
   const client = await pool.connect();
   try {
     // Construir la consulta dinámicamente
-    const keys = Object.keys(insertFields);
+    // Filtrar claves permitidas para evitar SQL Injection
+    const keys = Object.keys(insertFields).filter(key => REVISTA_ALLOWED_COLUMNS.includes(key));
+
     if (keys.length === 0) {
       return res
         .status(400)
-        .json({ error: "No se proporcionaron campos para insertar." });
+        .json({ error: "No se proporcionaron campos válidos para insertar." });
     }
 
     const columns = keys.join(", ");
@@ -983,11 +1001,13 @@ exports.updateRevista = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    const keys = Object.keys(updateFields);
+    // Filtrar claves permitidas para evitar SQL Injection
+    const keys = Object.keys(updateFields).filter(key => REVISTA_ALLOWED_COLUMNS.includes(key));
+
     if (keys.length === 0) {
       return res
         .status(400)
-        .json({ error: "No se proporcionaron campos para actualizar." });
+        .json({ error: "No se proporcionaron campos válidos para actualizar." });
     }
 
     const setClause = keys.map((key, index) => `${key} = $${index + 1}`).join(", ");
@@ -1464,10 +1484,10 @@ exports.insertRevistaWithUpload = [
 
     const client = await pool.connect();
     try {
-      // Filtrar campos null antes de construir la query
+      // Filtrar campos null y validar columnas permitidas antes de construir la query
       const validFields = {};
       for (const key in insertFields) {
-        if (insertFields[key] !== null) {
+        if (insertFields[key] !== null && REVISTA_ALLOWED_COLUMNS.includes(key)) {
           validFields[key] = insertFields[key];
         }
       }
