@@ -8,17 +8,22 @@ const app = express();
 const PORT = 4000;
 
 // Configuración CORS
+const defaultOrigins = [
+  'http://localhost:9000',
+  'http://localhost:4000',
+  'http://localhost:4001',
+  'http://directorio.minaamp.gob.ve',
+  'https://directorio.minaamp.gob.ve',
+  'https://backdirectorio.minaamp.gob.ve',
+  'https://authdirectorio.minaamp.gob.ve'
+];
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : defaultOrigins;
+
 app.use(cors({
-  origin: [
-    'http://localhost:9000',
-    // 'http://localhost:8080',
-    'http://localhost:4000',
-    'http://localhost:4001',
-    'http://directorio.minaamp.gob.ve',
-    'https://directorio.minaamp.gob.ve',
-    'https://backdirectorio.minaamp.gob.ve',
-    'https://authdirectorio.minaamp.gob.ve'
-  ],
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -825,31 +830,3 @@ app.get('/endpoints', (req, res) => {
 
   res.json(routes);
 });
-/*
-// Ruta para servir imágenes con CORS habilitado para cualquier dominio
-const portadasPath = path.join(__dirname, 'public', 'portadas');
-
-// Verificar si el directorio existe
-const fs = require('fs');
-if (!fs.existsSync(portadasPath)) {
-  console.error(`ERROR: El directorio de portadas no existe en: ${portadasPath}`);
-  console.log('Creando directorio...');
-  fs.mkdirSync(portadasPath, { recursive: true });
-}
-// Configurar middleware para servir archivos estáticos
-app.use('/portadas', express.static(portadasPath, {
-  setHeaders: (res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-  },
-  fallthrough: false // Para manejar mejor los errores 404
-}));
-
-// Middleware para manejar errores cuando no se encuentra un archivo
-app.use('/portadas', (req, res, next) => {
-  res.status(404).json({
-    error: 'Archivo no encontrado',
-    message: `La imagen ${req.path} no existe en el servidor`
-  });
-});
-*/

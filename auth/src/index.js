@@ -12,15 +12,21 @@ dotenv.config();
 const app = express();
 
 // Configuración de CORS
+const defaultOrigins = [
+    'http://localhost:9000',
+    'http://localhost:8080',
+    'http://directorio.minaamp.gob.ve',
+    'https://directorio.minaamp.gob.ve',
+    'http://authdirectorio.minaamp.gob.ve',
+    'https://authdirectorio.minaamp.gob.ve'
+];
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : defaultOrigins;
+
 app.use(cors({
-    origin: [
-        'http://localhost:9000',
-        'http://localhost:8080',
-        'http://directorio.minaamp.gob.ve',
-        'https://directorio.minaamp.gob.ve',
-        'http://authdirectorio.minaamp.gob.ve',
-        'https://authdirectorio.minaamp.gob.ve'
-    ],
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Métodos permitidos
     allowedHeaders: ['Content-Type', 'Authorization'], // Cabeceras permitidas
     credentials: true // Permite el envío de credenciales (cookies, tokens, etc.)
