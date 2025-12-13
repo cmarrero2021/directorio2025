@@ -70,7 +70,7 @@ const uploadStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Usar variable de entorno PORTADAS_PATH si está definida (producción)
     // Si no, usar la ruta relativa (desarrollo local)
-    const dir = process.env.PORTADAS_PATH || path.join(__dirname, "../../back/public/portadas");
+    const dir = process.env.PORTADAS_PATH || path.join(__dirname, "../../backend/public/portadas");
     ensureDir(dir);
     cb(null, dir);
   },
@@ -168,7 +168,7 @@ exports.uploadPortada = [
 
       // Eliminar archivo anterior si existe y es diferente
       if (oldFilename && oldFilename !== savedFilename) {
-        const dir = process.env.PORTADAS_PATH || path.join(__dirname, "../../back/public/portadas");
+        const dir = process.env.PORTADAS_PATH || path.join(__dirname, "../../backend/public/portadas");
         const oldFilePath = path.join(dir, oldFilename);
         if (fs.existsSync(oldFilePath)) {
           try {

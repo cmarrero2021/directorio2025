@@ -1,5 +1,5 @@
 const path = require('path');
-require('dotenv').config({ path: path.resolve(process.cwd(), '.env') });
+require('dotenv').config({ path: path.resolve(process.cwd(), `../.env.${process.env.NODE_ENV || 'development'}`) });
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors'); // Importar el paquete cors
@@ -52,7 +52,7 @@ app.get('/list-endpoints', (req, res) => {
     res.json(endpoints);
 });
 
-const PORT = process.env.PORT || 4001;
+const PORT = process.env.PORT_AUTH || 4100;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

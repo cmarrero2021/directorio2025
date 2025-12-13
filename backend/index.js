@@ -1,17 +1,18 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(process.cwd(), `../.env.${process.env.NODE_ENV || 'development'}`) });
 const express = require('express');
 const { Pool, Client } = require('pg');
 const cors = require('cors');
-const path = require('path');
 const WebSocket = require('ws');
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT_BACKEND || 4000;
 
 // Configuración CORS
 const defaultOrigins = [
   'http://localhost:9000',
   'http://localhost:4000',
-  'http://localhost:4001',
+  'http://localhost:4100',
   'http://directorio.minaamp.gob.ve',
   'https://directorio.minaamp.gob.ve',
   'https://backdirectorio.minaamp.gob.ve',
@@ -31,20 +32,20 @@ app.use(cors({
 
 // Configurar conexión a PostgreSQL para consultas regulares
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: '_api_revistas',
-  password: 'postgres',
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_DATABASE,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
 
 // Configurar cliente separado para escuchar notificaciones
 const notificationClient = new Client({
-  user: 'postgres',
-  host: 'localhost',
-  database: '_api_revistas',
-  password: 'postgres',
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_DATABASE,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
 
 // Iniciar servidor WebSocket
@@ -86,10 +87,10 @@ notificationClient.on('notification', (msg) => {
   }
 });
 /////////////////////////////////////////
+const fs = require('fs');
 const portadasPath = path.join(__dirname, 'public', 'portadas');
 
 // Verificar si el directorio existe
-const fs = require('fs');
 if (!fs.existsSync(portadasPath)) {
   console.error(`ERROR: El directorio de portadas no existe en: ${portadasPath}`);
   console.log('Creando directorio...');
