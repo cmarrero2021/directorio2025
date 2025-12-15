@@ -21,10 +21,12 @@ const PORT = process.env.PORT_BACKEND || 4000;
 //   'https://authdirectorio.minaamp.gob.ve'
 // ];
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-// ? 
-process.env.ALLOWED_ORIGINS.split(',')
-// : defaultOrigins;
+if (!process.env.ALLOWED_ORIGINS) {
+  throw new Error('ALLOWED_ORIGINS no está definido en el archivo .env');
+}
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
+
+console.log('allowedOrigins: ', allowedOrigins);
 
 app.use(cors({
   origin: allowedOrigins,
