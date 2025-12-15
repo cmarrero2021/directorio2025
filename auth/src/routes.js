@@ -41,7 +41,9 @@ const {
   insertRevistaWithUpload,
   getRevista,
   listLoginLogs,
-  listAuditLogs
+  listAuditLogs,
+  getSessionSettings,
+  updateSessionSettings
 } = require("./controllers");
 const { authenticate, authorize, checkBlacklist } = require("./middlewares");
 
@@ -84,7 +86,19 @@ router.patch(
   authorize("update_role_session_timeout"),
   updateRoleSessionTimeout
 );
-
+// Mantenimiento - Sesión
+router.get(
+  "/maintenance/session",
+  authenticate,
+  authorize("view_session_settings"),
+  getSessionSettings
+);
+router.put(
+  "/maintenance/session",
+  authenticate,
+  authorize("edit_session_settings"),
+  updateSessionSettings
+);
 // Usuarios
 router.post("/users", authenticate, authorize("create_user"), createUser); // Crear usuario (solo administradores)
 router.get("/users", authenticate, authorize("list_users"), listUsers); // Listar usuarios

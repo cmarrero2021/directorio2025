@@ -1591,3 +1591,57 @@ exports.listAuditLogs = async (req, res) => {
     client.release();
   }
 };
+// ==========================================
+// CONFIGURACIÓN DE SESIÓN (MANTENIMIENTO)
+// ==========================================
+
+exports.getSessionSettings = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT global_timeout FROM session_settings ORDER BY id ASC LIMIT 1');
+    if (result.rows.length === 0) {
+      // Si por alguna razón no hay registro, devolver default
+      return res.json({ global_timeout: 60 });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error al obtener configuración de sesión:', err);
+    res.status(500).json({ error: 'Error al obtener configuración.' });
+  } finally {
+    client.release();
+  }
+};
+
+exports.updateSessionSettings = async (req, res) => {
+  const { global_timeout } = req.body;
+  if (!global_timeout || isNaN(global_timeout) || global_timeout < 1) {
+    return res.status(400).json({ error: 'El tiempo de espera debe ser un número válido mayor a 0.' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await withAuditContext(client, req);
+
+    // Asumimos que siempre editamos el primer registro o insertamos si no existe (upsert check simple)
+    const check = await client.query('SELECT id FROM session_settings LIMIT 1');
+
+    if (check.rows.length > 0) {
+      await client.query(
+        'UPDATE session_settings SET global_timeout = $1, updated_at = NOW() WHERE id = $2',
+        [global_timeout, check.rows[0].id]
+      );
+    } else {
+      await client.query(
+        'INSERT INTO session_settings (global_timeout) VALUES ($1)',
+        [global_timeout]
+      );
+    }
+
+    res.json({ message: 'Configuración de sesión actualizada correctamente.' });
+  } catch (err) {
+    console.error('Error al actualizar configuración de sesión:', err);
+    res.status(500).json({ error: 'Error al actualizar configuración.' });
+  } finally {
+    client.release();
+  }
+};
