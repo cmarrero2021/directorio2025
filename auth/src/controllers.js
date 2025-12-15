@@ -3,7 +3,6 @@ exports.deleteRevista = async (req, res) => {
   const { id } = req.params;
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     const result = await client.query('DELETE FROM revistas WHERE id = $1 RETURNING *', [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Revista no encontrada.' });
@@ -58,7 +57,6 @@ const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 const moment = require("moment-timezone");
-const { withAuditContext } = require("./audit");
 
 // Ensure destination directory exists
 function ensureDir(dir) {
@@ -72,7 +70,7 @@ const uploadStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Usar variable de entorno PORTADAS_PATH si está definida (producción)
     // Si no, usar la ruta relativa (desarrollo local)
-    const dir = process.env.PORTADAS_PATH || path.join(__dirname, "../../back/public/portadas");
+    const dir = process.env.PORTADAS_PATH || path.join(__dirname, "../../backend/public/portadas");
     ensureDir(dir);
     cb(null, dir);
   },
@@ -88,6 +86,31 @@ const uploadAny = multer({
   storage: uploadStorage,
   limits: { fileSize: 1024 * 1024 * 2 }, // Límite de 2MB
 }).any();
+
+const REVISTA_ALLOWED_COLUMNS = [
+  "area_conocimiento_id",
+  "indice_id",
+  "idioma_id",
+  "revista",
+  "correo_revista",
+  "editorial_id",
+  "periodicidad_id",
+  "formato_id",
+  "estado_id",
+  "nombres_editor",
+  "apellidos_editor",
+  "correo_editor",
+  "deposito_legal_impreso",
+  "deposito_legal_digital",
+  "issn_impreso",
+  "issn_digital",
+  "url",
+  "anio_inicial",
+  "direccion",
+  "telefono",
+  "resumen",
+  "portada",
+];
 
 // Simple health/prueba endpoint
 exports.prueba = async (req, res) => {
@@ -130,7 +153,10 @@ exports.uploadPortada = [
     const client = await pool.connect();
 
     try {
-      await withAuditContext(client, req);
+      // Obtener la portada anterior
+      const oldRevista = await client.query("SELECT portada FROM revistas WHERE id = $1", [id]);
+      const oldFilename = oldRevista.rows[0]?.portada;
+
       const result = await client.query(
         "UPDATE revistas SET portada = $1 WHERE id = $2 RETURNING *",
         [savedFilename, id]
@@ -138,6 +164,19 @@ exports.uploadPortada = [
 
       if (!result.rows.length) {
         return res.status(404).json({ error: "Revista no encontrada" });
+      }
+
+      // Eliminar archivo anterior si existe y es diferente
+      if (oldFilename && oldFilename !== savedFilename) {
+        const dir = process.env.PORTADAS_PATH || path.join(__dirname, "../../backend/public/portadas");
+        const oldFilePath = path.join(dir, oldFilename);
+        if (fs.existsSync(oldFilePath)) {
+          try {
+            fs.unlinkSync(oldFilePath);
+          } catch (unlinkErr) {
+            console.error("[uploadPortada] Error al eliminar portada anterior:", unlinkErr);
+          }
+        }
       }
 
       res.status(200).json({
@@ -162,33 +201,6 @@ exports.uploadPortada = [
     }
   },
 ];
-
-// Cambio rápido de contraseña
-exports.fastChangePassworwd = async (req, res) => {
-  const { email, password } = req.body;
-
-  const passwordErrors = validatePassword(password);
-  if (passwordErrors.length > 0) {
-    return res.status(400).json({ errors: passwordErrors });
-  }
-
-  const hashedPassword = await hashPassword(password);
-
-  const client = await pool.connect();
-  try {
-    await withAuditContext(client, req);
-    await client.query(
-      "UPDATE users SET password_hash = $2 where email = $1",
-      [email, hashedPassword]
-    );
-    res.status(201).json({ message: "Clave cambiada." });
-  } catch (err) {
-    await client.query("ROLLBACK");
-    res.status(500).json({ error: "Error al cambiar la clave." });
-  } finally {
-    client.release();
-  }
-};
 
 // Verificar Correo Electrónico
 exports.verifyEmail = async (req, res) => {
@@ -315,7 +327,6 @@ exports.deleteUser = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     await client.query("UPDATE users SET deleted_at = NOW() WHERE id = $1", [
       userId,
     ]);
@@ -333,7 +344,6 @@ exports.deleteUserPermanently = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     await client.query("DELETE FROM users WHERE id = $1", [userId]);
     res.status(200).json({ message: "Usuario eliminado permanentemente." });
   } catch (err) {
@@ -354,7 +364,6 @@ exports.createRole = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     const result = await client.query(
       "INSERT INTO roles (name, description, session_timeout_min) VALUES ($1, $2, $3) RETURNING id",
       [name, description, timeout]
@@ -413,7 +422,6 @@ exports.createPermission = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     // Verificar si ya existe un permiso con ese nombre
     const exists = await client.query(
       "SELECT id FROM permissions WHERE name = $1",
@@ -454,7 +462,6 @@ exports.updatePermission = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     // Verificar si otro permiso ya tiene ese nombre
     const exists = await client.query(
       "SELECT id FROM permissions WHERE name = $1 AND id != $2",
@@ -491,7 +498,6 @@ exports.deletePermission = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     // Primero eliminar las asignaciones de este permiso a roles y usuarios
     await client.query("DELETE FROM role_permissions WHERE permission_id = $1", [permissionId]);
     await client.query("DELETE FROM user_permissions WHERE permission_id = $1", [permissionId]);
@@ -896,13 +902,14 @@ exports.insertRevista = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     // Construir la consulta dinámicamente
-    const keys = Object.keys(insertFields);
+    // Filtrar claves permitidas para evitar SQL Injection
+    const keys = Object.keys(insertFields).filter(key => REVISTA_ALLOWED_COLUMNS.includes(key));
+
     if (keys.length === 0) {
       return res
         .status(400)
-        .json({ error: "No se proporcionaron campos para insertar." });
+        .json({ error: "No se proporcionaron campos válidos para insertar." });
     }
 
     const columns = keys.join(", ");
@@ -994,12 +1001,13 @@ exports.updateRevista = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
-    const keys = Object.keys(updateFields);
+    // Filtrar claves permitidas para evitar SQL Injection
+    const keys = Object.keys(updateFields).filter(key => REVISTA_ALLOWED_COLUMNS.includes(key));
+
     if (keys.length === 0) {
       return res
         .status(400)
-        .json({ error: "No se proporcionaron campos para actualizar." });
+        .json({ error: "No se proporcionaron campos válidos para actualizar." });
     }
 
     const setClause = keys.map((key, index) => `${key} = $${index + 1}`).join(", ");
@@ -1213,7 +1221,6 @@ exports.updateRole = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     await client.query(
       "UPDATE roles SET name = $1, description = $2, session_timeout_min = $3, updated_at = NOW() WHERE id = $4",
       [name, description, timeout, roleId]
@@ -1235,7 +1242,6 @@ exports.deleteRole = async (req, res) => {
   const { roleId } = req.params;
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     await client.query("DELETE FROM roles WHERE id = $1", [roleId]);
     res.status(200).json({ message: "Rol eliminado exitosamente." });
   } catch (err) {
@@ -1257,7 +1263,6 @@ exports.assignRoleToUser = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     // Verificar si ya existe la asignación
     const check = await client.query(
       "SELECT * FROM user_roles WHERE user_id = $1 AND role_id = $2",
@@ -1287,7 +1292,6 @@ exports.removeRoleFromUser = async (req, res) => {
   const { userId, roleId } = req.body;
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     await client.query(
       "DELETE FROM user_roles WHERE user_id = $1 AND role_id = $2",
       [userId, roleId]
@@ -1312,7 +1316,6 @@ exports.assignPermissionToRole = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     const check = await client.query(
       "SELECT * FROM role_permissions WHERE role_id = $1 AND permission_id = $2",
       [roleId, permissionId]
@@ -1346,7 +1349,6 @@ exports.removePermissionFromRole = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     const result = await client.query(
       "DELETE FROM role_permissions WHERE role_id = $1 AND permission_id = $2",
       [roleId, permissionId]
@@ -1371,7 +1373,6 @@ exports.assignPermissionToUser = async (req, res) => {
   const { userId, permissionId } = req.body;
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     await client.query(
       "INSERT INTO user_permissions (user_id, permission_id) VALUES ($1, $2) ON CONFLICT (user_id, permission_id) DO NOTHING",
       [userId, permissionId]
@@ -1390,7 +1391,6 @@ exports.removePermissionFromUser = async (req, res) => {
   const { userId, permissionId } = req.body;
   const client = await pool.connect();
   try {
-    await withAuditContext(client, req);
     await client.query(
       "DELETE FROM user_permissions WHERE user_id = $1 AND permission_id = $2",
       [userId, permissionId]
@@ -1484,11 +1484,10 @@ exports.insertRevistaWithUpload = [
 
     const client = await pool.connect();
     try {
-      await withAuditContext(client, req);
-      // Filtrar campos null antes de construir la query
+      // Filtrar campos null y validar columnas permitidas antes de construir la query
       const validFields = {};
       for (const key in insertFields) {
-        if (insertFields[key] !== null) {
+        if (insertFields[key] !== null && REVISTA_ALLOWED_COLUMNS.includes(key)) {
           validFields[key] = insertFields[key];
         }
       }
@@ -1532,118 +1531,3 @@ exports.insertRevistaWithUpload = [
     }
   },
 ];
-
-// ================================
-// AUDITORÍA - LOGIN LOGS
-// ================================
-
-// Listar Login Logs
-exports.listLoginLogs = async (req, res) => {
-  const client = await pool.connect();
-  try {
-    const result = await client.query(
-      `SELECT 
-        id, 
-        user_id, 
-        username, 
-        ip_address::text as ip_address, 
-        login_status, 
-        login_timestamp, 
-        logout_type, 
-        logout_timestamp, 
-        session_token 
-      FROM login_logs 
-      ORDER BY id DESC`
-    );
-    res.status(200).json(result.rows);
-  } catch (err) {
-    console.error("Error al listar login logs:", err);
-    res.status(500).json({ error: "Error al listar los registros de ingreso." });
-  } finally {
-    client.release();
-  }
-};
-
-// Listar Audit Logs (Acciones)
-exports.listAuditLogs = async (req, res) => {
-  const client = await pool.connect();
-  try {
-    const result = await client.query(
-      `SELECT 
-        id,
-        fecha,
-        id_usuario,
-        usuario,
-        ip::text as ip,
-        tabla,
-        accion,
-        id_registro,
-        datos_anteriores,
-        datos_nuevos,
-        campos_modificados,
-        comando_sql
-      FROM vaudit_logs 
-      ORDER BY id DESC`
-    );
-    res.status(200).json(result.rows);
-  } catch (err) {
-    console.error("Error al listar audit logs:", err);
-    res.status(500).json({ error: "Error al listar los registros de acciones." });
-  } finally {
-    client.release();
-  }
-};
-// ==========================================
-// CONFIGURACIÓN DE SESIÓN (MANTENIMIENTO)
-// ==========================================
-
-exports.getSessionSettings = async (req, res) => {
-  const client = await pool.connect();
-  try {
-    const result = await client.query('SELECT global_timeout FROM session_settings ORDER BY id ASC LIMIT 1');
-    if (result.rows.length === 0) {
-      // Si por alguna razón no hay registro, devolver default
-      return res.json({ global_timeout: 60 });
-    }
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error('Error al obtener configuración de sesión:', err);
-    res.status(500).json({ error: 'Error al obtener configuración.' });
-  } finally {
-    client.release();
-  }
-};
-
-exports.updateSessionSettings = async (req, res) => {
-  const { global_timeout } = req.body;
-  if (!global_timeout || isNaN(global_timeout) || global_timeout < 1) {
-    return res.status(400).json({ error: 'El tiempo de espera debe ser un número válido mayor a 0.' });
-  }
-
-  const client = await pool.connect();
-  try {
-    await withAuditContext(client, req);
-
-    // Asumimos que siempre editamos el primer registro o insertamos si no existe (upsert check simple)
-    const check = await client.query('SELECT id FROM session_settings LIMIT 1');
-
-    if (check.rows.length > 0) {
-      await client.query(
-        'UPDATE session_settings SET global_timeout = $1, updated_at = NOW() WHERE id = $2',
-        [global_timeout, check.rows[0].id]
-      );
-    } else {
-      await client.query(
-        'INSERT INTO session_settings (global_timeout) VALUES ($1)',
-        [global_timeout]
-      );
-    }
-
-    res.json({ message: 'Configuración de sesión actualizada correctamente.' });
-  } catch (err) {
-    console.error('Error al actualizar configuración de sesión:', err);
-    res.status(500).json({ error: 'Error al actualizar configuración.' });
-  } finally {
-    client.release();
-  }
-};

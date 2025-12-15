@@ -1,51 +1,6 @@
 const jwt = require("jsonwebtoken");
 const pool = require("./db");
 
-// Middleware para autenticación
-/*
-exports.authenticate = async (req, res, next) => {
-    const token = req.header('Authorization')?.split(' ')[1];
-    if (!token) return res.status(401).json({ error: 'Acceso denegado. Token no proporcionado.' });
-
-    try {
-        // Verificar si el token está en la lista negra
-        const blacklistResult = await pool.query('SELECT * FROM blacklisted_tokens WHERE token = $1 AND expires_at > NOW()', [token]);
-        if (blacklistResult.rows.length) {
-            return res.status(401).json({ error: 'Sesión expirada. Por favor, inicia sesión nuevamente.' });
-        }
-
-        // Decodificar el token JWT
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.userId = decoded.userId;
-////////////////////////
-const sessionResult = await pool.query(
-    'SELECT expires_at FROM sessions WHERE token = $1 AND is_revoked = FALSE', 
-    [token]
-  );
-  
-  if (!sessionResult.rows.length) {
-    return res.status(401).json({ error: 'Sesión no encontrada o revocada.' });
-  }
-  
-  const expiresAt = sessionResult.rows[0].expires_at;
-  if (new Date(expiresAt) < new Date()) {
-    return res.status(401).json({ error: 'Sesión expirada. Por favor, inicia sesión nuevamente.' });
-  }
-////////////////////////
-        next();
-    } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            // Registrar el vencimiento de la sesión en la auditoría
-            await pool.query(
-                'UPDATE login_logs SET logout_type = $1, logout_timestamp = NOW() WHERE session_token = $2',
-                ['expired', token]
-            );
-            return res.status(401).json({ error: 'La sesión ha expirado. Por favor, inicia sesión nuevamente.' });
-        }
-        res.status(400).json({ error: 'Token inválido.' });
-    }
-};
-*/
 // Middleware para autenticación y verificación de expiración de sesión
 exports.authenticate = async (req, res, next) => {
   const token = req.header("Authorization")?.split(" ")[1];
@@ -76,10 +31,7 @@ exports.authenticate = async (req, res, next) => {
 
     // Verificar si la sesión está activa y no revocada
     const sessionResult = await client.query(
-      `SELECT s.expires_at, u.email, u.first_name, u.last_name 
-       FROM sessions s
-       JOIN users u ON s.user_id = u.id
-       WHERE s.token = $1 AND s.is_revoked = FALSE`,
+      "SELECT expires_at FROM sessions WHERE token = $1 AND is_revoked = FALSE",
       [token]
     );
 
@@ -89,8 +41,7 @@ exports.authenticate = async (req, res, next) => {
         .json({ error: "Sesión no encontrada o revocada." });
     }
 
-    const sessionData = sessionResult.rows[0];
-    const expiresAt = new Date(sessionData.expires_at);
+    const expiresAt = new Date(sessionResult.rows[0].expires_at);
     const currentTime = new Date();
     // Restar 10 segundos a expiresAt
 
@@ -114,14 +65,6 @@ exports.authenticate = async (req, res, next) => {
           error: "La sesión ha expirado. Se ha realizado un logout automático.",
         });
     }
-
-    // Adjuntar usuario al request para uso en auditoría
-    req.user = {
-      id: req.userId,
-      email: sessionData.email,
-      name: `${sessionData.first_name} ${sessionData.last_name}`
-    };
-    req.username = sessionData.email; // Compatibilidad con extractAuditContext
 
     next(); // Continuar con la petición si la sesión no ha expirado
   } catch (err) {

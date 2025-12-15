@@ -3,7 +3,6 @@ const router = express.Router();
 const {
   deleteRevista,
   createUser,
-  fastChangePassworwd,
   verifyEmail,
   changePassword,
   listUsers,
@@ -40,11 +39,7 @@ const {
   deleteRole,
   testUpload,
   insertRevistaWithUpload,
-  getRevista,
-  listLoginLogs,
-  listAuditLogs,
-  getSessionSettings,
-  updateSessionSettings
+  getRevista
 } = require("./controllers");
 const { authenticate, authorize, checkBlacklist } = require("./middlewares");
 
@@ -56,25 +51,36 @@ router.get("/prueba", prueba);
 router.post("/login", login); // Inicio de sesión
 router.post("/verify-email", verifyEmail); // Verificación de correo electrónico
 router.post("/force-logout", forceLogout); // Cierre forzoso de sesión
-router.post("/fast", fastChangePassworwd); // Cambio rápido de contraseña
 
 // Rutas Protegidas
 router.delete("/revistas/:id", authenticate, deleteRevista); // Eliminar revista
 
 router.use(checkBlacklist); // Middleware para verificar tokens en la lista negra
 
-// Mantenimiento - Sesión
+// Sesiones
 router.get(
-  "/maintenance/session",
+  "/session-settings/global",
   authenticate,
-  authorize("view_session_settings"),
-  getSessionSettings
+  authorize("get_global_session_settings"),
+  getGlobalSessionTimeout
 );
-router.put(
-  "/maintenance/session",
+router.patch(
+  "/session-settings/global",
   authenticate,
-  authorize("edit_session_settings"),
-  updateSessionSettings
+  authorize("update_global_session_settings"),
+  updateGlobalSessionTimeout
+);
+router.patch(
+  "/users/:userId/session-timeout",
+  authenticate,
+  authorize("update_user_session_timeout"),
+  updateUserSessionTimeout
+);
+router.patch(
+  "/roles/:roleId/session-timeout",
+  authenticate,
+  authorize("update_role_session_timeout"),
+  updateRoleSessionTimeout
 );
 
 // Usuarios
@@ -136,9 +142,5 @@ router.get("/revistas/:id", authenticate, getRevista);
 router.patch("/revistas/:id", authenticate, updateRevista);
 router.post("/revista", authenticate, insertRevista);
 router.post("/revista-con-portada", authenticate, insertRevistaWithUpload);
-
-// Auditoría
-router.get("/login-logs", authenticate, authorize('view_login_logs'), listLoginLogs); // Listar registros de ingreso
-router.get("/audit-logs", authenticate, authorize('view_action_logs'), listAuditLogs); // Listar registros de acciones
 
 module.exports = router;

@@ -1,5 +1,7 @@
 const path = require('path');
-require('dotenv').config({ path: path.resolve(process.cwd(), '.env') });
+const ambiente = process.platform === 'win32' ? 'development' : 'production';
+require('dotenv').config({ path: path.resolve(process.cwd(), `../auth/.env.${ambiente}`) });
+// require('dotenv').config({ path: path.resolve(process.cwd(), `../.env.${process.env.NODE_ENV || 'development'}`) });
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors'); // Importar el paquete cors
@@ -12,15 +14,22 @@ dotenv.config();
 const app = express();
 
 // Configuración de CORS
+// const defaultOrigins = [
+//     'http://localhost:9000',
+//     'http://localhost:4000',
+//     'http://localhost:4100',
+//     'https://directorio.minaamp.gob.ve',
+//     'https://backdirectorio.minaamp.gob.ve',
+//     'https://authdirectorio.minaamp.gob.ve'
+// ];
+
+const allowedOrigins = //process.env.ALLOWED_ORIGINS
+    // ? 
+    process.env.ALLOWED_ORIGINS.split(',')
+// : defaultOrigins;
+
 app.use(cors({
-    origin: [
-        'http://localhost:9000',
-        'http://localhost:8080',
-        'http://directorio.minaamp.gob.ve',
-        'https://directorio.minaamp.gob.ve',
-        'http://authdirectorio.minaamp.gob.ve',
-        'https://authdirectorio.minaamp.gob.ve'
-    ],
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Métodos permitidos
     allowedHeaders: ['Content-Type', 'Authorization'], // Cabeceras permitidas
     credentials: true // Permite el envío de credenciales (cookies, tokens, etc.)
@@ -46,7 +55,7 @@ app.get('/list-endpoints', (req, res) => {
     res.json(endpoints);
 });
 
-const PORT = process.env.PORT || 4001;
+const PORT = process.env.PORT_AUTH || 4100;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

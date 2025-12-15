@@ -1,7 +1,5 @@
 const path = require('path');
-const ambiente = process.platform === 'win32' ? 'development' : 'production';
-require('dotenv').config({ path: path.resolve(process.cwd(), `../auth/.env.${ambiente}`) });
-// require('dotenv').config({ path: path.resolve(process.cwd(), `../auth/.env.${process.env.NODE_ENV || ambiente}`) });
+require('dotenv').config({ path: path.resolve(process.cwd(), `../.env.${process.env.NODE_ENV || 'development'}`) });
 const express = require('express');
 const { Pool, Client } = require('pg');
 const cors = require('cors');
@@ -11,20 +9,19 @@ const app = express();
 const PORT = process.env.PORT_BACKEND || 4000;
 
 // Configuración CORS
-// const defaultOrigins = [
-//   'http://localhost:9000',
-//   'http://localhost:4000',
-//   'http://localhost:4100',
-//   'http://directorio.minaamp.gob.ve',
-//   'https://directorio.minaamp.gob.ve',
-//   'https://backdirectorio.minaamp.gob.ve',
-//   'https://authdirectorio.minaamp.gob.ve'
-// ];
+const defaultOrigins = [
+  'http://localhost:9000',
+  'http://localhost:4000',
+  'http://localhost:4100',
+  'http://directorio.minaamp.gob.ve',
+  'https://directorio.minaamp.gob.ve',
+  'https://backdirectorio.minaamp.gob.ve',
+  'https://authdirectorio.minaamp.gob.ve'
+];
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-// ? 
-process.env.ALLOWED_ORIGINS.split(',')
-// : defaultOrigins;
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',') 
+  : defaultOrigins;
 
 app.use(cors({
   origin: allowedOrigins,
