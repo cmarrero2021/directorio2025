@@ -39,7 +39,7 @@ app.use(cors({
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
+  database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
 });
@@ -48,7 +48,7 @@ const pool = new Pool({
 const notificationClient = new Client({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
+  database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
 });
@@ -835,4 +835,14 @@ app.get('/endpoints', (req, res) => {
   });
 
   res.json(routes);
+});
+app.get('/debug-db', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query('SELECT current_database(), current_user, inet_server_addr(), inet_server_port()');
+    client.release();
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.json({ error: err.message });
+  }
 });
