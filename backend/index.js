@@ -1,5 +1,5 @@
 const path = require('path');
-require('dotenv').config({ path: path.resolve(process.cwd(), `../.env.${process.env.NODE_ENV || 'development'}`) });
+require('dotenv').config({ path: path.resolve(process.cwd(), `.env.${process.env.NODE_ENV || 'development'}`) });
 const express = require('express');
 const { Pool, Client } = require('pg');
 const cors = require('cors');
@@ -13,10 +13,7 @@ const defaultOrigins = [
   'http://localhost:9000',
   'http://localhost:4000',
   'http://localhost:4100',
-  'http://directorio.minaamp.gob.ve',
-  'https://directorio.minaamp.gob.ve',
-  'https://backdirectorio.minaamp.gob.ve',
-  'https://authdirectorio.minaamp.gob.ve'
+  'http://directorio.oncti.gob.ve'
 ];
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS 

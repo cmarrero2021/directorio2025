@@ -54,9 +54,10 @@
                     <div class="vcard-info-col">
                       <div class="text-h6 text-bold">Lic. Fabiola Ortúzar</div>
                       <div class="text-body2">Gerente de Divulgación</div>
-                      <div class="vcard-email-align text-body2 text-bold"><a href="mailto:divulgación@oncti.gob.ve"
+                      <div class="vcard-email-align text-body2 text-bold" style="margin-bottom: 10% !important;"><a href="mailto:divulgación@oncti.gob.ve"
                           style="color:blue;">divulgación@oncti.gob.ve</a></div>
                     </div>
+                    
                   </div>
                 </q-card-section>
               </q-card>

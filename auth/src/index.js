@@ -18,9 +18,7 @@ const app = express();
 //     'http://localhost:9000',
 //     'http://localhost:4000',
 //     'http://localhost:4100',
-//     'https://directorio.minaamp.gob.ve',
-//     'https://backdirectorio.minaamp.gob.ve',
-//     'https://authdirectorio.minaamp.gob.ve'
+//     'http://directorio.oncti.gob.ve'
 // ];
 
 if (!process.env.ALLOWED_ORIGINS) {
