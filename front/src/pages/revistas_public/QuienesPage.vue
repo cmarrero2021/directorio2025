@@ -25,11 +25,11 @@
           </p>
           <div class="row q-col-gutter-md vcard-row-mobile-fix" :class="{ 'q-ml-xl': $q.screen.gt.sm }">
             <div class="col-12 col-md-6">
-              <q-card>
+              <q-card class="member-card">
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img :src="`${VITE_IMAGE_BASE_URL}betancourt.png`" alt="Foto Betancourt"
+                       <q-img :src="`${VITE_IMAGE_BASE_URL}betancourt.png`" alt="Foto Betancourt"
                         style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
@@ -44,11 +44,11 @@
               </q-card>
             </div>
             <div class="col-12 col-md-6">
-              <q-card>
+              <q-card class="member-card">
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img :src="`${VITE_IMAGE_BASE_URL}ortuzar.png`" alt="Foto Ortúzar"
+                       <q-img :src="`${VITE_IMAGE_BASE_URL}ortuzar.png`" alt="Foto Ortúzar"
                         style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
@@ -63,11 +63,11 @@
               </q-card>
             </div>
             <div class="col-12 col-md-6">
-              <q-card>
+              <q-card class="member-card">
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img :src="`${VITE_IMAGE_BASE_URL}araujo.png`" alt="Foto Araujo"
+                       <q-img :src="`${VITE_IMAGE_BASE_URL}araujo.png`" alt="Foto Araujo"
                         style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
@@ -81,11 +81,11 @@
               </q-card>
             </div>
             <div class="col-12 col-md-6">
-              <q-card>
+              <q-card class="member-card">
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img :src="`${VITE_IMAGE_BASE_URL}arvelo.png`" alt="Foto Arvelo"
+                       <q-img :src="`${VITE_IMAGE_BASE_URL}arvelo.png`" alt="Foto Arvelo"
                         style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
@@ -100,11 +100,11 @@
               </q-card>
             </div>
             <div class="col-12 col-md-6">
-              <q-card>
+              <q-card class="member-card">
                 <q-card-section class="row items-center">
                   <div class="vcard-flex-wrap">
                     <div class="vcard-img-col">
-                      <q-img :src="`${VITE_IMAGE_BASE_URL}morales.png`" alt="Foto Morales"
+                       <q-img :src="`${VITE_IMAGE_BASE_URL}morales.png`" alt="Foto Morales"
                         style="width:60px; height:60px; border-radius:50%; object-fit:cover;" />
                     </div>
                     <div class="vcard-info-col">
@@ -119,9 +119,9 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
     </div>
-  </div>
 
 
   <!-- Sección de pie -->
@@ -324,9 +324,36 @@ const portadas = (portadasResponse) => {
     revista2.value = data[1].revista;
   }
 }
+
+const ajustarAlturas = () => {
+  const cards = document.querySelectorAll('.member-card');
+  cards.forEach(card => {
+    card.style.minHeight = 'auto';
+  });
+
+  setTimeout(() => {
+    let maxHeight = 0;
+    cards.forEach(card => {
+      const height = card.offsetHeight;
+      if (height > maxHeight) {
+        maxHeight = height;
+      }
+    });
+
+    if (maxHeight > 0) {
+      cards.forEach(card => {
+        card.style.minHeight = `${maxHeight}px`;
+      });
+    }
+  }, 50);
+};
+
 onMounted(async () => {
   await cargarSecciones(true);
   configurarObserver();
+  ajustarAlturas();
+  window.addEventListener('resize', ajustarAlturas);
+  
   socketMessageHandler = async () => {
     try {
       await cargarSecciones(false);
@@ -341,13 +368,17 @@ onMounted(async () => {
       // await cargarSecciones(false);
       await cargarSecciones();
       Notify.create({ message: "Contenido actualizado", color: "positive", timeout: 2000 });
+      // Recalcular alturas por si el nuevo contenido de WebSocket cambia el texto
+      ajustarAlturas();
     } catch (error) {
       console.error('Error en WebSocket:', error);
       Notify.create({ message: "Error al actualizar", color: "negative", timeout: 3000 });
     }
   });
 });
+
 onUnmounted(() => {
+  window.removeEventListener('resize', ajustarAlturas);
   if (socketMessageHandler) {
     socket.removeEventListener("message", socketMessageHandler); // <-- Eliminar con misma referencia
     socketMessageHandler = null;
