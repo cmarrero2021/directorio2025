@@ -60,6 +60,8 @@ const VITE_GR_ESTADOS_URL = import.meta.env.VITE_GR_ESTADOS_URL;
 const VITE_GR_ESTADOS_FILTRADO_URL = import.meta.env.VITE_GR_ESTADOS_FILTRADO_URL;
 const VITE_DATA_ESTADOS_BASE_URL = import.meta.env.VITE_DATA_ESTADOS_BASE_URL;
 const VITE_DATA_NACIONAL_BASE_URL = import.meta.env.VITE_DATA_NACIONAL_BASE_URL;
+const VITE_DATA_ESTADOS_FILTRADO_URL = import.meta.env.VITE_DATA_ESTADOS_FILTRADO_URL;
+const VITE_DATA_NACIONAL_FILTRADO_URL = import.meta.env.VITE_DATA_NACIONAL_FILTRADO_URL;
 const showTable = ref(false);
 const selectedStateData = ref({});
 const estadoData = ref([]);
@@ -77,10 +79,26 @@ const uniqueValues = ref([]); // Valores únicos reales de los datos
 const gradientStyle = ref('');
 const currentZoom = ref(6); // Zoom inicial para desktop
 
+// Función auxiliar para enriquecer el campo 'estado' del resumen nacional
+// con los nombres reales de los estados que tienen coincidencias con los filtros activos
+const enrichEstadoField = (paisInfo, activeFilters) => {
+  const hasNonStateFilters = Object.keys(activeFilters).some(
+    key => key !== 'estado' && activeFilters[key]
+  );
+  if (hasNonStateFilters && estadoData.value.length > 0) {
+    const matchingStates = estadoData.value
+      .map(s => s.estado.toUpperCase())
+      .join(', ');
+    return { ...paisInfo, estado: matchingStates };
+  }
+  return paisInfo;
+};
+
 // Función para mostrar la data nacional en la tabla y en los gráficos
 const mostrarDataNacional = async () => {
-  const paisInfo = await fetchPaisInfo();
-  selectedStateData.value = paisInfo;
+  const activeFilters = filtersStore.getActiveFilters();
+  const paisInfo = await fetchPaisInfo(activeFilters);
+  selectedStateData.value = enrichEstadoField(paisInfo, activeFilters);
   showTable.value = true;
   selectedStateStore.selectedState = null;
   filtersStore.selectedEstado = null; // Sincronizar con el store de filtros
@@ -324,9 +342,10 @@ const updateMap = async () => {
 
       layer.on("click", async () => {
         const estadoName = feature.properties.name.toLowerCase();
-        const estadoInfo = await fetchEstadoInfo(estadoName);
-        const paisInfo = await fetchPaisInfo();
+        const activeFilters = filtersStore.getActiveFilters();
+        const estadoInfo = await fetchEstadoInfo(estadoName, activeFilters);
         if (JSON.stringify(estadoInfo).length == 2) {
+          const paisInfo = await fetchPaisInfo(activeFilters);
           selectedStateData.value = paisInfo;
           showTable.value = true;
           selectedStateStore.selectedState = null;
@@ -343,18 +362,36 @@ const updateMap = async () => {
     },
   }).addTo(map);
 };
-// Función para obtener la información nacional
-const fetchPaisInfo = async () => {
+// Función para obtener la información nacional (con filtros opcionales)
+const fetchPaisInfo = async (activeFilters = {}) => {
   try {
     const timestamp = new Date().getTime();
-    const separator = VITE_DATA_NACIONAL_BASE_URL.includes('?') ? '&' : '?';
-    const url = `${VITE_DATA_NACIONAL_BASE_URL}${separator}_t=${timestamp}`;
+    const hasFilters = Object.keys(activeFilters).some(
+      key => key !== 'estado' && activeFilters[key]
+    );
+
+    let url;
+    if (hasFilters) {
+      const params = new URLSearchParams();
+      Object.keys(activeFilters).forEach(key => {
+        if (key !== 'estado' && activeFilters[key]) {
+          params.append(key, activeFilters[key]);
+        }
+      });
+      params.append('_t', timestamp);
+      url = `${VITE_DATA_NACIONAL_FILTRADO_URL}?${params.toString()}`;
+      console.log('[MapComponent] fetchPaisInfo con filtros:', url);
+    } else {
+      const separator = VITE_DATA_NACIONAL_BASE_URL.includes('?') ? '&' : '?';
+      url = `${VITE_DATA_NACIONAL_BASE_URL}${separator}_t=${timestamp}`;
+    }
+
     const response = await axios.get(url);
     const paisInfo = response.data[0];
     return paisInfo || {};
   } catch (error) {
     Notify.create({
-      message: "Falla al obtener información del estado.",
+      message: "Falla al obtener información nacional.",
       color: "negative",
       position: "top",
       timeout: 3000,
@@ -362,17 +399,45 @@ const fetchPaisInfo = async () => {
     return {};
   }
 };
-// Función para obtener la información de un estado específico
-const fetchEstadoInfo = async (estadoName) => {
+
+// Función para obtener la información de un estado específico (con filtros opcionales)
+const fetchEstadoInfo = async (estadoName, activeFilters = {}) => {
   try {
     const timestamp = new Date().getTime();
-    const separator = VITE_DATA_ESTADOS_BASE_URL.includes('?') ? '&' : '?';
-    const url = `${VITE_DATA_ESTADOS_BASE_URL}${separator}_t=${timestamp}`;
-    const response = await axios.get(url);
-    const estadoInfo = response.data.find(
-      (item) => item.estado.toLowerCase() === estadoName
+    const hasFilters = Object.keys(activeFilters).some(
+      key => key !== 'estado' && activeFilters[key]
     );
-    return estadoInfo || {};
+
+    let url;
+    if (hasFilters) {
+      const params = new URLSearchParams();
+      // Pasar el estado como filtro en la query, junto con los demás filtros activos
+      params.append('estado', estadoName);
+      Object.keys(activeFilters).forEach(key => {
+        if (key !== 'estado' && activeFilters[key]) {
+          params.append(key, activeFilters[key]);
+        }
+      });
+      params.append('_t', timestamp);
+      url = `${VITE_DATA_ESTADOS_FILTRADO_URL}?${params.toString()}`;
+      console.log('[MapComponent] fetchEstadoInfo con filtros:', url);
+    } else {
+      const separator = VITE_DATA_ESTADOS_BASE_URL.includes('?') ? '&' : '?';
+      url = `${VITE_DATA_ESTADOS_BASE_URL}${separator}_t=${timestamp}`;
+    }
+
+    const response = await axios.get(url);
+
+    if (hasFilters) {
+      // El endpoint filtrado ya devuelve solo la fila del estado solicitado
+      const estadoInfo = response.data[0];
+      return estadoInfo || {};
+    } else {
+      const estadoInfo = response.data.find(
+        (item) => item.estado.toLowerCase() === estadoName
+      );
+      return estadoInfo || {};
+    }
   } catch (error) {
     Notify.create({
       message: "Falla al obtener información del estado.",
@@ -388,20 +453,16 @@ onMounted(async () => {
   initializeMap();
   // Cargar los datos iniciales del mapa
   await updateMap();
-  const paisInfo = await fetchPaisInfo();
+  const activeFilters = filtersStore.getActiveFilters();
+  const paisInfo = await fetchPaisInfo(activeFilters);
   selectedStateData.value = paisInfo;
   showTable.value = true;
 
   // Escuchar eventos de actualización desde WebSocket
   socket.onmessage = async (event) => {
-    // Notify.create({
-    //   message: "Cambio detectado en la base de datos. Actualizando mapa.",
-    //   color: "positive",
-    //   position: "top",
-    //   timeout: 3000,
-    // });
     await updateMap(); // Actualizar el mapa con los nuevos datos
-    const updatedPaisInfo = await fetchPaisInfo();
+    const currentFilters = filtersStore.getActiveFilters();
+    const updatedPaisInfo = await fetchPaisInfo(currentFilters);
     selectedStateData.value = updatedPaisInfo;
   };
 });
@@ -410,7 +471,7 @@ onUnmounted(() => {
   socket.onmessage = null;
 });
 
-// Watch para actualizar el mapa cuando cambien los filtros (excluyendo estado)
+// Watch para actualizar el mapa Y el cuadro resumen cuando cambien los filtros (excluyendo estado)
 watch(
   [
     () => filtersStore.selectedArea,
@@ -420,9 +481,32 @@ watch(
     () => filtersStore.selectedPeriodicidad,
     () => filtersStore.selectedFormato
   ],
-  (newValues, oldValues) => {
+  async (newValues, oldValues) => {
     console.log('[MapComponent] Filtros (sin estado) cambiados');
-    updateMap();
+    await updateMap();
+
+    // Actualizar también el cuadro resumen con los nuevos filtros
+    const activeFilters = filtersStore.getActiveFilters();
+    const estadoActual = selectedStateStore.selectedState;
+
+    if (estadoActual) {
+      // Hay un estado seleccionado: actualizar su resumen con los filtros
+      const estadoInfo = await fetchEstadoInfo(estadoActual, activeFilters);
+      if (JSON.stringify(estadoInfo).length > 2) {
+        selectedStateData.value = estadoInfo;
+      } else {
+        // Si el estado ya no tiene datos bajo los nuevos filtros, mostrar nacional
+        const paisInfo = await fetchPaisInfo(activeFilters);
+        selectedStateData.value = enrichEstadoField(paisInfo, activeFilters);
+        selectedStateStore.selectedState = null;
+        filtersStore.selectedEstado = null;
+      }
+    } else {
+      // Sin estado seleccionado: mostrar resumen nacional filtrado
+      const paisInfo = await fetchPaisInfo(activeFilters);
+      selectedStateData.value = enrichEstadoField(paisInfo, activeFilters);
+    }
+    showTable.value = true;
   },
   { immediate: false }
 );
@@ -436,21 +520,23 @@ watch(
     // Actualizar el selectedStateStore
     selectedStateStore.selectedState = newEstado;
 
+    const activeFilters = filtersStore.getActiveFilters();
+
     // Actualizar la ficha con la información del estado
     if (newEstado) {
-      const estadoInfo = await fetchEstadoInfo(newEstado);
+      const estadoInfo = await fetchEstadoInfo(newEstado, activeFilters);
       if (JSON.stringify(estadoInfo).length > 2) {
         selectedStateData.value = estadoInfo;
         showTable.value = true;
       } else {
         // Si no hay datos para ese estado, mostrar data nacional
-        const paisInfo = await fetchPaisInfo();
+        const paisInfo = await fetchPaisInfo(activeFilters);
         selectedStateData.value = paisInfo;
         showTable.value = true;
       }
     } else {
       // Si se limpia el filtro, mostrar data nacional
-      const paisInfo = await fetchPaisInfo();
+      const paisInfo = await fetchPaisInfo(activeFilters);
       selectedStateData.value = paisInfo;
       showTable.value = true;
     }

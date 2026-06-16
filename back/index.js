@@ -359,6 +359,84 @@ app.get('/data_estados', async (req, res) => {
   }
 });
 
+// Ruta GET para obtener los datos de un estado filtrado por criterios activos
+app.get('/data_estados_filtrado', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const filters = {
+      estado: req.query.estado,
+      area: req.query.area,
+      indice: req.query.indice,
+      idioma: req.query.idioma,
+      editorial: req.query.editorial,
+      periodicidad: req.query.periodicidad,
+      formato: req.query.formato
+    };
+
+    const { whereClause, params } = buildWhereClause(filters);
+    const query = `
+      SELECT
+        estado,
+        COUNT(DISTINCT area_conocimiento) AS cantidad_area_conocimiento,
+        COUNT(DISTINCT indice)            AS cantidad_indice,
+        COUNT(DISTINCT idioma)            AS cantidad_idioma,
+        COUNT(DISTINCT revista)           AS cantidad_revista,
+        COUNT(DISTINCT editorial)         AS cantidad_editorial,
+        COUNT(DISTINCT periodicidad)      AS cantidad_periodicidad,
+        COUNT(DISTINCT formato)           AS cantidad_formato
+      FROM revistas_data
+      ${whereClause}
+      GROUP BY estado
+      ORDER BY estado
+    `;
+
+    const result = await client.query(query, params);
+    client.release();
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al ejecutar la consulta:', err);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
+// Ruta GET para obtener los datos nacionales filtrados por criterios activos
+app.get('/data_nacional_filtrado', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const filters = {
+      estado: req.query.estado,
+      area: req.query.area,
+      indice: req.query.indice,
+      idioma: req.query.idioma,
+      editorial: req.query.editorial,
+      periodicidad: req.query.periodicidad,
+      formato: req.query.formato
+    };
+
+    const { whereClause, params } = buildWhereClause(filters);
+    const query = `
+      SELECT
+        'TODOS'::text                     AS estado,
+        COUNT(DISTINCT area_conocimiento) AS cantidad_area_conocimiento,
+        COUNT(DISTINCT indice)            AS cantidad_indice,
+        COUNT(DISTINCT idioma)            AS cantidad_idioma,
+        COUNT(DISTINCT revista)           AS cantidad_revista,
+        COUNT(DISTINCT editorial)         AS cantidad_editorial,
+        COUNT(DISTINCT periodicidad)      AS cantidad_periodicidad,
+        COUNT(DISTINCT formato)           AS cantidad_formato
+      FROM revistas_data
+      ${whereClause}
+    `;
+
+    const result = await client.query(query, params);
+    client.release();
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al ejecutar la consulta:', err);
+    res.status(500).send('Error interno del servidor');
+  }
+});
+
 // Ruta GET para obtener los índices con conteo
 app.get('/gr_indices', async (req, res) => {
   try {
